@@ -1,0 +1,1233 @@
+[file name]: index1.html
+[file content begin]
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>斌雪山飞瀑的个人主页 - Windows 10风格</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Windows 10 磁贴风格重置与变量 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        :root {
+            /* Windows 10 深色主题配色 */
+            --win10-bg: #171717;
+            --win10-surface: #1f1f1f;
+            --win10-surface-alt: #2a2a2a;
+            --win10-text: #f2f2f2;
+            --win10-text-secondary: #b0b0b0;
+            --win10-border: #404040;
+            
+            /* Windows 10 磁贴颜色 */
+            --tile-blue: #0078D7;
+            --tile-green: #107C10;
+            --tile-red: #D13438;
+            --tile-purple: #8661C5;
+            --tile-orange: #FF8C00;
+            --tile-cyan: #00BCF2;
+            --tile-pink: #E3008C;
+            --tile-brown: #825A2C;
+            --tile-yellow: #FFB900;
+            
+            /* 磁贴设计参数 */
+            --tile-gap: 20px;
+            --tile-padding: 24px;
+            --transition: all 0.15s ease;
+        }
+
+        body {
+            background-color: var(--win10-bg);
+            color: var(--win10-text);
+            min-height: 100vh;
+            line-height: 1.5;
+            padding: 0;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* Windows 10 磁贴网格背景 */
+        .windows-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background-color: var(--win10-bg);
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Windows 10 标题栏 */
+        .title-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 0 40px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--win10-border);
+        }
+
+        .main-title {
+            font-size: clamp(2.2rem, 4vw, 2.8rem);
+            font-weight: 300;
+            color: var(--win10-text);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .main-title i {
+            font-size: clamp(2.4rem, 4vw, 3rem);
+            color: var(--tile-blue);
+        }
+
+        /* Windows 10 磁贴网格 */
+        .tile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--tile-gap);
+            margin-bottom: 60px;
+            flex: 1;
+        }
+
+        .wide-tile {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 768px) {
+            .wide-tile {
+                grid-column: span 1;
+            }
+        }
+
+        /* Windows 10 磁贴样式 */
+        .tile {
+            background-color: var(--win10-surface);
+            border: none;
+            padding: var(--tile-padding);
+            position: relative;
+            overflow: hidden;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .tile:hover {
+            background-color: var(--win10-surface-alt);
+            transform: translateY(-3px);
+        }
+
+        .tile:active {
+            transform: translateY(0);
+        }
+
+        /* 磁贴颜色变体 */
+        .tile-blue {
+            background-color: var(--tile-blue);
+        }
+        
+        .tile-blue:hover {
+            background-color: #0066b3;
+        }
+
+        .tile-green {
+            background-color: var(--tile-green);
+        }
+        
+        .tile-green:hover {
+            background-color: #0c6c0c;
+        }
+
+        .tile-red {
+            background-color: var(--tile-red);
+        }
+        
+        .tile-red:hover {
+            background-color: #b32d30;
+        }
+
+        .tile-purple {
+            background-color: var(--tile-purple);
+        }
+        
+        .tile-purple:hover {
+            background-color: #7550b5;
+        }
+
+        .tile-orange {
+            background-color: var(--tile-orange);
+        }
+        
+        .tile-orange:hover {
+            background-color: #e67e00;
+        }
+
+        .tile-yellow {
+            background-color: var(--tile-yellow);
+            color: #000;
+        }
+        
+        .tile-yellow:hover {
+            background-color: #e6a700;
+        }
+        
+        .tile-yellow .tile-description,
+        .tile-yellow .tile-tag {
+            color: rgba(0, 0, 0, 0.9);
+        }
+
+        /* 磁贴内容 */
+        .tile-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .tile-title {
+            font-size: 1.8rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .tile-description {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+            flex-grow: 1;
+        }
+
+        .tile-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .tile-tag {
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 6px 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* 特殊磁贴 */
+        .intro-tile {
+            min-height: 280px;
+        }
+
+        .highlight-tile {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .highlight-text {
+            font-size: 2.2rem;
+            font-weight: 300;
+            line-height: 1.4;
+        }
+
+        /* Windows 10 语言切换器 */
+        .language-switcher {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .lang-label {
+            font-weight: 500;
+            font-size: 1.1rem;
+            color: var(--win10-text-secondary);
+            cursor: pointer;
+            padding: 8px 12px;
+            transition: var(--transition);
+        }
+
+        .lang-label.active {
+            color: var(--win10-text);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .lang-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background-color: var(--win10-surface-alt);
+            cursor: pointer;
+            transition: var(--transition);
+            overflow: hidden;
+        }
+
+        .lang-switch-handle {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background-color: var(--tile-blue);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .lang-switch.active .lang-switch-handle {
+            left: calc(100% - 27px);
+            background-color: var(--tile-green);
+        }
+
+        /* Windows 10 任务栏 */
+        .taskbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(31, 31, 31, 0.95);
+            padding: 8px 0;
+            display: flex;
+            justify-content: center;
+            gap: 2px;
+            z-index: 100;
+            border-top: 1px solid var(--win10-border);
+        }
+
+        .taskbar-btn {
+            padding: 12px 24px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--win10-text);
+            transition: var(--transition);
+            font-weight: 400;
+            font-size: 1rem;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .taskbar-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .taskbar-btn i {
+            font-size: 1.2rem;
+        }
+
+        /* Windows 10 开始按钮 */
+        .start-btn {
+            position: fixed;
+            bottom: 70px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: var(--tile-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            z-index: 101;
+            transition: var(--transition);
+        }
+
+        .start-btn:hover {
+            background-color: #0066b3;
+            transform: scale(1.1);
+        }
+
+        .start-btn i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        /* Windows 10 弹窗 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-container {
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow: hidden;
+            background-color: var(--win10-surface);
+            border: 1px solid var(--win10-border);
+            position: relative;
+        }
+
+        /* 弹窗标题栏 */
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            background-color: var(--win10-surface-alt);
+            border-bottom: 1px solid var(--win10-border);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: var(--win10-text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.8rem;
+            color: var(--win10-text-secondary);
+            transition: var(--transition);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: var(--win10-text);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+
+        .modal-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: var(--win10-text);
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .modal-image {
+            width: 100%;
+            border: 1px solid var(--win10-border);
+            transition: var(--transition);
+        }
+
+        .modal-image:hover {
+            border-color: var(--tile-blue);
+        }
+
+        /* 版本切换提醒 */
+        .version-notice {
+            background-color: var(--tile-yellow);
+            color: #000;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        .version-notice i {
+            font-size: 1.5rem;
+        }
+
+        .version-notice-text {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .version-notice-btn {
+            background-color: rgba(0, 0, 0, 0.2);
+            border: none;
+            color: #000;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .version-notice-btn:hover {
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+
+        /* 页脚 */
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 30px 0 120px;
+            color: var(--win10-text-secondary);
+            font-size: 0.95rem;
+            border-top: 1px solid var(--win10-border);
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+            
+            .title-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 24px;
+                padding: 24px 0 32px;
+            }
+            
+            .main-title {
+                flex-direction: row;
+                align-items: center;
+                gap: 16px;
+            }
+            
+            .tile-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .tile {
+                padding: 20px;
+                min-height: 180px;
+            }
+            
+            .tile-title {
+                font-size: 1.6rem;
+            }
+            
+            .tile-description {
+                font-size: 1rem;
+            }
+            
+            .language-switcher {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .taskbar {
+                padding: 6px 0;
+            }
+            
+            .taskbar-btn {
+                padding: 10px;
+                min-width: auto;
+                flex-grow: 1;
+            }
+            
+            .taskbar-btn span {
+                display: none;
+            }
+            
+            .start-btn {
+                width: 44px;
+                height: 44px;
+                bottom: 65px;
+                left: 16px;
+            }
+            
+            .modal-container {
+                width: 95%;
+                max-height: 85vh;
+            }
+            
+            .modal-body {
+                padding: 20px;
+            }
+            
+            .modal-header {
+                padding: 16px 20px;
+            }
+            
+            .image-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .version-notice {
+                flex-direction: column;
+                text-align: center;
+                gap: 8px;
+                padding: 16px;
+            }
+            
+            .version-notice-btn {
+                width: 100%;
+            }
+        }
+
+        /* 小屏幕手机优化 */
+        @media (max-width: 480px) {
+            .main-title {
+                font-size: 1.8rem;
+            }
+            
+            .main-title i {
+                font-size: 2.2rem;
+            }
+            
+            .tile {
+                padding: 18px;
+                min-height: 160px;
+            }
+            
+            .tile-title {
+                font-size: 1.4rem;
+            }
+            
+            .highlight-text {
+                font-size: 1.8rem;
+            }
+            
+            .modal-header {
+                padding: 14px 18px;
+            }
+            
+            .modal-title {
+                font-size: 1.3rem;
+            }
+            
+            footer {
+                padding: 30px 0 100px;
+            }
+        }
+
+        /* Windows 10 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .slide-up {
+            animation: slideUp 0.5s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <!-- Windows 10 磁贴网格背景 -->
+    <div class="windows-grid"></div>
+
+    <div class="container">
+        <!-- 版本切换提醒 -->
+        <div class="version-notice">
+            <i class="fas fa-desktop"></i>
+            <div class="version-notice-text" id="version-notice-text">
+                当前是Windows 10风格版本，点击切换到标准版本
+            </div>
+            <button class="version-notice-btn" id="switch-version-btn">
+                <i class="fas fa-exchange-alt"></i>
+                切换到标准版
+            </button>
+        </div>
+        
+        <!-- 标题栏 -->
+        <div class="title-bar">
+            <h1 class="main-title">
+                <i class="fas fa-mountain-sun"></i>
+                <span id="title-text">斌雪山飞瀑的个人主页</span>
+            </h1>
+            
+            <!-- Windows 10 语言切换器 -->
+            <div class="language-switcher">
+                <span class="lang-label active" id="zh-label">中文</span>
+                <div class="lang-switch" id="lang-switch">
+                    <div class="lang-switch-handle" id="lang-icon">中</div>
+                </div>
+                <span class="lang-label" id="en-label">English</span>
+            </div>
+        </div>
+        
+        <!-- Windows 10 磁贴网格 -->
+        <div class="tile-grid">
+            <!-- 介绍磁贴 -->
+            <div class="tile intro-tile tile-blue wide-tile">
+                <div class="tile-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="tile-title" id="intro-title">欢迎来到我的主页</div>
+                <div class="tile-description" id="intro-description">
+                    啥都玩，主要玩MC，想怎么更就怎么更，最快一日两更。剪辑技术虽然烂，所以不喜勿喷。不带货，不⭕💰，分享快乐是我的目的。
+                </div>
+                <div class="tile-tags">
+                    <div class="tile-tag">Minecraft</div>
+                    <div class="tile-tag">视频剪辑</div>
+                    <div class="tile-tag">游戏汉化</div>
+                    <div class="tile-tag">内容分享</div>
+                </div>
+            </div>
+            
+            <!-- 快手磁贴 -->
+            <div class="tile tile-green" id="kuaishou-tile">
+                <div class="tile-icon">
+                    <i class="fas fa-play-circle"></i>
+                </div>
+                <div class="tile-title" id="kuaishou-title">快手主页</div>
+                <div class="tile-description" id="kuaishou-description">
+                    访问我的快手主页，查看最新游戏视频和内容分享。
+                </div>
+            </div>
+            
+            <!-- 赞助磁贴 -->
+            <div class="tile tile-red" id="sponsor-tile">
+                <div class="tile-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <div class="tile-title" id="sponsor-title">赞助支持</div>
+                <div class="tile-description" id="sponsor-description">
+                    感谢您的支持！赞助方式请点击查看。
+                </div>
+            </div>
+            
+            <!-- 狗叫磁贴 -->
+            <div class="tile tile-purple" id="dog-tile">
+                <div class="tile-icon">
+                    <i class="fas fa-dog"></i>
+                </div>
+                <div class="tile-title" id="dog-title">听我狗叫</div>
+                <div class="tile-description" id="dog-description">
+                    技术不够，努力来凑！点击查看我的自嘲宣言。
+                </div>
+            </div>
+            
+            <!-- 技能磁贴 -->
+            <div class="tile tile-orange wide-tile">
+                <div class="tile-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="tile-title" id="skills-title">核心技能</div>
+                <div class="tile-description" id="skills-description">
+                    专注于Minecraft游戏视频制作、游戏汉化和简单剪辑。希望通过分享游戏中的快乐瞬间，与大家共同享受游戏的乐趣。
+                </div>
+            </div>
+            
+            <!-- 高亮磁贴 -->
+            <div class="tile highlight-tile tile-cyan">
+                <div class="highlight-text" id="highlight-text">汉化<br>剪辑<br>游戏</div>
+            </div>
+            
+            <!-- 版本切换磁贴 -->
+            <div class="tile tile-yellow" id="version-tile">
+                <div class="tile-icon">
+                    <i class="fas fa-exchange-alt"></i>
+                </div>
+                <div class="tile-title" id="version-title">版本切换</div>
+                <div class="tile-description" id="version-description">
+                    切换到标准版本界面，体验不同的风格设计。
+                </div>
+                <div class="tile-tags">
+                    <div class="tile-tag">标准版</div>
+                    <div class="tile-tag">切换</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 页脚 -->
+        <footer>
+            <p id="footer-text">© 2026 斌雪山飞瀑 | 当前版本: Windows 10风格 | 本页面托管于 GitHub Pages</p>
+        </footer>
+    </div>
+    
+    <!-- 弹窗1: 赞助我 -->
+    <div class="modal" id="sponsor-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-heart"></i>
+                    <span id="sponsor-modal-title">爱发电筹备中，敬请期待</span>
+                </h3>
+                <button class="modal-close" id="close-sponsor">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-text" id="sponsor-modal-text">感谢您的支持！爱发电页面正在筹备中，很快就会上线。在此期间，您可以通过以下方式支持我：</p>
+                
+                <div class="image-grid">
+                    <img src="https://youke.xn--y7xa690gmna.cn/s1/2026/01/31/697dd339a90e0.webp" alt="赞助二维码1" class="modal-image">
+                    <img src="https://youke.xn--y7xa690gmna.cn/s1/2026/01/31/697dd339d6883.webp" alt="赞助二维码2" class="modal-image">
+                </div>
+                
+                <p class="modal-text" id="sponsor-modal-note">扫描上方二维码支持我，您的鼓励是我持续创作的最大动力！</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 弹窗2: 听我狗叫 -->
+    <div class="modal" id="dog-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-dog"></i>
+                    <span>🙌菜就多练</span>
+                </h3>
+                <button class="modal-close" id="close-dog">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-text" id="dog-modal-text">技术不够，努力来凑！我还在不断学习和进步中，感谢大家的包容和支持。如果有什么建议，欢迎通过快手主页联系我！</p>
+                <div style="text-align: center; font-size: 4rem; margin: 20px 0;">🐕</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Windows 10 开始按钮 -->
+    <button class="start-btn" id="start-btn">
+        <i class="fab fa-windows"></i>
+    </button>
+    
+    <!-- Windows 10 任务栏 -->
+    <div class="taskbar">
+        <button class="taskbar-btn" id="taskbar-kuaishou">
+            <i class="fas fa-play-circle"></i>
+            <span>快手</span>
+        </button>
+        <button class="taskbar-btn" id="taskbar-sponsor">
+            <i class="fas fa-heart"></i>
+            <span>赞助</span>
+        </button>
+        <button class="taskbar-btn" id="taskbar-dog">
+            <i class="fas fa-dog"></i>
+            <span>狗叫</span>
+        </button>
+        <button class="taskbar-btn" id="taskbar-version">
+            <i class="fas fa-exchange-alt"></i>
+            <span id="taskbar-version-text">切换版本</span>
+        </button>
+    </div>
+    
+    <script>
+        // 获取DOM元素
+        const kuaishouTile = document.getElementById('kuaishou-tile');
+        const sponsorTile = document.getElementById('sponsor-tile');
+        const dogTile = document.getElementById('dog-tile');
+        const versionTile = document.getElementById('version-tile');
+        const sponsorModal = document.getElementById('sponsor-modal');
+        const dogModal = document.getElementById('dog-modal');
+        const closeSponsor = document.getElementById('close-sponsor');
+        const closeDog = document.getElementById('close-dog');
+        const langSwitch = document.getElementById('lang-switch');
+        const zhLabel = document.getElementById('zh-label');
+        const enLabel = document.getElementById('en-label');
+        const langIcon = document.getElementById('lang-icon');
+        const taskbarKuaishou = document.getElementById('taskbar-kuaishou');
+        const taskbarSponsor = document.getElementById('taskbar-sponsor');
+        const taskbarDog = document.getElementById('taskbar-dog');
+        const taskbarVersion = document.getElementById('taskbar-version');
+        const taskbarVersionText = document.getElementById('taskbar-version-text');
+        const startBtn = document.getElementById('start-btn');
+        const switchVersionBtn = document.getElementById('switch-version-btn');
+        const versionNoticeText = document.getElementById('version-notice-text');
+        
+        // 获取需要翻译的元素
+        const titleText = document.getElementById('title-text');
+        const introTitle = document.getElementById('intro-title');
+        const introDescription = document.getElementById('intro-description');
+        const kuaishouTitle = document.getElementById('kuaishou-title');
+        const kuaishouDescription = document.getElementById('kuaishou-description');
+        const sponsorTitle = document.getElementById('sponsor-title');
+        const sponsorDescription = document.getElementById('sponsor-description');
+        const dogTitle = document.getElementById('dog-title');
+        const dogDescription = document.getElementById('dog-description');
+        const skillsTitle = document.getElementById('skills-title');
+        const skillsDescription = document.getElementById('skills-description');
+        const highlightText = document.getElementById('highlight-text');
+        const aboutDescription = document.getElementById('about-description');
+        const footerText = document.getElementById('footer-text');
+        const sponsorModalTitle = document.getElementById('sponsor-modal-title');
+        const sponsorModalText = document.getElementById('sponsor-modal-text');
+        const sponsorModalNote = document.getElementById('sponsor-modal-note');
+        const dogModalText = document.getElementById('dog-modal-text');
+        const versionTitle = document.getElementById('version-title');
+        const versionDescription = document.getElementById('version-description');
+        
+        // 翻译数据
+        const translations = {
+            zh: {
+                title: "斌雪山飞瀑的个人主页",
+                introTitle: "欢迎来到我的主页",
+                introDescription: "啥都玩，主要玩MC，想怎么更就怎么更，最快一日两更。剪辑技术虽然烂，所以不喜勿喷。不带货，不⭕💰，分享快乐是我的目的。",
+                kuaishouTitle: "快手主页",
+                kuaishouDescription: "访问我的快手主页，查看最新游戏视频和内容分享。",
+                sponsorTitle: "赞助支持",
+                sponsorDescription: "感谢您的支持！赞助方式请点击查看。",
+                dogTitle: "听我狗叫",
+                dogDescription: "技术不够，努力来凑！点击查看我的自嘲宣言。",
+                skillsTitle: "核心技能",
+                skillsDescription: "专注于Minecraft游戏视频制作、游戏汉化和简单剪辑。希望通过分享游戏中的快乐瞬间，与大家共同享受游戏的乐趣。",
+                highlight: "汉化<br>剪辑<br>游戏",
+                aboutDescription: "我是斌雪山飞瀑，一名热爱游戏的内容创作者。所有内容免费分享，只为传播快乐！",
+                footer: "© 2026 斌雪山飞瀑 | 当前版本: Windows 10风格 | 本页面托管于 GitHub Pages",
+                sponsorModalTitle: "爱发电筹备中，敬请期待",
+                sponsorModalText: "感谢您的支持！爱发电页面正在筹备中，很快就会上线。在此期间，您可以通过以下方式支持我：",
+                sponsorModalNote: "扫描上方二维码支持我，您的鼓励是我持续创作的最大动力！",
+                dogModalText: "技术不够，努力来凑！我还在不断学习和进步中，感谢大家的包容和支持。如果有什么建议，欢迎通过快手主页联系我！",
+                versionTitle: "版本切换",
+                versionDescription: "切换到标准版本界面，体验不同的风格设计。",
+                versionNotice: "当前是Windows 10风格版本，点击切换到标准版本",
+                versionBtn: "切换到标准版",
+                taskbarVersion: "切换版本"
+            },
+            en: {
+                title: "BinXueshan Feipu's Homepage",
+                introTitle: "Welcome to My Homepage",
+                introDescription: "I play everything, mainly Minecraft. I update as I wish, up to twice a day. My editing skills aren't great, so please don't criticize harshly. I don't sell products or chase money - sharing happiness is my goal.",
+                kuaishouTitle: "Kuaishou Profile",
+                kuaishouDescription: "Visit my Kuaishou profile to see the latest gaming videos and content sharing.",
+                sponsorTitle: "Sponsorship",
+                sponsorDescription: "Thank you for your support! Click to view sponsorship methods.",
+                dogTitle: "Hear My Bark",
+                dogDescription: "Not skilled enough? Just practice more! Click to view my self-deprecating manifesto.",
+                skillsTitle: "Core Skills",
+                skillsDescription: "Focus on Minecraft video production, game localization, and simple editing. I hope to share joyful gaming moments and enjoy the fun of games together with everyone.",
+                highlight: "Localization<br>Editing<br>Gaming",
+                aboutDescription: "I'm BinXueshan Feipu, a content creator passionate about gaming. All content is shared freely, just to spread happiness!",
+                footer: "© 2026 BinXueshan Feipu | Current Version: Windows 10 Style | This page is hosted on GitHub Pages",
+                sponsorModalTitle: "Aifadian Page Under Construction, Stay Tuned",
+                sponsorModalText: "Thank you for your support! The Aifadian page is under construction and will be online soon. In the meantime, you can support me through the following methods:",
+                sponsorModalNote: "Scan the QR codes above to support me. Your encouragement is my greatest motivation to keep creating!",
+                dogModalText: "Not skilled enough? Just practice more! I'm still learning and improving. Thanks for your tolerance and support. If you have any suggestions, feel free to contact me via my Kuaishou profile!",
+                versionTitle: "Version Switch",
+                versionDescription: "Switch to the standard version interface to experience a different design style.",
+                versionNotice: "Currently in Windows 10 style version, click to switch to standard version",
+                versionBtn: "Switch to Standard",
+                taskbarVersion: "Switch Version"
+            }
+        };
+        
+        let currentLang = localStorage.getItem('preferredLanguage') || 'zh';
+        
+        // 初始化语言设置
+        function initLanguage() {
+            // 设置开关状态
+            if (currentLang === 'en') {
+                langSwitch.classList.add('active');
+                zhLabel.classList.remove('active');
+                enLabel.classList.add('active');
+                langIcon.textContent = 'EN';
+            } else {
+                langSwitch.classList.remove('active');
+                zhLabel.classList.add('active');
+                enLabel.classList.remove('active');
+                langIcon.textContent = '中';
+            }
+            
+            // 应用翻译
+            applyTranslation(currentLang);
+        }
+        
+        // 应用翻译
+        function applyTranslation(lang) {
+            const t = translations[lang];
+            
+            titleText.textContent = t.title;
+            introTitle.textContent = t.introTitle;
+            introDescription.textContent = t.introDescription;
+            kuaishouTitle.textContent = t.kuaishouTitle;
+            kuaishouDescription.textContent = t.kuaishouDescription;
+            sponsorTitle.textContent = t.sponsorTitle;
+            sponsorDescription.textContent = t.sponsorDescription;
+            dogTitle.textContent = t.dogTitle;
+            dogDescription.textContent = t.dogDescription;
+            skillsTitle.textContent = t.skillsTitle;
+            skillsDescription.textContent = t.skillsDescription;
+            highlightText.innerHTML = t.highlight;
+            aboutDescription.textContent = t.aboutDescription;
+            footerText.textContent = t.footer;
+            sponsorModalTitle.textContent = t.sponsorModalTitle;
+            sponsorModalText.textContent = t.sponsorModalText;
+            sponsorModalNote.textContent = t.sponsorModalNote;
+            dogModalText.textContent = t.dogModalText;
+            versionTitle.textContent = t.versionTitle;
+            versionDescription.textContent = t.versionDescription;
+            versionNoticeText.textContent = t.versionNotice;
+            switchVersionBtn.innerHTML = `<i class="fas fa-exchange-alt"></i> ${t.versionBtn}`;
+            taskbarVersionText.textContent = t.taskbarVersion;
+        }
+        
+        // 切换语言函数
+        function switchLanguage() {
+            // 切换语言
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            
+            // 更新开关状态
+            if (currentLang === 'en') {
+                langSwitch.classList.add('active');
+                zhLabel.classList.remove('active');
+                enLabel.classList.add('active');
+                langIcon.textContent = 'EN';
+            } else {
+                langSwitch.classList.remove('active');
+                zhLabel.classList.add('active');
+                enLabel.classList.remove('active');
+                langIcon.textContent = '中';
+            }
+            
+            // 应用翻译
+            applyTranslation(currentLang);
+            
+            // 保存语言偏好
+            localStorage.setItem('preferredLanguage', currentLang);
+        }
+        
+        // 弹窗效果
+        function openModal(modal) {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal(modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // 切换到标准版本
+        function switchToStandardVersion() {
+            // 添加切换动画
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.3s ease';
+            
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 300);
+        }
+        
+        // 事件监听器
+        kuaishouTile.addEventListener('click', () => {
+            window.open('https://www.kuaishou.com/profile/3xriimnj29xsdjc', '_blank');
+        });
+        
+        sponsorTile.addEventListener('click', () => openModal(sponsorModal));
+        dogTile.addEventListener('click', () => openModal(dogModal));
+        versionTile.addEventListener('click', switchToStandardVersion);
+        switchVersionBtn.addEventListener('click', switchToStandardVersion);
+        
+        closeSponsor.addEventListener('click', () => closeModal(sponsorModal));
+        closeDog.addEventListener('click', () => closeModal(dogModal));
+        
+        // 点击弹窗外部关闭弹窗
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                closeModal(e.target);
+            }
+        });
+        
+        // 语言切换事件
+        langSwitch.addEventListener('click', switchLanguage);
+        
+        // 点击语言标签也可以切换
+        zhLabel.addEventListener('click', () => {
+            if (currentLang !== 'zh') {
+                switchLanguage();
+            }
+        });
+        
+        enLabel.addEventListener('click', () => {
+            if (currentLang !== 'en') {
+                switchLanguage();
+            }
+        });
+        
+        // 任务栏按钮事件
+        taskbarKuaishou.addEventListener('click', () => {
+            window.open('https://www.kuaishou.com/profile/3xriimnj29xsdjc', '_blank');
+        });
+        
+        taskbarSponsor.addEventListener('click', () => openModal(sponsorModal));
+        taskbarDog.addEventListener('click', () => openModal(dogModal));
+        taskbarVersion.addEventListener('click', switchToStandardVersion);
+        
+        // 开始按钮事件
+        startBtn.addEventListener('click', () => {
+            // 创建Windows 10启动声音效果
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(350, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(550, audioContext.currentTime + 0.1);
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.2);
+            } catch (e) {
+                console.log("音频上下文不支持");
+            }
+            
+            // 显示Windows 10风格提示
+            const tooltip = document.createElement('div');
+            tooltip.style.cssText = `
+                position: fixed;
+                bottom: 120px;
+                left: 30px;
+                background-color: var(--win10-surface);
+                color: var(--win10-text);
+                padding: 12px 20px;
+                border: 1px solid var(--win10-border);
+                z-index: 1000;
+                font-weight: 400;
+                max-width: 280px;
+                animation: fadeIn 0.3s ease;
+            `;
+            
+            tooltip.textContent = currentLang === 'zh' ? 
+                "Windows 10 磁贴风格主页 | 按V切换到标准版" : 
+                "Windows 10 Tile Style Homepage | Press V to switch to standard version";
+            document.body.appendChild(tooltip);
+            
+            // 3秒后移除提示
+            setTimeout(() => {
+                tooltip.style.opacity = '0';
+                tooltip.style.transition = 'opacity 0.3s ease';
+                
+                setTimeout(() => {
+                    if (tooltip.parentNode) {
+                        tooltip.parentNode.removeChild(tooltip);
+                    }
+                }, 300);
+            }, 3000);
+        });
+        
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            initLanguage();
+            
+            // 添加页面加载动画效果
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.4s ease';
+            
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+            
+            // 添加磁贴进入动画
+            const tiles = document.querySelectorAll('.tile');
+            tiles.forEach((tile, index) => {
+                tile.style.opacity = '0';
+                tile.style.transform = 'translateY(20px)';
+                tile.style.transition = 'all 0.4s ease';
+                
+                setTimeout(() => {
+                    tile.style.opacity = '1';
+                    tile.style.transform = 'translateY(0)';
+                }, 200 + (index * 80));
+            });
+            
+            // 添加标题动画
+            const title = document.querySelector('.main-title');
+            title.style.opacity = '0';
+            title.style.transform = 'translateY(-10px)';
+            title.style.transition = 'all 0.6s ease';
+            
+            setTimeout(() => {
+                title.style.opacity = '1';
+                title.style.transform = 'translateY(0)';
+            }, 300);
+        });
+        
+        // 添加键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+S 打开赞助弹窗
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                openModal(sponsorModal);
+            }
+            
+            // Ctrl+D 打开狗叫弹窗
+            if (e.ctrlKey && e.key === 'd') {
+                e.preventDefault();
+                openModal(dogModal);
+            }
+            
+            // Ctrl+L 切换语言
+            if (e.ctrlKey && e.key === 'l') {
+                e.preventDefault();
+                switchLanguage();
+            }
+            
+            // Escape 关闭所有弹窗
+            if (e.key === 'Escape') {
+                closeModal(sponsorModal);
+                closeModal(dogModal);
+            }
+            
+            // Ctrl+K 打开快手
+            if (e.ctrlKey && e.key === 'k') {
+                e.preventDefault();
+                window.open('https://www.kuaishou.com/profile/3xriimnj29xsdjc', '_blank');
+            }
+            
+            // V 切换到标准版本
+            if (e.key === 'v' || e.key === 'V') {
+                e.preventDefault();
+                switchToStandardVersion();
+            }
+        });
+    </script>
+</body>
+</html>
+[file content end]
