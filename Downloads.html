@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>下载中心 - 斌雪山飞瀑</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        :root {
+            /* Win11风格颜色变量 */
+            --bg-color: #f8fafc;
+            --surface-color: #ffffff;
+            --surface-alt: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.07), 0 12px 32px rgba(0, 0, 0, 0.12);
+            --radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* Win11毛玻璃效果变量 */
+            --blur-bg: rgba(255, 255, 255, 0.85);
+            --blur-border: rgba(255, 255, 255, 0.2);
+            
+            /* 动画变量 */
+            --animation-duration: 0.5s;
+        }
+
+        /* 深色主题 */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0f172a;
+                --surface-color: #1e293b;
+                --surface-alt: #334155;
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --accent: #60a5fa;
+                --accent-hover: #93c5fd;
+                --border: #475569;
+                --shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.25);
+                --shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.25), 0 12px 32px rgba(0, 0, 0, 0.35);
+                
+                /* 深色主题毛玻璃效果 */
+                --blur-bg: rgba(30, 41, 59, 0.85);
+                --blur-border: rgba(255, 255, 255, 0.1);
+            }
+        }
+
+        /* Minecraft字体定义 */
+        @font-face {
+            font-family: 'Minecraft';
+            src: url('Minecraft-Seven_v2.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+            min-height: 100vh;
+            transition: background-color 0.5s ease, color 0.5s ease;
+            overflow-x: hidden;
+        }
+
+        /* Minecraft字体应用类 */
+        .minecraft-font {
+            font-family: 'Minecraft', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        /* Win11风格背景 */
+        .win11-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, 
+                rgba(var(--accent-rgb, 37, 99, 235), 0.03) 0%, 
+                rgba(var(--accent-rgb, 37, 99, 235), 0.01) 50%, 
+                rgba(var(--accent-rgb, 37, 99, 235), 0.05) 100%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 20px;
+        }
+
+        /* 顶部栏 */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            background-color: var(--blur-bg);
+            border-radius: var(--radius);
+            padding: 16px 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--blur-border);
+            animation: slideDown 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 返回按钮 */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background-color: var(--surface-color);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .back-btn:hover {
+            background-color: var(--surface-alt);
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        /* 语言选择器 */
+        .language-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .lang-btn {
+            background-color: var(--surface-color);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .lang-btn:hover {
+            background-color: var(--surface-alt);
+            transform: translateY(-2px);
+        }
+
+        .lang-btn.active {
+            background-color: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            box-shadow: 0 2px 8px rgba(var(--accent-rgb, 37, 99, 235), 0.3);
+        }
+
+        /* 标题区域 */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+        }
+
+        .main-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* 下载卡片网格 */
+        .download-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+
+        @media (max-width: 768px) {
+            .download-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        /* 下载卡片 */
+        .download-card {
+            background-color: var(--surface-color);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            animation: cardAppear 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+
+        .download-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent) 0%, #7c3aed 100%);
+            border-radius: var(--radius) var(--radius) 0 0;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .download-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--accent);
+        }
+
+        .download-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        /* 说明卡片 - 不可点击 */
+        .instruction-card {
+            cursor: default !important;
+            border-color: var(--border) !important;
+        }
+        
+        .instruction-card:hover {
+            transform: translateY(0) !important;
+            box-shadow: var(--shadow) !important;
+            border-color: var(--border) !important;
+        }
+        
+        .instruction-card:hover::before {
+            transform: scaleX(0) !important;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            color: white;
+            font-size: 1.6rem;
+            box-shadow: 0 4px 12px rgba(var(--accent-rgb, 37, 99, 235), 0.25);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .card-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .card-content {
+            margin-bottom: 20px;
+        }
+
+        .card-description {
+            font-size: 1rem;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            line-height: 1.7;
+        }
+
+        .card-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: var(--transition);
+            padding: 8px 0;
+        }
+
+        .card-link:hover {
+            color: var(--accent-hover);
+        }
+
+        .card-link i {
+            font-size: 0.9rem;
+        }
+
+        /* 提取码悬浮窗 */
+        .password-tooltip {
+            position: absolute;
+            top: -45px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--text-primary);
+            color: var(--bg-color);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 10;
+            white-space: nowrap;
+            pointer-events: none;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .password-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: var(--text-primary) transparent transparent transparent;
+        }
+
+        .download-card:hover .password-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 密码显示区域 */
+        .password-display {
+            background-color: var(--surface-alt);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .password-label {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .password-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+        }
+
+        /* Win11风格弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-container {
+            background-color: var(--surface-color);
+            border-radius: 16px;
+            padding: 0;
+            width: 90%;
+            max-width: 480px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--blur-border);
+            overflow: hidden;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .modal-overlay.active .modal-container {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .modal-header {
+            padding: 24px 24px 16px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-title i {
+            font-size: 1.8rem;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-text {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .modal-info {
+            background-color: var(--surface-alt);
+            border-radius: 10px;
+            padding: 16px;
+            margin: 20px 0;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-icon {
+            width: 32px;
+            height: 32px;
+            background-color: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 12px;
+            font-size: 0.9rem;
+        }
+
+        .info-text {
+            flex: 1;
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+
+        .info-password {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--accent);
+            margin-left: 4px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .modal-btn.cancel {
+            background-color: var(--surface-alt);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .modal-btn.cancel:hover {
+            background-color: var(--surface-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .modal-btn.confirm {
+            background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(var(--accent-rgb, 37, 99, 235), 0.3);
+        }
+
+        .modal-btn.confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(var(--accent-rgb, 37, 99, 235), 0.4);
+        }
+
+        /* 页脚 */
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            animation: fadeIn 1s ease 0.8s both;
+        }
+
+        /* 文言文特定样式 */
+        .classical-chinese {
+            font-family: 'SimSun', 'STSong', 'STKaiti', 'KaiTi', serif;
+        }
+
+        .classical-chinese .card-description,
+        .classical-chinese .card-title {
+            font-weight: normal;
+            letter-spacing: 0.5px;
+        }
+
+        /* Win11动画定义 */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        @keyframes slideDown {
+            from { 
+                opacity: 0; 
+                transform: translateY(-20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        @keyframes cardAppear {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px) scale(0.95); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 16px;
+            }
+            
+            .top-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+            
+            .language-selector {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .main-title {
+                font-size: 2.2rem;
+            }
+            
+            .download-card {
+                padding: 20px;
+            }
+            
+            .card-title {
+                font-size: 1.3rem;
+            }
+            
+            .modal-actions {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-title {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .download-card {
+                padding: 18px;
+            }
+            
+            .card-icon {
+                width: 42px;
+                height: 42px;
+                font-size: 1.2rem;
+            }
+            
+            .modal-container {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Win11风格背景 -->
+    <div class="win11-background"></div>
+    
+    <div class="container">
+        <!-- 顶部栏 -->
+        <div class="top-bar">
+            <!-- 返回按钮 -->
+            <a href="index.html" class="back-btn" id="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                <span id="back-text">返回主页</span>
+            </a>
+            
+            <!-- 语言选择器 -->
+            <div class="language-selector" id="language-selector">
+                <button class="lang-btn active" data-lang="zh">简体中文</button>
+                <button class="lang-btn" data-lang="classical">文言文</button>
+                <button class="lang-btn" data-lang="en">English</button>
+            </div>
+        </div>
+        
+        <!-- 标题区域 -->
+        <div class="header">
+            <h1 class="main-title" id="main-title">下载中心</h1>
+            <p class="subtitle" id="subtitle">点击下方卡片跳转到下载链接，鼠标悬停查看提取码</p>
+        </div>
+        
+        <!-- 下载卡片网格 -->
+        <div class="download-grid">
+            <!-- Minecraft货币多多 -->
+            <div class="download-card" data-link="https://wwazf.lanzouw.com/b014wphl2j" data-password="mcmod" data-name="Minecraft货币多多人民币版">
+                <!-- 提取码悬浮窗 -->
+                <div class="password-tooltip" id="password-tooltip-1">提取码: mcmod</div>
+                
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title minecraft-font" id="card-title-1">Minecraft货币多多人民币版</h3>
+                        <p class="card-subtitle minecraft-font" id="card-subtitle-1">Java版 1.16.x - 1.20.x</p>
+                    </div>
+                </div>
+                
+                <div class="card-content">
+                    <p class="card-description minecraft-font" id="card-description-1">
+                        为<span class="minecraft-font">Minecraft</span> Java版添加人民币货币系统的模组，适用于1.16.x到1.20.x版本。
+                    </p>
+                    
+                    <a href="javascript:void(0)" class="card-link" id="card-link-1">
+                        前往下载页面 <i class="fas fa-external-link-alt"></i>
+                    </a>
+                    
+                    <div class="password-display">
+                        <span class="password-label" id="password-label-1">提取码:</span>
+                        <span class="password-value">mcmod</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TruboWarp旧版 -->
+            <div class="download-card" data-link="https://wwazf.lanzouw.com/b014wpwlyb" data-password="xcxNB" data-name="TruboWarp（旧版）">
+                <!-- 提取码悬浮窗 -->
+                <div class="password-tooltip" id="password-tooltip-2">提取码: xcxNB</div>
+                
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title" id="card-title-2">TruboWarp（旧版）</h3>
+                        <p class="card-subtitle" id="card-subtitle-2">高性能Scratch修改版</p>
+                    </div>
+                </div>
+                
+                <div class="card-content">
+                    <p class="card-description" id="card-description-2">
+                        Scratch的高性能修改版本，提供更快的运行速度和更好的性能表现，适合旧版项目兼容。
+                    </p>
+                    
+                    <a href="javascript:void(0)" class="card-link" id="card-link-2">
+                        前往下载页面 <i class="fas fa-external-link-alt"></i>
+                    </a>
+                    
+                    <div class="password-display">
+                        <span class="password-label" id="password-label-2">提取码:</span>
+                        <span class="password-value">xcxNB</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Minecraft低配光影 -->
+            <div class="download-card" data-link="https://wwazf.lanzouw.com/b014ws207g" data-password="c7pe" data-name="Minecraft: Java低配光影">
+                <!-- 提取码悬浮窗 -->
+                <div class="password-tooltip" id="password-tooltip-3">提取码: c7pe</div>
+                
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-sun"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title minecraft-font" id="card-title-3">Minecraft: Java低配光影 😋</h3>
+                        <p class="card-subtitle minecraft-font" id="card-subtitle-3">适用于低配置设备的优化光影</p>
+                    </div>
+                </div>
+                
+                <div class="card-content">
+                    <p class="card-description minecraft-font" id="card-description-3">
+                        专门为低配置电脑优化的<span class="minecraft-font">Minecraft</span> Java版光影包，在提升画面效果的同时保持流畅运行。
+                    </p>
+                    
+                    <a href="javascript:void(0)" class="card-link" id="card-link-3">
+                        前往下载页面 <i class="fas fa-external-link-alt"></i>
+                    </a>
+                    
+                    <div class="password-display">
+                        <span class="password-label" id="password-label-3">提取码:</span>
+                        <span class="password-value">c7pe</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 使用说明 - 这个卡片不可点击 -->
+        <div class="download-card instruction-card" style="margin-bottom: 30px;">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div>
+                    <h3 class="card-title" id="instruction-title">使用说明</h3>
+                    <p class="card-subtitle" id="instruction-subtitle">下载与使用指南</p>
+                </div>
+            </div>
+            
+            <div class="card-content">
+                <p class="card-description" id="instruction-description" style="margin-bottom: 20px;">
+                    点击任意下载卡片即可跳转到对应的蓝奏云下载页面。每个卡片下方都显示了提取码，您也可以将鼠标悬停在卡片上查看提取码提示。
+                    <strong>此卡片仅为说明用途，不可点击。</strong>
+                </p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div style="background-color: var(--surface-alt); padding: 16px; border-radius: 8px;">
+                        <h4 style="margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">
+                            <i class="fas fa-mouse-pointer" style="margin-right: 8px; color: var(--accent);"></i>
+                            <span id="instruction-tip-1">鼠标悬停</span>
+                        </h4>
+                        <p style="font-size: 0.95rem; color: var(--text-secondary);" id="instruction-text-1">
+                            将鼠标悬停在下载卡片上，可以查看提取码提示框
+                        </p>
+                    </div>
+                    
+                    <div style="background-color: var(--surface-alt); padding: 16px; border-radius: 8px;">
+                        <h4 style="margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">
+                            <i class="fas fa-download" style="margin-right: 8px; color: var(--accent);"></i>
+                            <span id="instruction-tip-2">点击下载</span>
+                        </h4>
+                        <p style="font-size: 0.95rem; color: var(--text-secondary);" id="instruction-text-2">
+                            点击卡片任意位置或下载链接，即可跳转到下载页面
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 页脚 -->
+        <div class="footer">
+            <p id="footer-text">© 2026 斌雪山飞瀑 | 下载中心 | 所有资源仅供学习交流使用</p>
+        </div>
+    </div>
+    
+    <!-- Win11风格弹窗 -->
+    <div class="modal-overlay" id="download-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-download"></i>
+                    <span id="modal-title">下载确认</span>
+                </h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-text" id="modal-question">是否前往下载？</p>
+                
+                <div class="modal-info">
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <div class="info-text">
+                            <span id="modal-resource-name" class="minecraft-font">Minecraft货币多多人民币版</span>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-cloud"></i>
+                        </div>
+                        <div class="info-text">
+                            该资源由 <strong id="modal-cloud-name">蓝奏云</strong> 云盘保存
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <div class="info-text">
+                            提取码: <span class="info-password" id="modal-password">mcmod</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button class="modal-btn cancel" id="modal-cancel">取消</button>
+                    <button class="modal-btn confirm" id="modal-confirm">前往下载</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const languageSelector = document.getElementById('language-selector');
+        const langButtons = document.querySelectorAll('.lang-btn');
+        const backBtn = document.getElementById('back-btn');
+        const backText = document.getElementById('back-text');
+        const downloadCards = document.querySelectorAll('.download-card:not(.instruction-card)');
+        const downloadModal = document.getElementById('download-modal');
+        const modalCancel = document.getElementById('modal-cancel');
+        const modalConfirm = document.getElementById('modal-confirm');
+        const modalTitle = document.getElementById('modal-title');
+        const modalQuestion = document.getElementById('modal-question');
+        const modalResourceName = document.getElementById('modal-resource-name');
+        const modalCloudName = document.getElementById('modal-cloud-name');
+        const modalPassword = document.getElementById('modal-password');
+        
+        // 当前选择的下载链接
+        let currentDownloadLink = '';
+        
+        // 获取需要翻译的元素
+        const mainTitle = document.getElementById('main-title');
+        const subtitle = document.getElementById('subtitle');
+        const backButtonText = document.getElementById('back-text');
+        const cardTitle1 = document.getElementById('card-title-1');
+        const cardSubtitle1 = document.getElementById('card-subtitle-1');
+        const cardDescription1 = document.getElementById('card-description-1');
+        const cardLink1 = document.getElementById('card-link-1');
+        const passwordLabel1 = document.getElementById('password-label-1');
+        const passwordTooltip1 = document.getElementById('password-tooltip-1');
+        
+        const cardTitle2 = document.getElementById('card-title-2');
+        const cardSubtitle2 = document.getElementById('card-subtitle-2');
+        const cardDescription2 = document.getElementById('card-description-2');
+        const cardLink2 = document.getElementById('card-link-2');
+        const passwordLabel2 = document.getElementById('password-label-2');
+        const passwordTooltip2 = document.getElementById('password-tooltip-2');
+        
+        const cardTitle3 = document.getElementById('card-title-3');
+        const cardSubtitle3 = document.getElementById('card-subtitle-3');
+        const cardDescription3 = document.getElementById('card-description-3');
+        const cardLink3 = document.getElementById('card-link-3');
+        const passwordLabel3 = document.getElementById('password-label-3');
+        const passwordTooltip3 = document.getElementById('password-tooltip-3');
+        
+        const instructionTitle = document.getElementById('instruction-title');
+        const instructionSubtitle = document.getElementById('instruction-subtitle');
+        const instructionDescription = document.getElementById('instruction-description');
+        const instructionTip1 = document.getElementById('instruction-tip-1');
+        const instructionText1 = document.getElementById('instruction-text-1');
+        const instructionTip2 = document.getElementById('instruction-tip-2');
+        const instructionText2 = document.getElementById('instruction-text-2');
+        const footerText = document.getElementById('footer-text');
+        
+        // 翻译数据
+        const translations = {
+            zh: {
+                mainTitle: "下载中心",
+                subtitle: "点击下方卡片跳转到下载链接，鼠标悬停查看提取码",
+                backText: "返回主页",
+                cardTitle1: "Minecraft货币多多人民币版",
+                cardSubtitle1: "Java版 1.16.x - 1.20.x",
+                cardDescription1: "为Minecraft Java版添加人民币货币系统的模组，适用于1.16.x到1.20.x版本。",
+                cardLink1: "前往下载页面",
+                passwordLabel1: "提取码:",
+                passwordTooltip1: "提取码: mcmod",
+                cardTitle2: "TruboWarp（旧版）",
+                cardSubtitle2: "高性能Scratch修改版",
+                cardDescription2: "Scratch的高性能修改版本，提供更快的运行速度和更好的性能表现，适合旧版项目兼容。",
+                cardLink2: "前往下载页面",
+                passwordLabel2: "提取码:",
+                passwordTooltip2: "提取码: xcxNB",
+                cardTitle3: "Minecraft: Java低配光影 😋",
+                cardSubtitle3: "适用于低配置设备的优化光影",
+                cardDescription3: "专门为低配置电脑优化的Minecraft Java版光影包，在提升画面效果的同时保持流畅运行。",
+                cardLink3: "前往下载页面",
+                passwordLabel3: "提取码:",
+                passwordTooltip3: "提取码: c7pe",
+                instructionTitle: "使用说明",
+                instructionSubtitle: "下载与使用指南",
+                instructionDescription: "点击任意下载卡片即可跳转到对应的蓝奏云下载页面。每个卡片下方都显示了提取码，您也可以将鼠标悬停在卡片上查看提取码提示。此卡片仅为说明用途，不可点击。",
+                instructionTip1: "鼠标悬停",
+                instructionText1: "将鼠标悬停在下载卡片上，可以查看提取码提示框",
+                instructionTip2: "点击下载",
+                instructionText2: "点击卡片任意位置或下载链接，即可跳转到下载页面",
+                footerText: "© 2026 斌雪山飞瀑 | 下载中心 | 所有资源仅供学习交流使用",
+                modalTitle: "下载确认",
+                modalQuestion: "是否前往下载？",
+                modalCloudName: "蓝奏云",
+                modalCancel: "取消",
+                modalConfirm: "前往下载"
+            },
+            classical: {
+                mainTitle: "下载中心",
+                subtitle: "点击下方卡片可至下载链接，悬鼠于上可见提取之码",
+                backText: "返归主页",
+                cardTitle1: "Minecraft货币多多人民币版",
+                cardSubtitle1: "Java版 1.16.x - 1.20.x",
+                cardDescription1: "为Minecraft Java版增添人民币货币系统之模组，适用于1.16.x至1.20.x诸版本。",
+                cardLink1: "往下载页面",
+                passwordLabel1: "提取码:",
+                passwordTooltip1: "提取码: mcmod",
+                cardTitle2: "TruboWarp（旧版）",
+                cardSubtitle2: "高性能Scratch修改版",
+                cardDescription2: "Scratch之高性能修改版本，运行迅捷，性能优异，适于旧版项目之兼容。",
+                cardLink2: "往下载页面",
+                passwordLabel2: "提取码:",
+                passwordTooltip2: "提取码: xcxNB",
+                cardTitle3: "Minecraft: Java低配光影 😋",
+                cardSubtitle3: "适于低配设备之优化光影",
+                cardDescription3: "专为低配电脑优化之Minecraft Java版光影包，既提升画面之效，亦保运行之畅。",
+                cardLink3: "往下载页面",
+                passwordLabel3: "提取码:",
+                passwordTooltip3: "提取码: c7pe",
+                instructionTitle: "使用说明",
+                instructionSubtitle: "下载与使用指南",
+                instructionDescription: "点击任意下载卡片即可至蓝奏云下载之页。每卡片下方皆示提取之码，亦可悬鼠于卡上以观提取码提示。此卡片仅为说明用途，不可点击。",
+                instructionTip1: "悬鼠于上",
+                instructionText1: "悬鼠于下载卡片之上，可观提取码之提示框",
+                instructionTip2: "点击下载",
+                instructionText2: "点击卡片任意处或下载链接，即可至下载页面",
+                footerText: "© 2026 斌雪山飞瀑 | 下载中心 | 所有资源仅供学习交流之用",
+                modalTitle: "下载确认",
+                modalQuestion: "是否前往下载？",
+                modalCloudName: "蓝奏云",
+                modalCancel: "取消",
+                modalConfirm: "前往下载"
+            },
+            en: {
+                mainTitle: "Download Center",
+                subtitle: "Click on the cards below to jump to download links, hover to view extraction codes",
+                backText: "Back to Home",
+                cardTitle1: "Minecraft Currency Mod RMB Edition",
+                cardSubtitle1: "Java Edition 1.16.x - 1.20.x",
+                cardDescription1: "A mod that adds a RMB currency system to Minecraft Java Edition, compatible with versions 1.16.x to 1.20.x.",
+                cardLink1: "Go to download page",
+                passwordLabel1: "Extraction code:",
+                passwordTooltip1: "Code: mcmod",
+                cardTitle2: "TruboWarp (Legacy Version)",
+                cardSubtitle2: "High-performance Scratch Mod",
+                cardDescription2: "A high-performance modified version of Scratch, providing faster operation and better performance, suitable for legacy project compatibility.",
+                cardLink2: "Go to download page",
+                passwordLabel2: "Extraction code:",
+                passwordTooltip2: "Code: xcxNB",
+                cardTitle3: "Minecraft: Java Low-End Shaders 😋",
+                cardSubtitle3: "Optimized shaders for low-end devices",
+                cardDescription3: "A Minecraft Java Edition shader pack optimized specifically for low-end computers, improving visual effects while maintaining smooth performance.",
+                cardLink3: "Go to download page",
+                passwordLabel3: "Extraction code:",
+                passwordTooltip3: "Code: c7pe",
+                instructionTitle: "Instructions",
+                instructionSubtitle: "Download and Usage Guide",
+                instructionDescription: "Click on any download card to jump to the corresponding LanZou Cloud download page. Each card displays the extraction code below, and you can also hover over the card to view the extraction code hint. This card is for informational purposes only and cannot be clicked.",
+                instructionTip1: "Mouse Hover",
+                instructionText1: "Hover over the download card to view the extraction code tooltip",
+                instructionTip2: "Click to Download",
+                instructionText2: "Click anywhere on the card or the download link to jump to the download page",
+                footerText: "© 2026 BinXueshan Feipu | Download Center | All resources are for learning and exchange only",
+                modalTitle: "Download Confirmation",
+                modalQuestion: "Do you want to proceed to download?",
+                modalCloudName: "LanZou Cloud",
+                modalCancel: "Cancel",
+                modalConfirm: "Go to Download"
+            }
+        };
+        
+        let currentLang = localStorage.getItem('preferredLanguage') || 'zh';
+        
+        // 初始化语言设置
+        function initLanguage() {
+            // 设置按钮状态
+            langButtons.forEach(btn => {
+                if (btn.dataset.lang === currentLang) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // 应用翻译
+            applyTranslation(currentLang);
+            
+            // 如果是文言文模式，添加特定样式
+            if (currentLang === 'classical') {
+                document.body.classList.add('classical-chinese');
+            } else {
+                document.body.classList.remove('classical-chinese');
+            }
+        }
+        
+        // 应用翻译
+        function applyTranslation(lang) {
+            const t = translations[lang];
+            
+            mainTitle.textContent = t.mainTitle;
+            subtitle.textContent = t.subtitle;
+            backText.textContent = t.backText;
+            
+            cardTitle1.textContent = t.cardTitle1;
+            cardSubtitle1.textContent = t.cardSubtitle1;
+            cardDescription1.textContent = t.cardDescription1;
+            cardLink1.innerHTML = `${t.cardLink1} <i class="fas fa-external-link-alt"></i>`;
+            passwordLabel1.textContent = t.passwordLabel1;
+            passwordTooltip1.textContent = t.passwordTooltip1;
+            
+            cardTitle2.textContent = t.cardTitle2;
+            cardSubtitle2.textContent = t.cardSubtitle2;
+            cardDescription2.textContent = t.cardDescription2;
+            cardLink2.innerHTML = `${t.cardLink2} <i class="fas fa-external-link-alt"></i>`;
+            passwordLabel2.textContent = t.passwordLabel2;
+            passwordTooltip2.textContent = t.passwordTooltip2;
+            
+            cardTitle3.textContent = t.cardTitle3;
+            cardSubtitle3.textContent = t.cardSubtitle3;
+            cardDescription3.textContent = t.cardDescription3;
+            cardLink3.innerHTML = `${t.cardLink3} <i class="fas fa-external-link-alt"></i>`;
+            passwordLabel3.textContent = t.passwordLabel3;
+            passwordTooltip3.textContent = t.passwordTooltip3;
+            
+            instructionTitle.textContent = t.instructionTitle;
+            instructionSubtitle.textContent = t.instructionSubtitle;
+            instructionDescription.textContent = t.instructionDescription;
+            instructionTip1.textContent = t.instructionTip1;
+            instructionText1.textContent = t.instructionText1;
+            instructionTip2.textContent = t.instructionTip2;
+            instructionText2.textContent = t.instructionText2;
+            footerText.textContent = t.footerText;
+            
+            // 更新弹窗文本
+            modalTitle.textContent = t.modalTitle;
+            modalQuestion.textContent = t.modalQuestion;
+            modalCloudName.textContent = t.modalCloudName;
+            modalCancel.textContent = t.modalCancel;
+            modalConfirm.textContent = t.modalConfirm;
+        }
+        
+        // 切换语言函数
+        function switchLanguage(lang) {
+            currentLang = lang;
+            
+            // 更新按钮状态
+            langButtons.forEach(btn => {
+                if (btn.dataset.lang === lang) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // 应用翻译
+            applyTranslation(lang);
+            
+            // 如果是文言文模式，添加特定样式
+            if (lang === 'classical') {
+                document.body.classList.add('classical-chinese');
+            } else {
+                document.body.classList.remove('classical-chinese');
+            }
+            
+            // 保存语言偏好
+            localStorage.setItem('preferredLanguage', lang);
+        }
+        
+        // 显示下载确认弹窗
+        function showDownloadModal(link, password, resourceName) {
+            currentDownloadLink = link;
+            modalResourceName.textContent = resourceName;
+            modalPassword.textContent = password;
+            downloadModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // 隐藏下载确认弹窗
+        function hideDownloadModal() {
+            downloadModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // 事件监听器
+        langButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                switchLanguage(btn.dataset.lang);
+            });
+        });
+        
+        // 卡片点击事件
+        downloadCards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                // 防止点击链接时触发卡片点击事件
+                if (e.target.tagName === 'A') return;
+                
+                const link = card.dataset.link;
+                const password = card.dataset.password;
+                const resourceName = card.dataset.name;
+                
+                showDownloadModal(link, password, resourceName);
+                
+                // 添加点击反馈效果
+                card.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    card.style.transform = '';
+                }, 150);
+            });
+        });
+        
+        // 链接点击事件
+        document.querySelectorAll('.card-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const card = link.closest('.download-card');
+                const linkUrl = card.dataset.link;
+                const password = card.dataset.password;
+                const resourceName = card.dataset.name;
+                
+                showDownloadModal(linkUrl, password, resourceName);
+            });
+        });
+        
+        // 弹窗按钮事件
+        modalCancel.addEventListener('click', hideDownloadModal);
+        modalConfirm.addEventListener('click', () => {
+            window.open(currentDownloadLink, '_blank');
+            hideDownloadModal();
+        });
+        
+        // 点击弹窗外部关闭弹窗
+        downloadModal.addEventListener('click', (e) => {
+            if (e.target === downloadModal) {
+                hideDownloadModal();
+            }
+        });
+        
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            initLanguage();
+            
+            // 添加页面加载动画效果
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.6s ease';
+            
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+            
+            // 添加卡片进入动画（带延迟）
+            const cards = document.querySelectorAll('.download-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px) scale(0.95)';
+                card.style.animationDelay = `${0.3 + (index * 0.1)}s`;
+                
+                // 触发动画
+                setTimeout(() => {
+                    card.style.animation = 'cardAppear 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+                }, 300 + (index * 100));
+            });
+            
+            // 添加标题动画
+            const title = document.querySelector('.main-title');
+            const sub = document.querySelector('.subtitle');
+            
+            title.style.opacity = '0';
+            title.style.transform = 'translateY(20px)';
+            
+            sub.style.opacity = '0';
+            sub.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                title.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+                title.style.opacity = '1';
+                title.style.transform = 'translateY(0)';
+                
+                sub.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s';
+                sub.style.opacity = '1';
+                sub.style.transform = 'translateY(0)';
+            }, 300);
+            
+            // 检测系统颜色主题变化
+            const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            colorSchemeQuery.addEventListener('change', (e) => {
+                console.log('系统主题已更改:', e.matches ? '深色模式' : '浅色模式');
+            });
+        });
+        
+        // 添加键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+1 切换到简体中文
+            if (e.ctrlKey && e.key === '1') {
+                e.preventDefault();
+                switchLanguage('zh');
+            }
+            
+            // Ctrl+2 切换到文言文
+            if (e.ctrlKey && e.key === '2') {
+                e.preventDefault();
+                switchLanguage('classical');
+            }
+            
+            // Ctrl+3 切换到英文
+            if (e.ctrlKey && e.key === '3') {
+                e.preventDefault();
+                switchLanguage('en');
+            }
+            
+            // Escape 关闭弹窗或返回主页
+            if (e.key === 'Escape') {
+                if (downloadModal.classList.contains('active')) {
+                    hideDownloadModal();
+                } else {
+                    window.location.href = 'index.html';
+                }
+            }
+            
+            // 数字键1-3直接打开对应下载弹窗
+            if (!e.ctrlKey && e.key === '1') {
+                const card = document.querySelector('.download-card[data-link="https://wwazf.lanzouw.com/b014wphl2j"]');
+                if (card) {
+                    const link = card.dataset.link;
+                    const password = card.dataset.password;
+                    const resourceName = card.dataset.name;
+                    showDownloadModal(link, password, resourceName);
+                }
+            }
+            if (!e.ctrlKey && e.key === '2') {
+                const card = document.querySelector('.download-card[data-link="https://wwazf.lanzouw.com/b014wpwlyb"]');
+                if (card) {
+                    const link = card.dataset.link;
+                    const password = card.dataset.password;
+                    const resourceName = card.dataset.name;
+                    showDownloadModal(link, password, resourceName);
+                }
+            }
+            if (!e.ctrlKey && e.key === '3') {
+                const card = document.querySelector('.download-card[data-link="https://wwazf.lanzouw.com/b014ws207g"]');
+                if (card) {
+                    const link = card.dataset.link;
+                    const password = card.dataset.password;
+                    const resourceName = card.dataset.name;
+                    showDownloadModal(link, password, resourceName);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
