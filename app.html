@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>应用中心</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #FAF8F5;
+            --bg-warm: #F5F1EB;
+            --surface: #FFFFFF;
+            --text-primary: #1A1A1A;
+            --text-secondary: #666666;
+            --text-muted: #999999;
+            --accent: #FF6900;
+            --border: #E8E4DE;
+            --shadow: rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .header {
+            padding: 1.5rem 3rem;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .logo {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .main {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .hero h1 {
+            font-size: 2.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.03em;
+        }
+
+        .hero p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .app-card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 2rem;
+            text-decoration: none;
+            color: inherit;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px var(--shadow);
+            border-color: transparent;
+        }
+
+        .app-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .app-card:hover::after {
+            transform: scaleX(1);
+        }
+
+        .app-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .app-card:nth-child(1) .app-icon {
+            background: linear-gradient(135deg, #FFE5D0 0%, #FFD0A8 100%);
+            color: var(--accent);
+        }
+
+        .app-card:nth-child(2) .app-icon {
+            background: linear-gradient(135deg, #E0F4FF 0%, #B8E4FF 100%);
+            color: #0088CC;
+        }
+
+        .app-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .app-desc {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1.25rem;
+        }
+
+        .app-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+            background: var(--bg-warm);
+            color: var(--text-secondary);
+        }
+
+        .app-card:nth-child(2) .tag {
+            background: #F0F8FF;
+            color: #0066AA;
+        }
+
+        .app-action {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--accent);
+        }
+
+        .app-card:nth-child(2) .app-action {
+            color: #0088CC;
+        }
+
+        .arrow {
+            transition: transform 0.3s ease;
+        }
+
+        .app-card:hover .arrow {
+            transform: translateX(4px);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-top: 4rem;
+        }
+
+        .app-card {
+            opacity: 0;
+            animation: fadeUp 0.6s ease forwards;
+        }
+
+        .app-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .app-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem 1.5rem;
+            }
+
+            .main {
+                padding: 3rem 1.5rem;
+            }
+
+            .hero h1 {
+                font-size: 1.75rem;
+            }
+
+            .apps-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">应用中心</div>
+    </header>
+
+    <main class="main">
+        <section class="hero">
+            <h1>探索应用</h1>
+            <p>体验智能交互能力</p>
+        </section>
+
+        <div class="apps-grid">
+            <a href="aibeat.html" class="app-card">
+                <div class="app-icon">AI</div>
+                <h2 class="app-title">AI 感情对话</h2>
+                <p class="app-desc">
+                    与AI进行情感交流，体验温暖贴心的智能对话，理解你的情绪与需求。
+                </p>
+                <div class="app-tags">
+                    <span class="tag">情感识别</span>
+                    <span class="tag">自然对话</span>
+                    <span class="tag">智能回应</span>
+                </div>
+                <div class="app-action">
+                    开始体验 <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <a href="mimotts.html" class="app-card">
+                <div class="app-icon">TTS</div>
+                <h2 class="app-title">V2-TTS 体验</h2>
+                <p class="app-desc">
+                    体验文本转语音技术，感受自然流畅的语音合成效果。
+                </p>
+                <div class="app-tags">
+                    <span class="tag">多音色</span>
+                    <span class="tag">自然韵律</span>
+                    <span class="tag">高质量</span>
+                </div>
+                <div class="app-action">
+                    开始体验 <span class="arrow">→</span>
+                </div>
+            </a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>应用中心</p>
+    </footer>
+</body>
+</html>
