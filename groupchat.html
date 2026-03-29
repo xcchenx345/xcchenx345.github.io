@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>MiMo · 群聊</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#000;height:100vh;height:100dvh;display:flex;justify-content:center;overflow:hidden}
+body.dark{background:#000}
+
+#app{width:100%;max-width:500px;height:100%;background:#fff;display:flex;flex-direction:column;box-shadow:0 0 30px rgba(0,0,0,.5);border-radius:28px 28px 0 0;overflow:hidden;position:relative}
+body.dark #app{background:#0f0f0f}
+
+/* 顶栏 */
+.hdr{padding:12px 16px;background:#f8f8f8;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #ddd;z-index:10;gap:8px}
+body.dark .hdr{background:#1c1c1e;border-bottom-color:#2c2c2e}
+.hdr .title{font-size:16px;font-weight:700;color:#1a1a1a;display:flex;align-items:center;gap:8px}
+body.dark .hdr .title{color:#fff}
+.hdr .members{font-size:12px;color:#999}
+.hdr-btn{background:#e0e0e0;border:none;width:36px;height:36px;border-radius:50%;font-size:18px;color:#ffaa00;cursor:pointer;display:flex;align-items:center;justify-content:center}
+body.dark .hdr-btn{background:#2c2c2e;color:#ffaa00}
+
+/* 聊天区 */
+.cc{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:#f5f5f5}
+body.dark .cc{background:#0f0f0f}
+
+/* 消息 */
+.msg{display:flex;gap:10px;max-width:85%}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.msg .av{width:36px;height:36px;border-radius:50%;background:#ddd;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;overflow:hidden}
+.msg .av img{width:100%;height:100%;object-fit:cover}
+.msg .bw{display:flex;flex-direction:column}
+.msg .bh{display:flex;align-items:baseline;gap:8px;margin-bottom:3px;font-size:12px;color:#aaa}
+.msg.user .bh{justify-content:flex-end}
+.msg .nk{font-weight:600;font-size:12px}
+.msg .bbl{background:#e8e8e8;color:#1a1a1a;padding:10px 14px;border-radius:18px;font-size:15px;line-height:1.5;word-break:break-word}
+.msg.user .bbl{background:#d0ebff;color:#000;border-radius:18px 18px 4px 18px}
+.msg.ai .bbl{border-radius:18px 18px 18px 4px}
+body.dark .msg.ai .bbl{background:#2c2c2e;color:#fff}
+body.dark .msg.user .bbl{background:#3a6ea5}
+
+/* AI 颜色 */
+.nick-0{color:#ff6b6b}.nick-1{color:#ffa94d}.nick-2{color:#51cf66}.nick-3{color:#339af0}.nick-4{color:#cc5de8}.nick-5{color:#20c997}.nick-6{color:#f06595}.nick-7{color:#ffd43b}
+
+/* 输入区 */
+.ia{padding:10px 12px;background:#fff;border-top:1px solid #ddd;display:flex;gap:8px;align-items:flex-end}
+body.dark .ia{background:#1c1c1e;border-top-color:#2c2c2e}
+.iw{flex:1;display:flex;align-items:center;background:#f0f0f0;border-radius:22px;padding:0 16px;min-height:44px}
+body.dark .iw{background:#2c2c2e}
+.iw input{flex:1;border:none;background:transparent;font-size:15px;outline:none;color:#1a1a1a;padding:10px 0}
+body.dark .iw input{color:#fff}
+.send{background:#ffaa00;color:#fff;border:none;width:44px;height:44px;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.send:disabled{opacity:.3}
+.chain-btn{background:#e0e0e0;border:none;height:44px;padding:0 14px;border-radius:22px;font-size:13px;color:#ffaa00;cursor:pointer;flex-shrink:0;white-space:nowrap}
+body.dark .chain-btn{background:#2c2c2e;color:#ffaa00}
+.chain-btn.on{background:#ffaa00;color:#fff}
+
+/* 弹窗遮罩 */
+.mo{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:100}
+.mo.hid{display:none}
+.mc{background:#fff;border-radius:16px;padding:24px;width:90%;max-width:400px;max-height:80vh;overflow-y:auto}
+body.dark .mc{background:#2c2c2e}
+.mc h3{font-size:18px;margin-bottom:16px;color:#1a1a1a}
+body.dark .mc h3{color:#fff}
+.mc label{display:block;font-size:13px;color:#888;margin:12px 0 4px}
+.mc input[type=text]{width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:10px;font-size:14px;background:#f8f8f8;color:#1a1a1a;outline:none}
+body.dark .mc input[type=text]{background:#3a3a3c;border-color:#555;color:#fff}
+.ai-option{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;cursor:pointer;margin:4px 0;transition:background .15s}
+.ai-option:hover{background:#f0f0f0}
+body.dark .ai-option:hover{background:#3a3a3c}
+.ai-option.on{background:#fff3e0}
+body.dark .ai-option.on{background:#4a3a20}
+.ai-option .ck{width:20px;height:20px;border:2px solid #ccc;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;transition:all .15s}
+.ai-option.on .ck{background:#ffaa00;border-color:#ffaa00;color:#fff}
+.ai-option .aav{width:32px;height:32px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;overflow:hidden}
+.ai-option .aav img{width:100%;height:100%;object-fit:cover}
+.ai-option .anm{font-size:14px;font-weight:500;color:#1a1a1a}
+body.dark .ai-option .anm{color:#e5e5e5}
+.ai-option .amd{font-size:11px;color:#999}
+.btn-row{display:flex;gap:8px;margin-top:16px}
+.btn-row button{flex:1;padding:12px;border:none;border-radius:10px;font-size:15px;cursor:pointer}
+.btn-p{background:#ffaa00;color:#fff;font-weight:600}
+.btn-c{background:#e0e0e0;color:#666}
+body.dark .btn-c{background:#3a3a3c;color:#aaa}
+
+/* 系统消息 */
+.sys-msg{text-align:center;font-size:12px;color:#aaa;padding:8px 0}
+
+/* 打字中 */
+.typing{display:flex;align-items:center;gap:4px;padding:6px 0}
+.typing span{font-size:12px;color:#999}
+.typing .dot{width:6px;height:6px;border-radius:50%;background:#999;animation:blink 1.4s infinite both}
+.typing .dot:nth-child(2){animation-delay:.2s}
+.typing .dot:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
+
+/* 抽屉 */
+.dw{position:fixed;top:0;left:0;width:300px;height:100%;background:#fff;z-index:50;transform:translateX(-100%);transition:transform .25s;display:flex;flex-direction:column}
+body.dark .dw{background:#1c1c1e}
+.dw.open{transform:translateX(0)}
+.dov{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:40;display:none}
+.dov.show{display:block}
+.dwh{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eee}
+body.dark .dwh{border-bottom-color:#2c2c2e}
+.dwh h3{font-size:16px;font-weight:700}
+body.dark .dwh h3{color:#fff}
+.dwc{background:none;border:none;font-size:20px;cursor:pointer;color:#999}
+.dwl{flex:1;overflow-y:auto;padding:12px}
+.dwf{padding:12px;border-top:1px solid #eee}
+body.dark .dwf{border-top-color:#2c2c2e}
+.nsb{width:100%;padding:12px;border:none;border-radius:12px;font-size:14px;cursor:pointer;background:#ffaa00;color:#fff;font-weight:600}
+.nsb:hover{opacity:.9}
+
+/* 成员头像列表 */
+.member-bar{padding:8px 16px;display:flex;gap:8px;overflow-x:auto;border-bottom:1px solid #eee;background:#fff}
+body.dark .member-bar{background:#1c1c1e;border-bottom-color:#2c2c2e}
+.member-tag{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:16px;background:#f0f0f0;font-size:12px;white-space:nowrap;flex-shrink:0}
+body.dark .member-tag{background:#2c2c2e}
+.member-tag .mav{width:18px;height:18px;border-radius:50%;background:#ddd;display:flex;align-items:center;justify-content:center;font-size:10px;overflow:hidden}
+.member-tag .mav img{width:100%;height:100%;object-fit:cover}
+.member-tag .mnm{font-weight:500;color:#1a1a1a}
+body.dark .member-tag .mnm{color:#e5e5e5}
+.member-tag.you{background:#d0ebff}
+body.dark .member-tag.you{background:#2a4a6a}
+
+/* 空状态 */
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#ccc;font-size:14px;gap:12px;padding:40px;text-align:center}
+.empty .icon{font-size:48px}
+
+/* Toast */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:10px;font-size:14px;color:#fff;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+.toast.success{background:rgba(46,125,50,.9)}
+.toast.info{background:rgba(25,118,210,.9)}
+
+/* ===== 平板 ===== */
+@media (min-width:768px) and (max-width:1280px){
+  body{background:#ededed;padding:0;display:flex;height:100vh;overflow:hidden}
+  body.dark{background:#111}
+  .dov{display:none!important}
+  .dw{position:relative!important;top:auto;left:auto;transform:none!important;width:300px;min-width:300px;height:100vh;box-shadow:none!important;border-radius:0;border-right:1px solid #ddd;order:-1}
+  #app{flex:1;max-width:none;height:100vh;border-radius:0;box-shadow:none;border:none}
+}
+
+/* ===== 桌面端 ===== */
+@media (min-width:1281px){
+  body{background:#ededed;padding:0;display:flex;height:100vh;overflow:hidden}
+  body.dark{background:#111}
+  .dov{display:none!important}
+  .dw{position:relative!important;top:auto;left:auto;transform:none!important;width:300px;min-width:300px;height:100vh;box-shadow:none!important;border-radius:0;border-right:1px solid #ddd;order:-1}
+  #app{flex:1;max-width:none;height:100vh;border-radius:0;box-shadow:none;border:none}
+  .hdr{background:#f8f8f8;border-bottom-color:#ddd}
+  body.dark .hdr{background:#1c1c1e;border-bottom-color:#2c2c2e}
+  .cc{background:#f5f5f5}
+  body.dark .cc{background:#111}
+  .msg.ai .bbl{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  body.dark .msg.ai .bbl{background:#2c2c2e}
+  .msg.user .bbl{background:#d0ebff}
+  body.dark .msg.user .bbl{background:#3a6ea5}
+  .ia{background:#f0f0f0;border-top-color:#ddd}
+  body.dark .ia{background:#1c1c1e}
+  .iw{background:#fff}
+  body.dark .iw{background:#2c2c2e}
+  .send{background:#fff;color:#ffaa00}
+  body.dark .send{background:#2c2c2e;color:#ffaa00}
+  .chain-btn{background:#fff}
+  body.dark .chain-btn{background:#2c2c2e}
+}
+</style>
+</head>
+<body>
+
+<!-- 抽屉 -->
+<div class="dov" id="dov"></div>
+<div class="dw" id="dw">
+  <div class="dwh"><h3>群聊列表</h3><button class="dwc" id="dcb">✕</button></div>
+  <div class="dwl" id="dwl"></div>
+  <div class="dwf"><button class="nsb" id="nsb">创建群聊</button></div>
+</div>
+
+<!-- 主界面 -->
+<div id="app">
+  <div class="hdr">
+    <button class="hdr-btn" id="menuBtn">☰</button>
+    <div class="title"><span id="gcName">群聊</span><span class="members" id="gcCount"></span></div>
+    <button class="hdr-btn" id="gcSettings">⚙️</button>
+  </div>
+  <div class="member-bar" id="memberBar"></div>
+  <div class="cc" id="cc">
+    <div class="empty"><div class="icon">👥</div><div>还没有群聊<br>点击下方按钮创建一个</div></div>
+  </div>
+  <div class="ia">
+    <button class="chain-btn" id="chainBtn" title="自动接龙">🔗 接龙</button>
+    <div class="iw"><input id="inp" placeholder="说点什么…"></div>
+    <button class="send" id="sdbtn">➤</button>
+  </div>
+</div>
+
+<!-- 创建/编辑群聊弹窗 -->
+<div class="mo hid" id="setupM">
+  <div class="mc">
+    <h3 id="setupTitle">创建群聊</h3>
+    <label>群聊名称</label><input type="text" id="gcN" placeholder="例如：AI茶话会">
+    <label>选择成员（点击勾选）</label>
+    <div id="aiList" style="margin:8px 0;max-height:300px;overflow-y:auto"></div>
+    <div class="btn-row">
+      <button class="btn-c" id="setupCancel">取消</button>
+      <button class="btn-p" id="setupOk">创建</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<audio id="tts"></audio>
+
+<script>
+(function(){
+// ===== 核心数据 =====
+var groups=[],gcid=null,chainMode=false;
+var aiColors=['#ff6b6b','#ffa94d','#51cf66','#339af0','#cc5de8','#20c997','#f06595','#ffd43b'];
+
+// DOM
+var $=function(i){return document.getElementById(i)};
+var $cc=$('cc'),$inp=$('inp'),$sd=$('sdbtn'),$dw=$('dw'),$dov=$('dov'),$dwl=$('dwl');
+var $gcName=$('gcName'),$gcCount=$('gcCount'),$memberBar=$('memberBar');
+var $setupM=$('setupM'),$gcN=$('gcN'),$aiList=$('aiList');
+var $chainBtn=$('chainBtn');
+
+// ===== 读取主程序数据 =====
+function getSessions(){
+  try{return JSON.parse(localStorage.getItem('mimo_s'))||[]}catch(e){return []}
+}
+function getAk(){return localStorage.getItem('mimo_a')||''}
+function getDak(){return localStorage.getItem('mimo_da')||''}
+
+// ===== 配置 =====
+var CFG={
+  'mimo-v2-flash':{p:'m',l:'Flash',u:'https://api.xiaomimimo.com/v1/chat/completions',r:0},
+  'mimo-v2-pro':{p:'m',l:'Pro',u:'https://api.xiaomimimo.com/v1/chat/completions',r:0},
+  'mimo-v2-omni':{p:'m',l:'Omni',u:'https://api.xiaomimimo.com/v1/chat/completions',r:0},
+  'deepseek-chat':{p:'d',l:'V3',u:'https://api.deepseek.com/v1/chat/completions',r:1},
+  'deepseek-reasoner':{p:'d',l:'R1',u:'https://api.deepseek.com/v1/chat/completions',r:1}
+};
+
+// ===== 存储 =====
+function sv(){localStorage.setItem('mimo_gc',JSON.stringify(groups))}
+function ld(){
+  var g=localStorage.getItem('mimo_gc');
+  if(g) try{groups=JSON.parse(g)}catch(e){groups=[]}
+}
+
+// ===== 工具 =====
+function $(i){return document.getElementById(i)}
+function escH(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''}
+function showToast(t,type){var b=$('toast');b.textContent=t;b.className='toast show '+(type||'info');setTimeout(function(){b.classList.remove('show')},2000)}
+function isWide(){return window.innerWidth>=768}
+
+// ===== 群聊列表渲染 =====
+function rGL(){
+  $dwl.innerHTML='';
+  if(!groups.length){$dwl.innerHTML='<p style="text-align:center;color:#999;padding:20px">暂无群聊</p>';return}
+  groups.forEach(function(g){
+    var d=document.createElement('div');
+    d.style.cssText='padding:12px;border-radius:10px;margin:4px 0;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .15s';
+    if(g.id===gcid) d.style.background='#fff3e0';
+    d.onmouseover=function(){if(g.id!==gcid)d.style.background='#f0f0f0'};
+    d.onmouseout=function(){d.style.background=g.id===gcid?'#fff3e0':'transparent'};
+    d.innerHTML='<div style="font-size:20px">👥</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escH(g.name)+'</div><div style="font-size:12px;color:#999">'+g.members.length+'人 · '+(g.messages?g.messages.length:0)+'条</div></div>';
+    d.onclick=function(){switchGroup(g.id);if(!isWide()){$dw.classList.remove('open');$dov.classList.remove('show')}};
+    $dwl.appendChild(d);
+  });
+}
+
+// ===== 切换群聊 =====
+function switchGroup(id){
+  var g=groups.find(function(x){return x.id===id});
+  if(!g)return;
+  gcid=id;
+  $gcName.textContent=g.name;
+  $gcCount.textContent='('+g.members.length+'人)';
+  rMembers(g);
+  rMsgs(g);
+  sv();
+}
+
+// ===== 渲染成员栏 =====
+function rMembers(g){
+  $memberBar.innerHTML='';
+  // 用户
+  var uav=localStorage.getItem('mimo_uav')||'👤';
+  var umy=localStorage.getItem('mimo_my')||'用户';
+  var ut=document.createElement('div');
+  ut.className='member-tag you';
+  ut.innerHTML='<div class="mav">'+(uav.startsWith('http')?'<img src="'+escH(uav)+'">':escH(uav))+'</div><span class="mnm">'+escH(umy)+'</span>';
+  $memberBar.appendChild(ut);
+  g.members.forEach(function(m){
+    var t=document.createElement('div');
+    t.className='member-tag';
+    t.innerHTML='<div class="mav">'+(m.avatar&&m.avatar.startsWith('http')?'<img src="'+escH(m.avatar)+'">':escH(m.avatar||'🤖'))+'</div><span class="mnm">'+escH(m.name)+'</span>';
+    $memberBar.appendChild(t);
+  });
+}
+
+// ===== 渲染消息 =====
+function rMsgs(g){
+  $cc.innerHTML='';
+  if(!g.messages||!g.messages.length){
+    $cc.innerHTML='<div class="empty"><div class="icon">💬</div><div>群聊已创建<br>发条消息试试吧</div></div>';
+    return;
+  }
+  g.messages.forEach(function(m){rMsg(g,m)});
+  $cc.scrollTop=$cc.scrollHeight;
+}
+
+function rMsg(g,m){
+  if(m.type==='sys'){
+    var d=document.createElement('div');
+    d.className='sys-msg';
+    d.textContent=m.content;
+    $cc.appendChild(d);
+    return;
+  }
+  var d=document.createElement('div');
+  d.className='msg'+(m.sender==='user'?' user':' ai');
+
+  // 头像
+  var av=document.createElement('div');
+  av.className='av';
+  if(m.sender==='user'){
+    var uav=localStorage.getItem('mimo_uav')||'👤';
+    av.innerHTML=uav.startsWith('http')?'<img src="'+escH(uav)+'">':escH(uav);
+  }else{
+    var ai=m.aiData||{};
+    av.innerHTML=(ai.avatar&&ai.avatar.startsWith('http'))?'<img src="'+escH(ai.avatar)+'">':escH(ai.avatar||'🤖');
+  }
+
+  // 内容
+  var bw=document.createElement('div');
+  bw.className='bw';
+  var bh=document.createElement('div');
+  bh.className='bh';
+  var nk=document.createElement('span');
+  nk.className='nk';
+  if(m.sender==='user'){
+    var umy=localStorage.getItem('mimo_my')||'用户';
+    nk.textContent=umy;
+  }else{
+    var ai=m.aiData||{};
+    nk.textContent=ai.name||'AI';
+    // 颜色
+    var ci=g.members.findIndex(function(x){return x.id===m.aiId});
+    if(ci>=0) nk.className='nk nick-'+(ci%8);
+  }
+  bh.appendChild(nk);
+  if(m.time){
+    var tm=document.createElement('span');
+    tm.style.cssText='font-size:11px;color:#bbb';
+    tm.textContent=new Date(m.time).toLocaleTimeString('zh-CN',{hour12:false,hour:'2-digit',minute:'2-digit'});
+    bh.appendChild(tm);
+  }
+  bw.appendChild(bh);
+
+  var bbl=document.createElement('div');
+  bbl.className='bbl';
+  bbl.textContent=m.content;
+  bw.appendChild(bbl);
+
+  d.appendChild(av);
+  d.appendChild(bw);
+  $cc.appendChild(d);
+}
+
+// ===== 添加消息 =====
+function addMsg(g,sender,content,aiId,aiData){
+  if(!g.messages) g.messages=[];
+  var m={type:'text',sender:sender,content:content,time:Date.now()};
+  if(aiId) m.aiId=aiId;
+  if(aiData) m.aiData=aiData;
+  g.messages.push(m);
+  rMsg(g,m);
+  $cc.scrollTop=$cc.scrollHeight;
+  sv();
+}
+
+// ===== API 调用（单个AI回复） =====
+function callAI(g,member,text,history,cb){
+  var c=CFG[member.model];
+  if(!c){cb('（未知模型）');return}
+  var key='';
+  if(c.p==='m'){key=getAk();if(!key){cb('（未设置MiMo密钥）');return}}
+  else{key=getDak();if(!key){cb('（未设置DeepSeek密钥）');return}}
+
+  var ds=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  var umy=localStorage.getItem('mimo_my')||'用户';
+  var membersDesc=g.members.map(function(m){return m.name+'('+m.personality+')'}).join('、');
+  var sp='You are MiMo. Today: '+ds+'.\n你是群聊「'+g.name+'」中的一员。群成员：'+membersDesc+'、'+umy+'(用户)。\n你的角色：'+member.name+'，性格：'+(member.personality||'友善')+'。\n请以「'+member.name+'」的身份说话，简短自然，像真人聊天。不要用第三人称描述自己。用括号描述动作神态如（微笑）。';
+
+  var msgs=[{role:'system',content:sp}].concat(history.slice(-12).map(function(m){
+    if(m.type==='sys') return {role:'system',content:m.content};
+    if(m.sender==='user') return {role:'user',content:umy+': '+m.content};
+    var name=(m.aiData&&m.aiData.name)||'AI';
+    return {role:'assistant',content:name+': '+m.content};
+  }),[{role:'user',content:text}]);
+
+  var body={model:member.model,messages:msgs,max_completion_tokens:c.r?4096:512,stream:false};
+  if(!c.r){body.temperature=0.85;body.top_p=0.95}
+
+  fetch(c.u,{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify(body)})
+  .then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})
+  .then(function(d){
+    var reply=d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content;
+    if(!reply) throw new Error('无回复');
+    cb(reply.trim());
+  }).catch(function(e){cb('（'+member.name+' 暂时无法回应：'+e.message+'）')});
+}
+
+// ===== 发送用户消息 =====
+function sendUserMsg(){
+  var g=groups.find(function(x){return x.id===gcid});
+  if(!g||!g.members.length){showToast('请先添加成员','warn');return}
+  var t=$inp.value.trim();
+  if(!t)return;
+  $inp.value='';
+  addMsg(g,'user',t);
+  // 随机选一个AI回复
+  var m=g.members[Math.floor(Math.random()*g.members.length)];
+  showTyping(m.name);
+  callAI(g,m,'用户说：'+t,g.messages,function(reply){
+    removeTyping();
+    addMsg(g,'ai',reply,m.id,{name:m.name,avatar:m.avatar});
+  });
+}
+
+// ===== 接龙模式 =====
+function doChain(){
+  var g=groups.find(function(x){return x.id===gcid});
+  if(!g||g.members.length<2){showToast('至少需要2个成员才能接龙','warn');return}
+  // 让最后一个发言的AI之外的AI接话
+  var lastAI=null;
+  for(var i=g.messages.length-1;i>=0;i--){
+    if(g.messages[i].sender==='ai'){lastAI=g.messages[i].aiId;break}
+  }
+  var candidates=g.members.filter(function(m){return m.id!==lastAI});
+  if(!candidates.length) candidates=g.members;
+  var m=candidates[Math.floor(Math.random()*candidates.length)];
+
+  // 构建上下文：让AI看到最近的对话
+  var context='最近群里的对话：\n';
+  g.messages.slice(-6).forEach(function(msg){
+    if(msg.sender==='user') context+='用户：'+msg.content+'\n';
+    else context+=(msg.aiData?msg.aiData.name:'AI')+'：'+msg.content+'\n';
+  });
+  context+='现在请你接上话题，自然地继续聊天。';
+
+  showTyping(m.name);
+  callAI(g,m,context,g.messages,function(reply){
+    removeTyping();
+    addMsg(g,'ai',reply,m.id,{name:m.name,avatar:m.avatar});
+    // 接龙模式下继续
+    if(chainMode){
+      setTimeout(doChain,800+Math.random()*1500);
+    }
+  });
+}
+
+// ===== 打字中指示器 =====
+function showTyping(name){
+  removeTyping();
+  var d=document.createElement('div');
+  d.id='typingInd';
+  d.className='typing';
+  d.innerHTML='<div class="dot"></div><div class="dot"></div><div class="dot"></div><span>'+escH(name)+' 正在输入…</span>';
+  $cc.appendChild(d);
+  $cc.scrollTop=$cc.scrollHeight;
+}
+function removeTyping(){var t=$('typingInd');if(t)t.remove()}
+
+// ===== 创建群聊 =====
+var editId=null;
+
+function openSetup(editing){
+  var ss=getSessions();
+  if(!ss.length){showToast('没有可用的AI角色，请先在主程序创建对话','warn');return}
+  editId=editing||null;
+  var existing=null;
+  if(editing){
+    existing=groups.find(function(x){return x.id===editing});
+    $('setupTitle').textContent='编辑群聊';
+    $('setupOk').textContent='保存';
+  }else{
+    $('setupTitle').textContent='创建群聊';
+    $('setupOk').textContent='创建';
+  }
+  $gcN.value=existing?existing.name:'';
+
+  // 生成AI列表
+  var selIds=existing?existing.members.map(function(m){return m.id}):[];
+  $aiList.innerHTML='';
+  ss.forEach(function(s){
+    var d=document.createElement('div');
+    d.className='ai-option'+(selIds.indexOf(s.id)>=0?' on':'');
+    d.dataset.id=s.id;
+    var av=s.aiAvatar||'🤖';
+    d.innerHTML='<div class="ck">'+(selIds.indexOf(s.id)>=0?'✓':'')+'</div><div class="aav">'+(av.startsWith('http')?'<img src="'+escH(av)+'">':escH(av))+'</div><div><div class="anm">'+escH(s.aiName||s.name)+'</div><div class="amd">'+escH(s.personality||'未设性格')+'</div></div>';
+    d.onclick=function(){
+      d.classList.toggle('on');
+      d.querySelector('.ck').textContent=d.classList.contains('on')?'✓':'';
+    };
+    $aiList.appendChild(d);
+  });
+  $setupM.classList.remove('hid');
+}
+
+function saveSetup(){
+  var name=$gcN.value.trim()||'群聊';
+  var sel=[];
+  $aiList.querySelectorAll('.ai-option.on').forEach(function(d){
+    var s=getSessions().find(function(x){return x.id==d.dataset.id});
+    if(s) sel.push({id:s.id,name:s.aiName||s.name,avatar:s.aiAvatar||'🤖',personality:s.personality||'',model:localStorage.getItem('mimo_cm')||'mimo-v2-flash'});
+  });
+  if(sel.length<1){showToast('至少选择1个成员','warn');return}
+
+  if(editId){
+    var g=groups.find(function(x){return x.id===editId});
+    if(g){g.name=name;g.members=sel}
+  }else{
+    var g={id:Date.now(),name:name,members:sel,messages:[{type:'sys',content:'群聊已创建，欢迎大家！'}]};
+    groups.push(g);
+    switchGroup(g.id);
+  }
+  sv();rGL();
+  $setupM.classList.add('hid');
+  if(editId) switchGroup(editId);
+  showToast(editId?'✅ 已保存':'✅ 群聊已创建','success');
+}
+
+// ===== 事件绑定 =====
+$('menuBtn').onclick=function(){$dw.classList.add('open');$dov.classList.add('show');rGL()};
+$('dcb').onclick=function(){$dw.classList.remove('open');$dov.classList.remove('show')};
+$dov.onclick=function(){$dw.classList.remove('open');$dov.classList.remove('show')};
+$('nsb').onclick=function(){openSetup()};
+$('gcSettings').onclick=function(){if(gcid)openSetup(gcid)};
+$('setupCancel').onclick=function(){$setupM.classList.add('hid')};
+$('setupOk').onclick=saveSetup;
+
+$sd.onclick=sendUserMsg;
+$inp.onkeypress=function(e){if(e.key==='Enter')$sd.click()};
+
+$chainBtn.onclick=function(){
+  chainMode=!chainMode;
+  $chainBtn.classList.toggle('on',chainMode);
+  $chainBtn.textContent=chainMode?'🔗 接龙中…':'🔗 接龙';
+  if(chainMode) doChain();
+};
+
+// ===== 宽屏自动展开抽屉 =====
+if(isWide()){$dw.classList.add('open')}
+
+// ===== 深色模式跟随系统 =====
+if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches){
+  document.body.classList.add('dark');
+}
+
+// ===== 初始化 =====
+ld();
+rGL();
+if(groups.length) switchGroup(groups[0].id);
+
+// 定期刷新主程序数据
+setInterval(function(){rGL()},5000);
+
+})();
+</script>
+</body>
+</html>
