@@ -11,7 +11,7 @@
 
   /* ── Orb ── */
   .orb-wrap{position:relative;width:var(--ball);height:var(--ball);display:flex;align-items:center;justify-content:center}
-  .orb{width:100%;height:100%;border-radius:50%;background:#6C5CE7;box-shadow:0 0 60px rgba(108,92,231,.35);cursor:pointer;will-change:transform,border-radius,background}
+  .orb{width:100%;height:100%;border-radius:50%;background:#6C5CE7;box-shadow:0 0 60px rgba(108,92,231,.35);cursor:pointer;will-change:transform,border-radius,background;transition:background .3s}
   .orb:hover{transform:scale(1.04)}.orb:active{transform:scale(.97)}
 
   /* ── Deco rings ── */
@@ -22,30 +22,34 @@
   .orb.idle{background:#6C5CE7;animation:orb-breathe 3s ease-in-out infinite}
   @keyframes orb-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 
+  /* ═══ LOADING ═══ */
+  .orb.loading{background:#a29bfe;animation:orb-pulse-load 1.5s ease-in-out infinite;cursor:default}
+  @keyframes orb-pulse-load{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.04);opacity:.7}}
+
   /* ═══ LISTENING ═══ */
   .orb.listen{background:#ff6348;box-shadow:0 0 60px rgba(255,99,72,.4)}
   .orb.listen{animation:orb-listen .9s ease-in-out infinite}
   @keyframes orb-listen{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
 
-  /* ═══ THINKING — morphing shape ═══ */
+  /* ═══ THINKING ═══ */
   .orb.think{background:#fdcb6e;box-shadow:0 0 60px rgba(253,203,110,.4);animation:orb-morph 1.6s ease-in-out infinite}
   @keyframes orb-morph{
-    0%  {border-radius:50%;transform:scale(1)}
-    20% {border-radius:42% 58% 55% 45%/55% 42% 58% 45%;transform:scale(1.04)}
-    40% {border-radius:55% 45% 42% 58%/45% 55% 42% 58%;transform:scale(1.02)}
-    60% {border-radius:45% 55% 58% 42%/58% 45% 55% 42%;transform:scale(1.06)}
-    80% {border-radius:58% 42% 45% 55%/42% 58% 45% 55%;transform:scale(1.03)}
+    0%{border-radius:50%;transform:scale(1)}
+    20%{border-radius:42% 58% 55% 45%/55% 42% 58% 45%;transform:scale(1.04)}
+    40%{border-radius:55% 45% 42% 58%/45% 55% 42% 58%;transform:scale(1.02)}
+    60%{border-radius:45% 55% 58% 42%/58% 45% 55% 42%;transform:scale(1.06)}
+    80%{border-radius:58% 42% 45% 55%/42% 58% 45% 55%;transform:scale(1.03)}
     100%{border-radius:50%;transform:scale(1)}
   }
 
   /* ═══ SPEAKING ball ═══ */
   .orb.speak-ball{background:#6C5CE7;box-shadow:0 0 80px rgba(108,92,231,.5)}
-  .orb.speak-ball~.ring{opacity:1;animation:r-pulse 1.8s ease-out infinite}
-  .ring:nth-child(3){animation-delay:.5s}
-  .ring:nth-child(4){animation-delay:1s}
-  @keyframes r-pulse{0%{transform:scale(.85);opacity:.5}100%{transform:scale(1.15);opacity:0}}
+  .orb.speak-ball~.ring{opacity:1;animation:sp-ring-pulse 1.8s ease-out infinite}
+  .ring:nth-child(3){animation-delay:.5s}.ring:nth-child(4){animation-delay:1s}
+  @keyframes sp-ring-pulse{0%{transform:scale(.85);opacity:.5}100%{transform:scale(1.15);opacity:0}}
+  @keyframes ring-voice{0%{transform:scale(1);opacity:.5}100%{transform:scale(1.2);opacity:0}}
 
-  /* ═══ SPEAKING bars — hide orb, show canvas ═══ */
+  /* ═══ SPEAKING bars ═══ */
   .orb.speak-bars{opacity:0;pointer-events:none}
   .orb.speak-bars~.ring{opacity:0}
 
@@ -53,7 +57,7 @@
   #waveCanvas.on{opacity:1}
 
   /* ── Status ── */
-  .status{margin-top:32px;font-size:15px;color:rgba(255,255,255,.5);min-height:22px;transition:color .3s}
+  .status{margin-top:32px;font-size:15px;color:rgba(255,255,255,.5);min-height:22px;transition:color .3s;text-align:center;padding:0 20px}
   .status.on{color:rgba(255,255,255,.85)}
   .hint{position:fixed;bottom:120px;font-size:13px;color:rgba(255,255,255,.3);animation:fade-pulse 3s ease-in-out infinite}
   @keyframes fade-pulse{0%,100%{opacity:.3}50%{opacity:.7}}
@@ -64,7 +68,7 @@
   .btn:hover{background:rgba(255,255,255,.14);color:#fff}.btn:active{transform:scale(.92)}
   .btn svg{width:24px;height:24px;fill:currentColor}
   .btn.stop{background:rgba(255,107,107,.15);color:var(--danger)}.btn.stop:hover{background:rgba(255,107,107,.3)}
-
+  .btn.hidden{display:none}
   .pause-wrap{position:fixed;bottom:max(40px,env(safe-area-inset-bottom));left:max(24px,env(safe-area-inset-left));z-index:10}
 
   /* ── Settings ── */
@@ -98,8 +102,7 @@
   .msg.a::before{content:'MiMo';display:block;font-size:11px;font-weight:600;color:#ffeaa7;margin-bottom:4px}
   .empty{text-align:center;color:rgba(255,255,255,.25);font-size:13px;padding:24px 0}
   .clearbtn{display:block;margin:12px auto 0;padding:8px 20px;background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.2);border-radius:8px;color:var(--danger);font-size:12px;cursor:pointer}
-  .clearbtn:hover{background:rgba(255,107,107,.2)}
-  .clearbtn.hid{display:none}
+  .clearbtn:hover{background:rgba(255,107,107,.2)}.clearbtn.hid{display:none}
   .membtn{border-color:rgba(253,203,110,.3);color:#fdcb6e;background:rgba(253,203,110,.08)}
   .membtn:hover{background:rgba(253,203,110,.15)}
 
@@ -113,11 +116,38 @@
   .sendbtn:hover{background:#5a4bd1}.sendbtn:active{transform:scale(.9)}
   .sendbtn svg{width:20px;height:20px;fill:currentColor}
   .sendbtn:disabled{opacity:.3}
+
+  /* Badge */
+  .stt-badge{position:fixed;top:max(16px,env(safe-area-inset-top));left:max(16px,env(safe-area-inset-left));z-index:20;font-size:11px;padding:4px 10px;border-radius:12px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);backdrop-filter:blur(10px)}
+  .stt-badge.ready{color:rgba(118,255,133,.7)}.stt-badge.loading-badge{color:rgba(253,203,110,.7)}
+
+  /* Mic level bar */
+  .mic-level{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:60%;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;opacity:0;transition:opacity .3s}
+  .mic-level.on{opacity:1}
+  .mic-level-fill{height:100%;width:0%;background:#ff6348;border-radius:2px;transition:width .1s}
+
+  /* Toast */
+  .toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.85);color:#fff;padding:12px 24px;border-radius:12px;font-size:14px;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;text-align:center;max-width:80vw}
+  .toast.show{opacity:1}
+
+  /* Loading overlay */
+  .load-overlay{position:fixed;inset:0;background:rgba(10,10,15,.92);backdrop-filter:blur(20px);z-index:50;display:none;align-items:center;justify-content:center;flex-direction:column;gap:20px}
+  .load-overlay.show{display:flex}
+  .load-spinner{width:48px;height:48px;border:3px solid rgba(108,92,231,.2);border-top-color:#6C5CE7;border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .load-text{text-align:center;max-width:80vw}
+  .load-text h3{font-size:16px;font-weight:500;margin-bottom:8px}
+  .load-text p{font-size:13px;color:rgba(255,255,255,.4)}
+  .load-bar{width:min(300px,70vw);height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+  .load-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,#6C5CE7,#a29bfe);border-radius:2px;transition:width .3s}
+  .load-pct{font-size:12px;color:rgba(255,255,255,.3);min-height:18px}
 </style>
 </head>
 <body>
 
 <button class="gear" id="gearBtn"><svg viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z"/></svg></button>
+
+<div class="stt-badge" id="sttBadge">语音: 加载中…</div>
 
 <div class="orb-wrap">
   <div class="orb idle" id="orb"></div>
@@ -125,6 +155,7 @@
   <div class="ring"></div>
   <div class="ring"></div>
   <canvas id="waveCanvas" width="400" height="400"></canvas>
+  <div class="mic-level" id="micLevel"><div class="mic-level-fill" id="micLevelFill"></div></div>
 </div>
 
 <div class="status" id="status"></div>
@@ -155,6 +186,11 @@
     <div class="field"><label>API Key</label><input type="password" id="inKey" placeholder="MiMo API Key" autocomplete="off"><div class="hint">platform.xiaomimimo.com 获取</div></div>
     <div class="field"><label>Chat 模型</label><input type="text" id="inChat" placeholder="mimo-v2-flash"></div>
     <div class="field"><label>TTS 模型</label><input type="text" id="inTts" placeholder="mimo-v2-tts"></div>
+    <div class="field"><label>语音识别模型</label><select id="inWhisperModel">
+      <option value="onnx-community/whisper-tiny">Whisper Tiny（~30MB，推荐）</option>
+      <option value="onnx-community/whisper-base">Whisper Base（~60MB，更准）</option>
+      <option value="onnx-community/whisper-small">Whisper Small（~190MB，最准）</option>
+    </select><div class="hint">首次需下载，之后缓存秒开。Tiny 最快最省流量。</div></div>
     <div class="field"><label>API Endpoint</label><input type="text" id="inEp" placeholder="https://api.xiaomimimo.com/v1/chat/completions"><div class="hint">如果跨域报错，可填本地代理地址如 http://localhost:8080/v1/chat/completions</div></div>
     <div class="field"><label>音色</label><select id="inVoice"><option value="mimo_default">MiMo-默认</option><option value="default_zh">MiMo-中文女声</option><option value="default_en">MiMo-英文女声</option></select></div>
     <div class="field"><label>说话可视化</label><select id="inVis"><option value="bars">音符跳动</option><option value="ball">圆球脉动</option></select></div>
@@ -171,7 +207,85 @@
   </div>
 </div>
 
-<script>
+<!-- Loading overlay -->
+<div class="load-overlay" id="loadOverlay">
+  <div class="load-spinner"></div>
+  <div class="load-text">
+    <h3>正在加载语音识别模型</h3>
+    <p id="loadSubtext">首次使用需要下载，之后从缓存加载</p>
+  </div>
+  <div class="load-bar"><div class="load-bar-fill" id="loadBarFill"></div></div>
+  <div class="load-pct" id="loadPct"></div>
+  <button class="bcancel" id="skipLoad" style="margin-top:12px;font-size:13px;padding:8px 20px;opacity:.5">先用文字输入 →</button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Load transformers.js early so it's ready when needed -->
+<script src="https://cdn.jsdelivr.net/npm/@huggingface/transformers@3" type="module"></script>
+
+<script type="module">
+// ════════════════════════════════════════
+// Whisper local STT (browser WASM)
+// ════════════════════════════════════════
+let whisperPipeline=null, whisperReady=false, whisperLoading=false, whisperFailed=false;
+// Use smaller quantized models from onnx-community
+const WHISPER_MODELS={
+  tiny:'onnx-community/whisper-tiny',
+  base:'onnx-community/whisper-base',
+  small:'onnx-community/whisper-small'
+};
+
+// Try multiple CDN sources for transformers.js
+const TFJS_CDNS=[
+  'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3',
+  'https://unpkg.com/@huggingface/transformers@3',
+  'https://esm.sh/@huggingface/transformers@3'
+];
+
+async function importTransformers(){
+  // Check if already loaded via script tag
+  if(window.pipeline)return window;
+  for(const cdn of TFJS_CDNS){
+    try{
+      const mod=await import(cdn);
+      return mod;
+    }catch(e){console.warn('CDN failed:',cdn,e)}
+  }
+  throw new Error('所有CDN源加载失败');
+}
+
+async function loadWhisper(modelId,onProgress){
+  whisperLoading=true;whisperFailed=false;
+  updateSttBadge();
+  const startTime=Date.now();
+  try{
+    const{pipeline,env}=await importTransformers();
+    env.backends.onnx.wasm.proxy=true;
+    // Allow multiple download sources for faster loading
+    env.allowRemoteModels=true;
+    whisperPipeline=await pipeline('automatic-speech-recognition',modelId,{
+      progress_callback:p=>{
+        if(onProgress)onProgress(p);
+        // Timeout: if loading takes > 5min, warn
+        if(Date.now()-startTime>300000&&p.status!=='ready'){
+          console.warn('Model loading timeout');
+        }
+      }
+    });
+    whisperReady=true;whisperLoading=false;
+    updateSttBadge();
+    return true;
+  }catch(e){
+    whisperLoading=false;whisperFailed=true;
+    updateSttBadge();
+    console.error('Whisper load failed:',e);
+    return false;
+  }
+}
+
+// ════════════════════════════════════════
 const SYS=`你是MiMo，小米AI助手，正在语音对话。
 每条回复开头用<style>风格</style>指定语音风格，如：<style>温柔</style>没关系的……
 风格支持：开心/悲伤/生气/温柔/语速慢/变快/悄悄话/夹子音/台湾腔/东北话/四川话/粤语/河南话/孙悟空/林黛玉/唱歌
@@ -189,7 +303,9 @@ const SYS=`你是MiMo，小米AI助手，正在语音对话。
 // ── State ──
 const S={
   key:localStorage.getItem('mk')||'',chatM:localStorage.getItem('mcm')||'mimo-v2-flash',
-  ttsM:localStorage.getItem('mtm')||'mimo-v2-tts',ep:localStorage.getItem('mep')||'https://api.xiaomimimo.com/v1/chat/completions',
+  ttsM:localStorage.getItem('mtm')||'mimo-v2-tts',
+  whisperModel:localStorage.getItem('mwm')||'onnx-community/whisper-tiny',
+  ep:localStorage.getItem('mep')||'https://api.xiaomimimo.com/v1/chat/completions',
   voice:localStorage.getItem('mv')||'mimo_default',vis:localStorage.getItem('mvs')||'bars',
   style:localStorage.getItem('mst')||'',sys:localStorage.getItem('msp')||SYS,
   mem:JSON.parse(localStorage.getItem('mm')||'[]'),msgs:JSON.parse(localStorage.getItem('mmg')||'[]'),
@@ -198,8 +314,16 @@ const S={
 
 // ── DOM ──
 const $=id=>document.getElementById(id);
-const orb=$('orb'),status=$('status'),hint=$('hint'),stopBtn=$('stopBtn'),textBar=$('textBar'),textInput=$('textInput'),sendBtn=$('sendBtn'),overlay=$('overlay');
+const orb=$('orb'),statusEl=$('status'),hint=$('hint'),stopBtn=$('stopBtn'),
+      textBar=$('textBar'),textInput=$('textInput'),sendBtn=$('sendBtn'),
+      overlay=$('overlay'),toastEl=$('toast'),
+      micLevel=$('micLevel'),micLevelFill=$('micLevelFill'),sttBadge=$('sttBadge'),
+      loadOverlay=$('loadOverlay'),loadBarFill=$('loadBarFill'),loadPct=$('loadPct'),
+      loadSubtext=$('loadSubtext'),skipLoadBtn=$('skipLoad');
 const canvas=$('waveCanvas'),cCtx=canvas.getContext('2d');
+
+// ── Toast ──
+function showToast(msg,dur=2500){toastEl.textContent=msg;toastEl.classList.add('show');setTimeout(()=>toastEl.classList.remove('show'),dur)}
 
 // ── State machine ──
 function setSt(s){
@@ -208,19 +332,20 @@ function setSt(s){
   canvas.classList.remove('on');
   stopBtn.classList.add('hidden');
   hint.classList.add('hidden');
+  micLevel.classList.remove('on');
   switch(s){
     case'idle':orb.classList.add('idle');break;
-    case'listening':orb.classList.add('listen');stopBtn.classList.remove('hidden');setStatus('正在听...',1);break;
-    case'thinking':orb.classList.add('think');stopBtn.classList.remove('hidden');setStatus('正在思考...',1);break;
+    case'loading':orb.classList.add('loading');setStatus('正在加载语音模型…',1);break;
+    case'listening':orb.classList.add('listen');stopBtn.classList.remove('hidden');micLevel.classList.add('on');setStatus('正在听…',1);break;
+    case'thinking':orb.classList.add('think');stopBtn.classList.remove('hidden');setStatus('正在思考…',1);break;
     case'speaking':
-      stopBtn.classList.remove('hidden');
-      setStatus('正在说话...',1);
-      if(S.vis==='ball'){orb.classList.add('speak-ball')}
+      stopBtn.classList.remove('hidden');setStatus('正在说话…',1);
+      if(S.vis==='ball')orb.classList.add('speak-ball');
       else{orb.classList.add('speak-bars');canvas.classList.add('on')}
       break;
   }
 }
-function setStatus(t,a){status.textContent=t;status.classList.toggle('on',!!a)}
+function setStatus(t,a){statusEl.textContent=t;statusEl.classList.toggle('on',!!a)}
 
 // ── Audio + Analyser ──
 let audioCtx=null,analyser=null,sourceNode=null;
@@ -229,9 +354,7 @@ let _playToken=0,_visRaf=null;
 function ensureAudioCtx(){
   if(!audioCtx||audioCtx.state==='closed'){
     audioCtx=new(window.AudioContext||window.webkitAudioContext)({sampleRate:24000});
-    analyser=audioCtx.createAnalyser();
-    analyser.fftSize=256;
-    analyser.smoothingTimeConstant=0.8;
+    analyser=audioCtx.createAnalyser();analyser.fftSize=256;analyser.smoothingTimeConstant=0.8;
   }
   if(audioCtx.state==='suspended')audioCtx.resume();
 }
@@ -247,12 +370,9 @@ function playWav(bytes){
         try{
           const src=audioCtx.createBufferSource();src.buffer=buf;
           src.connect(analyser);analyser.connect(audioCtx.destination);
-          sourceNode=src;
-          let settled=false;
+          sourceNode=src;let settled=false;
           const done=()=>{if(settled)return;settled=true;sourceNode=null;stopVis();res()};
-          src.onended=done;
-          src.start(0);
-          startVis(token);
+          src.onended=done;src.start(0);startVis(token);
           setTimeout(done,buf.duration*1000+500);
         }catch(e){stopVis();res()}
       },()=>{res()});
@@ -262,130 +382,86 @@ function playWav(bytes){
 
 function stopAll(){
   S.abort&&S.abort.abort();S.abort=null;
-  if(recog)try{recog.stop()}catch(e){}
-  _playToken++;
-  stopVis();
+  stopRecording();
+  _playToken++;stopVis();
   if(sourceNode){try{sourceNode.stop()}catch(e){}sourceNode=null}
   if(audioCtx&&audioCtx.state!=='closed'){try{audioCtx.close()}catch(e){}}
   audioCtx=null;analyser=null;
 }
 
 // ── Visualization ──
-function startVis(token){
-  if(S.vis==='ball') startBallVis(token);
-  else startBarsVis(token);
-}
-
+function startVis(token){S.vis==='ball'?startBallVis(token):startBarsVis(token)}
 function stopVis(){if(_visRaf){cancelAnimationFrame(_visRaf);_visRaf=null}cCtx.clearRect(0,0,canvas.width,canvas.height)}
 
-// ── Ball: scale with RMS amplitude ──
 function startBallVis(token){
-  const data=new Uint8Array(analyser.frequencyBinCount);
-  let smooth=1;
+  const data=new Uint8Array(analyser.frequencyBinCount);let smooth=1;
   function loop(){
     if(token!==_playToken||S.state!=='speaking')return;
     analyser.getByteTimeDomainData(data);
     let sum=0;for(let i=0;i<data.length;i++){const v=(data[i]-128)/128;sum+=v*v}
-    const rms=Math.sqrt(sum/data.length);
-    const target=1+rms*1.8;
-    smooth+=(target-smooth)*0.25;
-    orb.style.transform=`scale(${smooth})`;
-    // glow intensity
-    const glow=60+rms*120;
-    orb.style.boxShadow=`0 0 ${glow}px rgba(108,92,231,${.35+rms*.5}),inset 0 -6px 16px rgba(0,0,0,.3),inset 0 3px 10px rgba(255,255,255,.15)`;
+    const rms=Math.sqrt(sum/data.length),target=1+rms*1.8;
+    smooth+=(target-smooth)*0.25;orb.style.transform=`scale(${smooth})`;
+    orb.style.boxShadow=`0 0 ${60+rms*120}px rgba(108,92,231,${.35+rms*.5}),inset 0 -6px 16px rgba(0,0,0,.3),inset 0 3px 10px rgba(255,255,255,.15)`;
     _visRaf=requestAnimationFrame(loop);
-  }
-  loop();
+  }loop();
 }
 
-// ── Bars: ChatGPT-style circular waveform ──
 function startBarsVis(token){
-  const BAR_COUNT=48;
-  const freqData=new Uint8Array(analyser.frequencyBinCount);
-  let smoothBars=new Float32Array(BAR_COUNT).fill(0);
-
+  const BAR_COUNT=48,freqData=new Uint8Array(analyser.frequencyBinCount);let smoothBars=new Float32Array(BAR_COUNT).fill(0);
   function loop(){
     if(token!==_playToken||S.state!=='speaking')return;
     analyser.getByteFrequencyData(freqData);
-
-    const w=canvas.width,h=canvas.height;
-    const cx=w/2,cy=h/2;
-    const baseR=Math.min(w,h)*0.22;   // inner radius
-    const maxH=Math.min(w,h)*0.16;    // max bar height
-
-    cCtx.clearRect(0,0,w,h);
-
-    // aggregate frequency bins into BAR_COUNT buckets
-    const binsPerBar=Math.floor(freqData.length/BAR_COUNT);
-
+    const w=canvas.width,h=canvas.height,cx=w/2,cy=h/2,baseR=Math.min(w,h)*.22,maxH=Math.min(w,h)*.16;
+    cCtx.clearRect(0,0,w,h);const bpb=Math.floor(freqData.length/BAR_COUNT);
     for(let i=0;i<BAR_COUNT;i++){
-      let sum=0;
-      const start=i*binsPerBar;
-      for(let j=start;j<start+binsPerBar;j++)sum+=freqData[j];
-      const avg=sum/binsPerBar/255;  // 0-1
-
-      // smooth
-      smoothBars[i]+=(avg-smoothBars[i])*0.3;
-      const val=smoothBars[i];
-
-      const angle=(i/BAR_COUNT)*Math.PI*2-Math.PI/2;
-      const barH=4+val*maxH;
-      const x1=cx+Math.cos(angle)*baseR;
-      const y1=cy+Math.sin(angle)*baseR;
-      const x2=cx+Math.cos(angle)*(baseR+barH);
-      const y2=cy+Math.sin(angle)*(baseR+barH);
-
-      // color: purple gradient by height
-      const alpha=0.4+val*0.6;
-      cCtx.beginPath();
-      cCtx.moveTo(x1,y1);
-      cCtx.lineTo(x2,y2);
-      cCtx.lineWidth=3;
-      cCtx.lineCap='round';
-      cCtx.strokeStyle=`rgba(162,155,254,${alpha})`;
-      cCtx.stroke();
-
-      // glow dot at tip
-      if(val>0.15){
-        cCtx.beginPath();
-        cCtx.arc(x2,y2,1.5+val*2,0,Math.PI*2);
-        cCtx.fillStyle=`rgba(180,170,255,${val*0.7})`;
-        cCtx.fill();
-      }
+      let sum=0;const st=i*bpb;for(let j=st;j<st+bpb;j++)sum+=freqData[j];
+      smoothBars[i]+=(sum/bpb/255-smoothBars[i])*.3;
+      const val=smoothBars[i],angle=(i/BAR_COUNT)*Math.PI*2-Math.PI/2,bH=4+val*maxH;
+      const x1=cx+Math.cos(angle)*baseR,y1=cy+Math.sin(angle)*baseR;
+      const x2=cx+Math.cos(angle)*(baseR+bH),y2=cy+Math.sin(angle)*(baseR+bH);
+      cCtx.beginPath();cCtx.moveTo(x1,y1);cCtx.lineTo(x2,y2);cCtx.lineWidth=3;cCtx.lineCap='round';
+      cCtx.strokeStyle=`rgba(162,155,254,${.4+val*.6})`;cCtx.stroke();
+      if(val>.15){cCtx.beginPath();cCtx.arc(x2,y2,1.5+val*2,0,Math.PI*2);cCtx.fillStyle=`rgba(180,170,255,${val*.7})`;cCtx.fill()}
     }
-
-    // center soft glow
     let rms=0;for(let i=0;i<smoothBars.length;i++)rms+=smoothBars[i];rms/=smoothBars.length;
-    if(rms>0.05){
-      const grad=cCtx.createRadialGradient(cx,cy,baseR*0.3,cx,cy,baseR*0.9);
-      grad.addColorStop(0,`rgba(108,92,231,${rms*0.2})`);
-      grad.addColorStop(1,'rgba(108,92,231,0)');
-      cCtx.fillStyle=grad;
-      cCtx.fillRect(0,0,w,h);
-    }
-
+    if(rms>.05){const g=cCtx.createRadialGradient(cx,cy,baseR*.3,cx,cy,baseR*.9);g.addColorStop(0,`rgba(108,92,231,${rms*.2})`);g.addColorStop(1,'rgba(108,92,231,0)');cCtx.fillStyle=g;cCtx.fillRect(0,0,w,h)}
     _visRaf=requestAnimationFrame(loop);
-  }
-  loop();
+  }loop();
 }
 
 // ── Settings ──
 $('gearBtn').onclick=()=>{
-  $('inKey').value=S.key;$('inChat').value=S.chatM;$('inTts').value=S.ttsM;$('inEp').value=S.ep;
+  $('inKey').value=S.key;$('inChat').value=S.chatM;$('inTts').value=S.ttsM;
+  $('inWhisperModel').value=S.whisperModel;$('inEp').value=S.ep;
   $('inVoice').value=S.voice;$('inVis').value=S.vis;$('inStyle').value=S.style;$('inSys').value=S.sys;
   renderLog();renderMem();overlay.classList.add('show');
 };
 $('btnCancel').onclick=()=>overlay.classList.remove('show');
 overlay.onclick=e=>{if(e.target===overlay)overlay.classList.remove('show')};
 $('btnSave').onclick=()=>{
+  const newModel=$('inWhisperModel').value;
   S.key=$('inKey').value.trim();S.chatM=$('inChat').value.trim()||'mimo-v2-flash';
-  S.ttsM=$('inTts').value.trim()||'mimo-v2-tts';S.ep=$('inEp').value.trim()||S.ep;
-  S.voice=$('inVoice').value;S.vis=$('inVis').value;S.style=$('inStyle').value.trim();S.sys=$('inSys').value.trim()||SYS;
+  S.ttsM=$('inTts').value.trim()||'mimo-v2-tts';
+  S.ep=$('inEp').value.trim()||S.ep;
+  S.voice=$('inVoice').value;S.vis=$('inVis').value;S.style=$('inStyle').value.trim();
+  S.sys=$('inSys').value.trim()||SYS;
   localStorage.setItem('mk',S.key);localStorage.setItem('mcm',S.chatM);localStorage.setItem('mtm',S.ttsM);
   localStorage.setItem('mep',S.ep);localStorage.setItem('mv',S.voice);localStorage.setItem('mvs',S.vis);
   localStorage.setItem('mst',S.style);localStorage.setItem('msp',S.sys);
-  overlay.classList.remove('show');
+  if(newModel!==S.whisperModel){
+    S.whisperModel=newModel;localStorage.setItem('mwm',newModel);
+    whisperReady=false;whisperPipeline=null;
+    initWhisper();
+  }
+  updateSttBadge();overlay.classList.remove('show');
 };
+
+function updateSttBadge(){
+  if(whisperReady){sttBadge.textContent='✓ 语音就绪';sttBadge.className='stt-badge ready'}
+  else if(whisperLoading){sttBadge.textContent='⏳ 加载中…';sttBadge.className='stt-badge loading-badge'}
+  else if(whisperFailed){sttBadge.textContent='⚠ 加载失败';sttBadge.className='stt-badge'}
+  else{sttBadge.textContent='语音: 待加载';sttBadge.className='stt-badge'}
+}
 
 function renderLog(){
   const el=$('chatLog'),cb=$('btnClearChat');
@@ -394,8 +470,7 @@ function renderLog(){
   el.innerHTML=S.msgs.map(m=>{
     let d=m.content.replace(/\n?\[记忆:[^\]]*\]\s*$/g,'').replace(/^<style>[^<]+<\/style>\s*/g,'');
     return`<div class="msg ${m.role==='user'?'u':'a'}">${d.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>`;
-  }).join('');
-  el.scrollTop=el.scrollHeight;
+  }).join('');el.scrollTop=el.scrollHeight;
 }
 function renderMem(){
   const el=$('memLog'),cb=$('btnClearMem');
@@ -407,9 +482,171 @@ $('btnClearChat').onclick=()=>{S.msgs=[];localStorage.setItem('mmg','[]');render
 $('btnClearMem').onclick=()=>{S.mem=[];localStorage.setItem('mm','[]');renderMem()};
 $('btnClearAll').onclick=()=>{if(!confirm('确定忘记所有？'))return;S.msgs=[];S.mem=[];localStorage.setItem('mmg','[]');localStorage.setItem('mm','[]');renderLog();renderMem()};
 
-// ── Speech Recognition ──
-let recog=null;
-function initRec(){
+// ════════════════════════════════════════
+// ── Whisper Init & STT ──
+// ════════════════════════════════════════
+
+function onWhisperProgress(p){
+  const file=p.file||'';
+  const status=p.status||'';
+  const pct=Math.round(p.progress||0);
+  loadBarFill.style.width=pct+'%';
+  if(status==='progress'){
+    // Show which file and progress
+    const shortFile=file.split('/').pop()||'';
+    loadPct.textContent=`${shortFile}  ${pct}%`;
+  }else if(status==='ready'){
+    loadPct.textContent='模型就绪！';
+  }else if(status==='initiate'){
+    loadPct.textContent='准备下载…';
+  }else if(status==='download'){
+    loadPct.textContent='开始下载…';
+  }
+}
+
+async function initWhisper(){
+  if(whisperReady||whisperLoading)return;
+  loadOverlay.classList.add('show');
+  loadBarFill.style.width='0%';
+  loadPct.textContent='连接中…';
+  const sizeLabel=S.whisperModel.includes('tiny')?'~30MB':S.whisperModel.includes('base')?'~60MB':'~190MB';
+  loadSubtext.textContent=`首次需下载 ${sizeLabel}，之后秒开`;
+
+  const ok=await loadWhisper(S.whisperModel,onWhisperProgress);
+
+  loadOverlay.classList.remove('show');
+  if(ok){
+    setStatus('语音识别就绪');
+    showToast('语音模型加载完成 ✓',2000);
+    setTimeout(()=>{if(S.state==='idle')setStatus('')},3000);
+  }else{
+    setStatus('语音模型加载失败');
+    showToast('加载失败，请检查网络后刷新页面',4000);
+    setTimeout(()=>{if(S.state==='idle')setStatus('')},5000);
+  }
+}
+
+// ── MediaRecorder ──
+let mediaStream=null,mediaRecorder=null,recordedChunks=[];
+
+async function startRecording(){
+  try{
+    mediaStream=await navigator.mediaDevices.getUserMedia({
+      audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}
+    });
+  }catch(e){
+    if(e.name==='NotAllowedError'||e.name==='PermissionDeniedError'){
+      setStatus('请允许麦克风权限');showToast('请在浏览器设置中允许麦克风权限',3000);
+    }else{setStatus('无法访问麦克风: '+e.message);showToast('麦克风访问失败',2500)}
+    setSt('idle');return false;
+  }
+  recordedChunks=[];
+  const mime=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus'
+    :MediaRecorder.isTypeSupported('audio/webm')?'audio/webm'
+    :MediaRecorder.isTypeSupported('audio/mp4')?'audio/mp4':'';
+  try{mediaRecorder=new MediaRecorder(mediaStream,mime?{mimeType:mime}:{})}
+  catch(e){mediaRecorder=new MediaRecorder(mediaStream)}
+
+  mediaRecorder.ondataavailable=e=>{if(e.data.size>0)recordedChunks.push(e.data)};
+  mediaRecorder.onstop=async()=>{
+    if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null}
+    if(!recordedChunks.length){setSt('idle');return}
+    const blob=new Blob(recordedChunks,{type:mediaRecorder.mimeType||'audio/webm'});
+    recordedChunks=[];
+    await sttWithWhisper(blob);
+  };
+  mediaRecorder.start(100);
+  setSt('listening');
+  startMicLevel(mediaStream);
+  return true;
+}
+
+function stopRecording(){
+  if(mediaRecorder&&mediaRecorder.state==='recording')mediaRecorder.stop();
+  if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null}
+  stopMicLevel();
+}
+
+// ── Mic level ──
+let micLevelRaf=null,micSmoothedScale=1;
+
+function startMicLevel(stream){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const src=ctx.createMediaStreamSource(stream);
+    const an=ctx.createAnalyser();an.fftSize=512;an.smoothingTimeConstant=.6;
+    src.connect(an);const data=new Uint8Array(an.fftSize);micSmoothedScale=1;
+    const rings=document.querySelectorAll('.ring');
+    function loop(){
+      if(S.state!=='listening'){ctx.close();rings.forEach(r=>r.style.opacity='');return}
+      an.getByteTimeDomainData(data);let sum=0;
+      for(let i=0;i<data.length;i++){const v=(data[i]-128)/128;sum+=v*v}
+      const rms=Math.sqrt(sum/data.length),target=1+rms*3.5;
+      micSmoothedScale+=(target-micSmoothedScale)*.28;
+      orb.style.transform=`scale(${micSmoothedScale})`;
+      const glow=50+rms*200;
+      orb.style.boxShadow=`0 0 ${glow}px rgba(255,99,72,${.35+rms*.5}),inset 0 -4px 12px rgba(0,0,0,.25),inset 0 2px 8px rgba(255,255,255,.1)`;
+      if(rms>.02){
+        rings.forEach((r,i)=>{
+          r.style.opacity='1';r.style.animation=`ring-voice ${.4+rms*.6}s ease-out ${i*.15}s infinite`;
+          r.style.borderColor=`rgba(255,99,72,${.15+rms*.4})`;
+        });
+      }else{rings.forEach(r=>{r.style.opacity='0';r.style.animation=''})}
+      micLevelFill.style.width=Math.min(100,rms*350)+'%';
+      micLevelRaf=requestAnimationFrame(loop);
+    }loop();
+    startMicLevel._ctx=ctx;
+  }catch(e){}
+}
+
+function stopMicLevel(){
+  if(micLevelRaf){cancelAnimationFrame(micLevelRaf);micLevelRaf=null}
+  if(startMicLevel._ctx){try{startMicLevel._ctx.close()}catch(e){}startMicLevel._ctx=null}
+  micLevelFill.style.width='0%';micSmoothedScale=1;
+  orb.style.transform='';orb.style.boxShadow='';
+  document.querySelectorAll('.ring').forEach(r=>{r.style.opacity='';r.style.animation='';r.style.borderColor=''});
+}
+
+// ── Whisper STT ──
+async function sttWithWhisper(blob){
+  if(!whisperReady||!whisperPipeline){setStatus('语音模型未就绪');setSt('idle');return}
+
+  setSt('thinking');
+  setStatus('正在识别…');
+
+  try{
+    // Decode audio → Float32Array @ 16kHz
+    const ac=new(window.AudioContext||window.webkitAudioContext)({sampleRate:16000});
+    const ab=await blob.arrayBuffer();
+    const decoded=await ac.decodeAudioData(ab);
+    let raw=decoded.getChannelData(0);
+
+    // Trim leading silence
+    let start=0;while(start<raw.length&&Math.abs(raw[start])<.01)start++;
+    if(start>1600)raw=raw.subarray(start);
+    ac.close();
+
+    if(raw.length<3200){setStatus('录音太短，请多说几句');setSt('idle');setTimeout(()=>{if(S.state==='idle')setStatus('')},3000);return}
+
+    // Run whisper
+    const result=await whisperPipeline(raw,{language:'zh',task:'transcribe'});
+    const text=(result?.text||'').trim();
+
+    if(!text){setStatus('未识别到内容，请重试');setSt('idle');setTimeout(()=>{if(S.state==='idle')setStatus('')},3000);return}
+
+    setStatus(`"${text}"`);
+    await correctAndSend(text);
+  }catch(e){
+    console.error('STT error:',e);
+    setStatus(`识别出错: ${e.message?.slice(0,60)||'未知错误'}`);
+    setSt('idle');setTimeout(()=>{if(S.state==='idle')setStatus('')},5000);
+  }
+}
+
+// ── Web Speech fallback (desktop only) ──
+const hasWebSpeech=!!(window.SpeechRecognition||window.webkitSpeechRecognition);
+let webSpeechRecog=null;
+function initWebSpeech(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR)return null;
   const r=new SR();r.lang='zh-CN';r.continuous=false;r.interimResults=true;
@@ -417,15 +654,45 @@ function initRec(){
     let f='';for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal)f+=e.results[i][0].transcript;
     if(f){setStatus(`"${f}"`);correctAndSend(f)}
   };
-  r.onerror=e=>{if(e.error==='not-allowed'){setStatus('请允许麦克风权限');setSt('idle')}else if(e.error!=='aborted'&&e.error!=='no-speech')setSt('idle')};
+  r.onerror=e=>{
+    if(e.error==='not-allowed'){setStatus('请允许麦克风权限');setSt('idle')}
+    else if(e.error==='no-speech'){setStatus('未检测到语音');setSt('idle');setTimeout(()=>{if(S.state==='idle')setStatus('')},3000)}
+    else if(e.error!=='aborted')setSt('idle');
+  };
   r.onend=()=>{if(S.state==='listening')setSt('idle')};
   return r;
+}
+
+// ── Start voice input ──
+async function startVoiceInput(){
+  if(S.state!=='idle')return;
+  if(!S.key){$('gearBtn').click();return}
+  stopAll();
+
+  // Use whisper if ready
+  if(whisperReady){await startRecording();return}
+
+  // Still loading? Wait for it
+  if(whisperLoading){showToast('模型正在加载，请稍候…');return}
+
+  // Try web speech as fallback
+  if(hasWebSpeech){
+    if(!webSpeechRecog)webSpeechRecog=initWebSpeech();
+    if(webSpeechRecog){
+      try{webSpeechRecog.start();setSt('listening')}catch(e){
+        webSpeechRecog=initWebSpeech();
+        try{webSpeechRecog.start();setSt('listening')}catch(e2){setStatus('语音启动失败')}
+      }return;
+    }
+  }
+
+  setStatus('请等待模型加载完成');
+  showToast('语音模型尚未就绪，请等待加载',3000);
 }
 
 // ── STT Correction ──
 async function correctAndSend(raw){
   setSt('thinking');
-  if(recog)try{recog.stop()}catch(e){}
   let fixed=raw;
   try{
     const r=await fetch(S.ep,{method:'POST',headers:{'Content-Type':'application/json','api-key':S.key},
@@ -476,47 +743,29 @@ async function speakTts(text){
   const clean=pm?text.slice(pm[0].length).trim():text;
   const finalStyle=S.style||style;
   let content=clean;if(finalStyle)content=`<style>${finalStyle}</style>${content}`;
-
-  setStatus('正在生成语音...',1);
+  setStatus('正在生成语音…',1);
   const ttsTimer=setTimeout(()=>{if(S.state==='thinking')setStatus('语音生成中，请耐心等待…',1)},3000);
-
-  // 绝对保底：不管发生什么，最多 N 秒后强制回到 idle
   let forceIdle=null;
-
   try{
     const r=await fetch(S.ep,{method:'POST',headers:{'Content-Type':'application/json','api-key':S.key},
       body:JSON.stringify({model:S.ttsM,messages:[{role:'user',content:clean},{role:'assistant',content}],audio:{format:'wav',voice:S.voice}})});
     if(!r.ok){const e=await r.text();throw new Error(`TTS ${r.status}: ${e.slice(0,200)}`)}
-    const d=await r.json();
-    if(d.error)throw new Error('TTS: '+JSON.stringify(d.error).slice(0,200));
-    const b64=d.choices?.[0]?.message?.audio?.data;
-    if(!b64)throw new Error('TTS: 无音频数据');
-
-    clearTimeout(ttsTimer);
-    setSt('speaking');
-
-    // 算音频时长，设保底 = 时长×1000 + 2s
-    const bin=atob(b64);const raw=new Uint8Array(bin.length);
-    for(let i=0;i<bin.length;i++)raw[i]=bin.charCodeAt(i);
+    const d=await r.json();if(d.error)throw new Error('TTS: '+JSON.stringify(d.error).slice(0,200));
+    const b64=d.choices?.[0]?.message?.audio?.data;if(!b64)throw new Error('TTS: 无音频数据');
+    clearTimeout(ttsTimer);setSt('speaking');
+    const bin=atob(b64);const raw=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)raw[i]=bin.charCodeAt(i);
     const wav=ensureWav(raw);
-    const durSec=wav.length/(24000*2); // PCM16 mono: totalBytes / (sampleRate * 2)
-    const safetyMs=Math.max(durSec*1000+2000,5000);
-    forceIdle=setTimeout(()=>{stopAll();setSt('idle')},safetyMs);
-
+    const durSec=wav.length/(24000*2);
+    forceIdle=setTimeout(()=>{stopAll();setSt('idle')},Math.max(durSec*1000+2000,5000));
     await playWav(wav);
   }catch(e){
     clearTimeout(ttsTimer);
-    if(e.name!=='AbortError'){setStatus(`语音错误: ${e.message.slice(0,60)}`)}
+    if(e.name!=='AbortError')setStatus(`语音错误: ${e.message.slice(0,60)}`);
   }finally{
     if(forceIdle)clearTimeout(forceIdle);
-    stopVis();
-    // 强制清理 UI，不依赖 setSt 内部逻辑
-    S.state='idle';
-    orb.className='orb idle';
-    canvas.classList.remove('on');
-    stopBtn.classList.add('hidden');
-    status.textContent='';
-    status.classList.remove('on');
+    stopVis();S.state='idle';orb.className='orb idle';
+    canvas.classList.remove('on');stopBtn.classList.add('hidden');
+    statusEl.textContent='';statusEl.classList.remove('on');
   }
 }
 
@@ -533,18 +782,12 @@ function ws(v,o,s){for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))}
 // ── Controls ──
 orb.addEventListener('click',()=>{
   if(textBar.classList.contains('show')){textInput.focus();return}
-  if(S.state!=='idle')return;
-  if(!S.key){$('gearBtn').click();return}
-  stopAll();
-  if(!recog)recog=initRec();
-  if(!recog){setStatus('浏览器不支持语音识别');return}
-  try{recog.start();setSt('listening')}catch(e){}
+  startVoiceInput();
 });
-
 stopBtn.onclick=()=>{stopAll();setSt('idle')};
 $('pauseBtn').onclick=()=>{stopAll();setSt('idle')};
 
-// ── Text mode (5 rapid mouse clicks) ──
+// ── Text mode (5 rapid clicks) ──
 let clicks=[];
 orb.addEventListener('pointerdown',e=>{
   if(e.pointerType!=='mouse'||e.button!==0)return;
@@ -557,7 +800,13 @@ sendBtn.onclick=doSend;
 function doSend(){const t=textInput.value.trim();if(!t)return;textInput.value='';sendBtn.disabled=true;sendChat(t)}
 
 // ── Init ──
+updateSttBadge();
 if(!S.key)setStatus('点击右上角设置 API Key');
+
+// Skip loading overlay → use text input
+skipLoadBtn.onclick=()=>{loadOverlay.classList.remove('show');textBar.classList.add('show');setTimeout(()=>textInput.focus(),300)};
+
+initWhisper();
 </script>
 </body>
 </html>
