@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https: http:; connect-src 'self' https: http: blob: data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http: blob:; img-src 'self' data: blob: https: http:; media-src 'self' blob: data: https: http:;">
 <title>MiMo 语音对话</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
@@ -217,20 +218,18 @@
   <div class="load-bar"><div class="load-bar-fill" id="loadBarFill"></div></div>
   <div class="load-pct" id="loadPct"></div>
   <button class="bcancel" id="skipLoad" style="margin-top:12px;font-size:13px;padding:8px 20px;opacity:.5">先用文字输入 →</button>
+  <p style="font-size:11px;color:rgba(255,255,255,.2);margin-top:8px;max-width:280px;text-align:center">首次较慢属正常，下载完自动缓存</p>
 </div>
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
-
-<!-- Load transformers.js early so it's ready when needed -->
-<script src="https://cdn.jsdelivr.net/npm/@huggingface/transformers@3" type="module"></script>
 
 <script type="module">
 // ════════════════════════════════════════
 // Whisper local STT (browser WASM)
 // ════════════════════════════════════════
 let whisperPipeline=null, whisperReady=false, whisperLoading=false, whisperFailed=false;
-// Use smaller quantized models from onnx-community
+// Use onnx-community quantized models (smaller files)
 const WHISPER_MODELS={
   tiny:'onnx-community/whisper-tiny',
   base:'onnx-community/whisper-base',
@@ -244,36 +243,60 @@ const TFJS_CDNS=[
   'https://esm.sh/@huggingface/transformers@3'
 ];
 
+// CORS proxy for model download (if direct fails)
+const CORS_PROXIES=[
+  url=>url,  // direct
+  url=>`https://corsproxy.io/?${encodeURIComponent(url)}`,
+  url=>`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+];
+
 async function importTransformers(){
-  // Check if already loaded via script tag
-  if(window.pipeline)return window;
   for(const cdn of TFJS_CDNS){
     try{
       const mod=await import(cdn);
       return mod;
-    }catch(e){console.warn('CDN failed:',cdn,e)}
+    }catch(e){console.warn('TFJS CDN failed:',cdn,e.message)}
   }
-  throw new Error('所有CDN源加载失败');
+  throw new Error('transformers.js加载失败，请检查网络');
 }
 
 async function loadWhisper(modelId,onProgress){
   whisperLoading=true;whisperFailed=false;
   updateSttBadge();
-  const startTime=Date.now();
   try{
     const{pipeline,env}=await importTransformers();
-    env.backends.onnx.wasm.proxy=true;
-    // Allow multiple download sources for faster loading
+
+    // Configure ONNX runtime
+    env.backends.onnx.wasm.proxy=false;
     env.allowRemoteModels=true;
-    whisperPipeline=await pipeline('automatic-speech-recognition',modelId,{
-      progress_callback:p=>{
-        if(onProgress)onProgress(p);
-        // Timeout: if loading takes > 5min, warn
-        if(Date.now()-startTime>300000&&p.status!=='ready'){
-          console.warn('Model loading timeout');
+
+    // Intercept fetch to redirect HuggingFace → Chinese mirror
+    const origFetch=window.fetch;
+    const mirroredFetch=function(input,init){
+      let url=typeof input==='string'?input:(input&&input.url)||'';
+      if(url.includes('huggingface.co')){
+        url=url.replace(/https?:\/\/huggingface\.co/g,'https://hf-mirror.com');
+        if(typeof input==='string'){
+          input=url;
+        }else{
+          input=new Request(url,input);
         }
       }
-    });
+      return origFetch.call(window,input,init);
+    };
+
+    // Patch during model load
+    window.fetch=mirroredFetch;
+
+    try{
+      whisperPipeline=await pipeline('automatic-speech-recognition',modelId,{
+        progress_callback:p=>{if(onProgress)onProgress(p)}
+      });
+    }finally{
+      // Always restore original fetch
+      window.fetch=origFetch;
+    }
+
     whisperReady=true;whisperLoading=false;
     updateSttBadge();
     return true;
