@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>MiMo 语音对话</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--bg:#0a0a0f;--accent:#6C5CE7;--accent2:#a29bfe;--danger:#ff6b6b;--ball:min(200px,42vw)}
+  body{background:var(--bg);color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;height:100dvh;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;user-select:none}
+
+  /* ── Orb ── */
+  .orb-wrap{position:relative;width:var(--ball);height:var(--ball);display:flex;align-items:center;justify-content:center}
+  .orb{width:100%;height:100%;border-radius:50%;background:#6C5CE7;box-shadow:0 0 60px rgba(108,92,231,.35);cursor:pointer;will-change:transform,border-radius,background}
+  .orb:hover{transform:scale(1.04)}.orb:active{transform:scale(.97)}
+
+  /* ── Deco rings ── */
+  .ring{position:absolute;border-radius:50%;border:1.5px solid rgba(108,92,231,.2);pointer-events:none;opacity:0;transition:opacity .3s}
+  .ring:nth-child(2){width:115%;height:115%}.ring:nth-child(3){width:130%;height:130%}.ring:nth-child(4){width:145%;height:145%}
+
+  /* ═══ IDLE ═══ */
+  .orb.idle{background:#6C5CE7;animation:orb-breathe 3s ease-in-out infinite}
+  @keyframes orb-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+  /* ═══ LISTENING ═══ */
+  .orb.listen{background:#ff6348;box-shadow:0 0 60px rgba(255,99,72,.4)}
+  .orb.listen{animation:orb-listen .9s ease-in-out infinite}
+  @keyframes orb-listen{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+
+  /* ═══ THINKING — morphing shape ═══ */
+  .orb.think{background:#fdcb6e;box-shadow:0 0 60px rgba(253,203,110,.4);animation:orb-morph 1.6s ease-in-out infinite}
+  @keyframes orb-morph{
+    0%  {border-radius:50%;transform:scale(1)}
+    20% {border-radius:42% 58% 55% 45%/55% 42% 58% 45%;transform:scale(1.04)}
+    40% {border-radius:55% 45% 42% 58%/45% 55% 42% 58%;transform:scale(1.02)}
+    60% {border-radius:45% 55% 58% 42%/58% 45% 55% 42%;transform:scale(1.06)}
+    80% {border-radius:58% 42% 45% 55%/42% 58% 45% 55%;transform:scale(1.03)}
+    100%{border-radius:50%;transform:scale(1)}
+  }
+
+  /* ═══ SPEAKING ball ═══ */
+  .orb.speak-ball{background:#6C5CE7;box-shadow:0 0 80px rgba(108,92,231,.5)}
+  .orb.speak-ball~.ring{opacity:1;animation:r-pulse 1.8s ease-out infinite}
+  .ring:nth-child(3){animation-delay:.5s}
+  .ring:nth-child(4){animation-delay:1s}
+  @keyframes r-pulse{0%{transform:scale(.85);opacity:.5}100%{transform:scale(1.15);opacity:0}}
+
+  /* ═══ SPEAKING bars — hide orb, show canvas ═══ */
+  .orb.speak-bars{opacity:0;pointer-events:none}
+  .orb.speak-bars~.ring{opacity:0}
+
+  #waveCanvas{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;opacity:0;transition:opacity .3s}
+  #waveCanvas.on{opacity:1}
+
+  /* ── Status ── */
+  .status{margin-top:32px;font-size:15px;color:rgba(255,255,255,.5);min-height:22px;transition:color .3s}
+  .status.on{color:rgba(255,255,255,.85)}
+  .hint{position:fixed;bottom:120px;font-size:13px;color:rgba(255,255,255,.3);animation:fade-pulse 3s ease-in-out infinite}
+  @keyframes fade-pulse{0%,100%{opacity:.3}50%{opacity:.7}}
+
+  /* ── Buttons ── */
+  .ctrl{position:fixed;bottom:max(40px,env(safe-area-inset-bottom));left:0;right:0;display:flex;align-items:center;justify-content:center;gap:32px;z-index:10}
+  .btn{width:56px;height:56px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);backdrop-filter:blur(10px);transition:all .25s}
+  .btn:hover{background:rgba(255,255,255,.14);color:#fff}.btn:active{transform:scale(.92)}
+  .btn svg{width:24px;height:24px;fill:currentColor}
+  .btn.stop{background:rgba(255,107,107,.15);color:var(--danger)}.btn.stop:hover{background:rgba(255,107,107,.3)}
+
+  .pause-wrap{position:fixed;bottom:max(40px,env(safe-area-inset-bottom));left:max(24px,env(safe-area-inset-left));z-index:10}
+
+  /* ── Settings ── */
+  .gear{position:fixed;top:max(16px,env(safe-area-inset-top));right:max(16px,env(safe-area-inset-right));z-index:20;width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(10px);transition:all .25s}
+  .gear:hover{background:rgba(255,255,255,.12);color:#fff}
+  .gear svg{width:22px;height:22px;fill:currentColor}
+
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(16px);z-index:100;display:none;align-items:center;justify-content:center}
+  .overlay.show{display:flex}
+  .panel{background:rgba(30,30,40,.95);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px;width:min(440px,92vw);max-height:90vh;overflow-y:auto}
+  .panel h2{font-size:20px;font-weight:600;margin-bottom:24px}
+  .panel h3{font-size:15px;font-weight:600;margin:24px 0 12px;color:rgba(255,255,255,.6)}
+  .field{margin-bottom:18px}
+  .field label{display:block;font-size:13px;color:rgba(255,255,255,.5);margin-bottom:6px;font-weight:500}
+  .field input,.field select,.field textarea{width:100%;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#fff;font-size:14px;outline:none}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
+  .field textarea{resize:vertical;min-height:60px}
+  .field .hint{font-size:11px;color:rgba(255,255,255,.3);margin-top:4px}
+  .sactions{display:flex;gap:12px;margin-top:24px}
+  .sactions button{flex:1;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer}
+  .bsave{background:var(--accent);color:#fff}.bsave:hover{background:#5a4bd1}
+  .bcancel{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7)}
+
+  /* Chat log */
+  .log{max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+  .log::-webkit-scrollbar{width:4px}.log::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px}
+  .msg{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6;word-break:break-word;white-space:pre-wrap}
+  .msg.u{background:rgba(108,92,231,.2);border:1px solid rgba(108,92,231,.25);align-self:flex-end;max-width:85%;color:rgba(255,255,255,.9)}
+  .msg.u::before{content:'你';display:block;font-size:11px;font-weight:600;color:var(--accent2);margin-bottom:4px}
+  .msg.a{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);align-self:flex-start;max-width:85%;color:rgba(255,255,255,.85)}
+  .msg.a::before{content:'MiMo';display:block;font-size:11px;font-weight:600;color:#ffeaa7;margin-bottom:4px}
+  .empty{text-align:center;color:rgba(255,255,255,.25);font-size:13px;padding:24px 0}
+  .clearbtn{display:block;margin:12px auto 0;padding:8px 20px;background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.2);border-radius:8px;color:var(--danger);font-size:12px;cursor:pointer}
+  .clearbtn:hover{background:rgba(255,107,107,.2)}
+  .clearbtn.hid{display:none}
+  .membtn{border-color:rgba(253,203,110,.3);color:#fdcb6e;background:rgba(253,203,110,.08)}
+  .membtn:hover{background:rgba(253,203,110,.15)}
+
+  /* Text input */
+  .textbar{position:fixed;bottom:0;left:0;right:0;padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));background:rgba(20,20,30,.95);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;z-index:20;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+  .textbar.show{transform:translateY(0)}
+  .textbar input{flex:1;padding:12px 16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:24px;color:#fff;font-size:15px;outline:none}
+  .textbar input:focus{border-color:var(--accent)}
+  .textbar input::placeholder{color:rgba(255,255,255,.3)}
+  .sendbtn{width:44px;height:44px;border-radius:50%;border:none;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+  .sendbtn:hover{background:#5a4bd1}.sendbtn:active{transform:scale(.9)}
+  .sendbtn svg{width:20px;height:20px;fill:currentColor}
+  .sendbtn:disabled{opacity:.3}
+</style>
+</head>
+<body>
+
+<button class="gear" id="gearBtn"><svg viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z"/></svg></button>
+
+<div class="orb-wrap">
+  <div class="orb idle" id="orb"></div>
+  <div class="ring"></div>
+  <div class="ring"></div>
+  <div class="ring"></div>
+  <canvas id="waveCanvas" width="400" height="400"></canvas>
+</div>
+
+<div class="status" id="status"></div>
+<div class="hint" id="hint">点击圆球开始对话</div>
+
+<div class="pause-wrap">
+  <button class="btn" id="pauseBtn" title="打断">
+    <svg viewBox="0 0 24 24"><path d="M14,19H18V5H14M6,19H10V5H6V19Z"/></svg>
+  </button>
+</div>
+
+<div class="ctrl">
+  <button class="btn stop hidden" id="stopBtn">
+    <svg viewBox="0 0 24 24"><path d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/></svg>
+  </button>
+</div>
+
+<!-- Text input -->
+<div class="textbar" id="textBar">
+  <input type="text" id="textInput" placeholder="输入消息..." autocomplete="off">
+  <button class="sendbtn" id="sendBtn" disabled><svg viewBox="0 0 24 24"><path d="M2,21L23,12L2,3V10L17,12L2,14V21Z"/></svg></button>
+</div>
+
+<!-- Settings -->
+<div class="overlay" id="overlay">
+  <div class="panel">
+    <h2>⚙️ 设置</h2>
+    <div class="field"><label>API Key</label><input type="password" id="inKey" placeholder="MiMo API Key" autocomplete="off"><div class="hint">platform.xiaomimimo.com 获取</div></div>
+    <div class="field"><label>Chat 模型</label><input type="text" id="inChat" placeholder="mimo-v2-flash"></div>
+    <div class="field"><label>TTS 模型</label><input type="text" id="inTts" placeholder="mimo-v2-tts"></div>
+    <div class="field"><label>API Endpoint</label><input type="text" id="inEp" placeholder="https://api.xiaomimimo.com/v1/chat/completions"><div class="hint">如果跨域报错，可填本地代理地址如 http://localhost:8080/v1/chat/completions</div></div>
+    <div class="field"><label>音色</label><select id="inVoice"><option value="mimo_default">MiMo-默认</option><option value="default_zh">MiMo-中文女声</option><option value="default_en">MiMo-英文女声</option></select></div>
+    <div class="field"><label>说话可视化</label><select id="inVis"><option value="bars">音符跳动</option><option value="ball">圆球脉动</option></select></div>
+    <div class="field"><label>全局语音风格 (留空由模型决定)</label><textarea id="inStyle" placeholder="开心 / 东北话 / 悄悄话" rows="2"></textarea></div>
+    <div class="field"><label>系统提示词</label><textarea id="inSys" rows="8"></textarea></div>
+    <div class="sactions"><button class="bcancel" id="btnCancel">取消</button><button class="bsave" id="btnSave">保存</button></div>
+    <h3>对话记录</h3>
+    <div class="log" id="chatLog"><div class="empty">暂无对话</div></div>
+    <button class="clearbtn hid" id="btnClearChat">清空对话</button>
+    <h3>长期记忆</h3>
+    <div class="log" id="memLog" style="max-height:160px"><div class="empty">暂无记忆</div></div>
+    <button class="clearbtn hid membtn" id="btnClearMem">清空记忆</button>
+    <button class="clearbtn" id="btnClearAll" style="margin-top:20px;border-color:rgba(255,107,107,.3);color:#ff6b6b;background:rgba(255,107,107,.08)">🗑️ 忘记所有（对话+记忆）</button>
+  </div>
+</div>
+
+<script>
+const SYS=`你是MiMo，小米AI助手，正在语音对话。
+每条回复开头用<style>风格</style>指定语音风格，如：<style>温柔</style>没关系的……
+风格支持：开心/悲伤/生气/温柔/语速慢/变快/悄悄话/夹子音/台湾腔/东北话/四川话/粤语/河南话/孙悟空/林黛玉/唱歌
+正文用中文括号嵌入语气控制：（轻声）（叹气）（深呼吸）（语速加快）（苦笑）（沉默片刻）
+自然穿插呼吸和停顿：呼……、呃……、——拉长音、……省略表停顿
+副语言要自然合理，情绪到了才用。
+回复最后单独一行写长期记忆：[记忆:xxx]（没有新信息写[记忆:无]），用户看不到。
+示例：
+<style>开心</style>哈哈太有意思了！我真的没想到会这样。
+<style>东北话</style>哎呀妈呀！这事儿整的，忒有意思了！
+<style>悄悄话</style>（轻声）嘘……轻点儿，别吵醒他。
+限制：2-3句话，口语化，禁用markdown和代码，有观点有情绪，不要过于表达情绪，
+不要什么都记住，说话尽量流畅，加上<style>流畅</style>最合适不过`;
+
+// ── State ──
+const S={
+  key:localStorage.getItem('mk')||'',chatM:localStorage.getItem('mcm')||'mimo-v2-flash',
+  ttsM:localStorage.getItem('mtm')||'mimo-v2-tts',ep:localStorage.getItem('mep')||'https://api.xiaomimimo.com/v1/chat/completions',
+  voice:localStorage.getItem('mv')||'mimo_default',vis:localStorage.getItem('mvs')||'bars',
+  style:localStorage.getItem('mst')||'',sys:localStorage.getItem('msp')||SYS,
+  mem:JSON.parse(localStorage.getItem('mm')||'[]'),msgs:JSON.parse(localStorage.getItem('mmg')||'[]'),
+  state:'idle',abort:null
+};
+
+// ── DOM ──
+const $=id=>document.getElementById(id);
+const orb=$('orb'),status=$('status'),hint=$('hint'),stopBtn=$('stopBtn'),textBar=$('textBar'),textInput=$('textInput'),sendBtn=$('sendBtn'),overlay=$('overlay');
+const canvas=$('waveCanvas'),cCtx=canvas.getContext('2d');
+
+// ── State machine ──
+function setSt(s){
+  S.state=s;
+  orb.className='orb';
+  canvas.classList.remove('on');
+  stopBtn.classList.add('hidden');
+  hint.classList.add('hidden');
+  switch(s){
+    case'idle':orb.classList.add('idle');break;
+    case'listening':orb.classList.add('listen');stopBtn.classList.remove('hidden');setStatus('正在听...',1);break;
+    case'thinking':orb.classList.add('think');stopBtn.classList.remove('hidden');setStatus('正在思考...',1);break;
+    case'speaking':
+      stopBtn.classList.remove('hidden');
+      setStatus('正在说话...',1);
+      if(S.vis==='ball'){orb.classList.add('speak-ball')}
+      else{orb.classList.add('speak-bars');canvas.classList.add('on')}
+      break;
+  }
+}
+function setStatus(t,a){status.textContent=t;status.classList.toggle('on',!!a)}
+
+// ── Audio + Analyser ──
+let audioCtx=null,analyser=null,sourceNode=null;
+let _playToken=0,_visRaf=null;
+
+function ensureAudioCtx(){
+  if(!audioCtx||audioCtx.state==='closed'){
+    audioCtx=new(window.AudioContext||window.webkitAudioContext)({sampleRate:24000});
+    analyser=audioCtx.createAnalyser();
+    analyser.fftSize=256;
+    analyser.smoothingTimeConstant=0.8;
+  }
+  if(audioCtx.state==='suspended')audioCtx.resume();
+}
+
+function playWav(bytes){
+  return new Promise(res=>{
+    const token=_playToken;
+    if(token!==_playToken||S.state!=='speaking'){res();return}
+    try{
+      ensureAudioCtx();
+      audioCtx.decodeAudioData(bytes.buffer.slice(0),buf=>{
+        if(token!==_playToken||audioCtx.state==='closed'){res();return}
+        try{
+          const src=audioCtx.createBufferSource();src.buffer=buf;
+          src.connect(analyser);analyser.connect(audioCtx.destination);
+          sourceNode=src;
+          let settled=false;
+          const done=()=>{if(settled)return;settled=true;sourceNode=null;stopVis();res()};
+          src.onended=done;
+          src.start(0);
+          startVis(token);
+          setTimeout(done,buf.duration*1000+500);
+        }catch(e){stopVis();res()}
+      },()=>{res()});
+    }catch(e){res()}
+  });
+}
+
+function stopAll(){
+  S.abort&&S.abort.abort();S.abort=null;
+  if(recog)try{recog.stop()}catch(e){}
+  _playToken++;
+  stopVis();
+  if(sourceNode){try{sourceNode.stop()}catch(e){}sourceNode=null}
+  if(audioCtx&&audioCtx.state!=='closed'){try{audioCtx.close()}catch(e){}}
+  audioCtx=null;analyser=null;
+}
+
+// ── Visualization ──
+function startVis(token){
+  if(S.vis==='ball') startBallVis(token);
+  else startBarsVis(token);
+}
+
+function stopVis(){if(_visRaf){cancelAnimationFrame(_visRaf);_visRaf=null}cCtx.clearRect(0,0,canvas.width,canvas.height)}
+
+// ── Ball: scale with RMS amplitude ──
+function startBallVis(token){
+  const data=new Uint8Array(analyser.frequencyBinCount);
+  let smooth=1;
+  function loop(){
+    if(token!==_playToken||S.state!=='speaking')return;
+    analyser.getByteTimeDomainData(data);
+    let sum=0;for(let i=0;i<data.length;i++){const v=(data[i]-128)/128;sum+=v*v}
+    const rms=Math.sqrt(sum/data.length);
+    const target=1+rms*1.8;
+    smooth+=(target-smooth)*0.25;
+    orb.style.transform=`scale(${smooth})`;
+    // glow intensity
+    const glow=60+rms*120;
+    orb.style.boxShadow=`0 0 ${glow}px rgba(108,92,231,${.35+rms*.5}),inset 0 -6px 16px rgba(0,0,0,.3),inset 0 3px 10px rgba(255,255,255,.15)`;
+    _visRaf=requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+// ── Bars: ChatGPT-style circular waveform ──
+function startBarsVis(token){
+  const BAR_COUNT=48;
+  const freqData=new Uint8Array(analyser.frequencyBinCount);
+  let smoothBars=new Float32Array(BAR_COUNT).fill(0);
+
+  function loop(){
+    if(token!==_playToken||S.state!=='speaking')return;
+    analyser.getByteFrequencyData(freqData);
+
+    const w=canvas.width,h=canvas.height;
+    const cx=w/2,cy=h/2;
+    const baseR=Math.min(w,h)*0.22;   // inner radius
+    const maxH=Math.min(w,h)*0.16;    // max bar height
+
+    cCtx.clearRect(0,0,w,h);
+
+    // aggregate frequency bins into BAR_COUNT buckets
+    const binsPerBar=Math.floor(freqData.length/BAR_COUNT);
+
+    for(let i=0;i<BAR_COUNT;i++){
+      let sum=0;
+      const start=i*binsPerBar;
+      for(let j=start;j<start+binsPerBar;j++)sum+=freqData[j];
+      const avg=sum/binsPerBar/255;  // 0-1
+
+      // smooth
+      smoothBars[i]+=(avg-smoothBars[i])*0.3;
+      const val=smoothBars[i];
+
+      const angle=(i/BAR_COUNT)*Math.PI*2-Math.PI/2;
+      const barH=4+val*maxH;
+      const x1=cx+Math.cos(angle)*baseR;
+      const y1=cy+Math.sin(angle)*baseR;
+      const x2=cx+Math.cos(angle)*(baseR+barH);
+      const y2=cy+Math.sin(angle)*(baseR+barH);
+
+      // color: purple gradient by height
+      const alpha=0.4+val*0.6;
+      cCtx.beginPath();
+      cCtx.moveTo(x1,y1);
+      cCtx.lineTo(x2,y2);
+      cCtx.lineWidth=3;
+      cCtx.lineCap='round';
+      cCtx.strokeStyle=`rgba(162,155,254,${alpha})`;
+      cCtx.stroke();
+
+      // glow dot at tip
+      if(val>0.15){
+        cCtx.beginPath();
+        cCtx.arc(x2,y2,1.5+val*2,0,Math.PI*2);
+        cCtx.fillStyle=`rgba(180,170,255,${val*0.7})`;
+        cCtx.fill();
+      }
+    }
+
+    // center soft glow
+    let rms=0;for(let i=0;i<smoothBars.length;i++)rms+=smoothBars[i];rms/=smoothBars.length;
+    if(rms>0.05){
+      const grad=cCtx.createRadialGradient(cx,cy,baseR*0.3,cx,cy,baseR*0.9);
+      grad.addColorStop(0,`rgba(108,92,231,${rms*0.2})`);
+      grad.addColorStop(1,'rgba(108,92,231,0)');
+      cCtx.fillStyle=grad;
+      cCtx.fillRect(0,0,w,h);
+    }
+
+    _visRaf=requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+// ── Settings ──
+$('gearBtn').onclick=()=>{
+  $('inKey').value=S.key;$('inChat').value=S.chatM;$('inTts').value=S.ttsM;$('inEp').value=S.ep;
+  $('inVoice').value=S.voice;$('inVis').value=S.vis;$('inStyle').value=S.style;$('inSys').value=S.sys;
+  renderLog();renderMem();overlay.classList.add('show');
+};
+$('btnCancel').onclick=()=>overlay.classList.remove('show');
+overlay.onclick=e=>{if(e.target===overlay)overlay.classList.remove('show')};
+$('btnSave').onclick=()=>{
+  S.key=$('inKey').value.trim();S.chatM=$('inChat').value.trim()||'mimo-v2-flash';
+  S.ttsM=$('inTts').value.trim()||'mimo-v2-tts';S.ep=$('inEp').value.trim()||S.ep;
+  S.voice=$('inVoice').value;S.vis=$('inVis').value;S.style=$('inStyle').value.trim();S.sys=$('inSys').value.trim()||SYS;
+  localStorage.setItem('mk',S.key);localStorage.setItem('mcm',S.chatM);localStorage.setItem('mtm',S.ttsM);
+  localStorage.setItem('mep',S.ep);localStorage.setItem('mv',S.voice);localStorage.setItem('mvs',S.vis);
+  localStorage.setItem('mst',S.style);localStorage.setItem('msp',S.sys);
+  overlay.classList.remove('show');
+};
+
+function renderLog(){
+  const el=$('chatLog'),cb=$('btnClearChat');
+  if(!S.msgs.length){el.innerHTML='<div class="empty">暂无对话</div>';cb.classList.add('hid');return}
+  cb.classList.remove('hid');
+  el.innerHTML=S.msgs.map(m=>{
+    let d=m.content.replace(/\n?\[记忆:[^\]]*\]\s*$/g,'').replace(/^<style>[^<]+<\/style>\s*/g,'');
+    return`<div class="msg ${m.role==='user'?'u':'a'}">${d.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>`;
+  }).join('');
+  el.scrollTop=el.scrollHeight;
+}
+function renderMem(){
+  const el=$('memLog'),cb=$('btnClearMem');
+  if(!S.mem.length){el.innerHTML='<div class="empty">暂无记忆</div>';cb.classList.add('hid');return}
+  cb.classList.remove('hid');
+  el.innerHTML=S.mem.map(m=>`<div class="msg a" style="align-self:stretch;max-width:100%;background:rgba(253,203,110,.08);border-color:rgba(253,203,110,.15)">${m.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>`).join('');
+}
+$('btnClearChat').onclick=()=>{S.msgs=[];localStorage.setItem('mmg','[]');renderLog()};
+$('btnClearMem').onclick=()=>{S.mem=[];localStorage.setItem('mm','[]');renderMem()};
+$('btnClearAll').onclick=()=>{if(!confirm('确定忘记所有？'))return;S.msgs=[];S.mem=[];localStorage.setItem('mmg','[]');localStorage.setItem('mm','[]');renderLog();renderMem()};
+
+// ── Speech Recognition ──
+let recog=null;
+function initRec(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR)return null;
+  const r=new SR();r.lang='zh-CN';r.continuous=false;r.interimResults=true;
+  r.onresult=e=>{
+    let f='';for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal)f+=e.results[i][0].transcript;
+    if(f){setStatus(`"${f}"`);correctAndSend(f)}
+  };
+  r.onerror=e=>{if(e.error==='not-allowed'){setStatus('请允许麦克风权限');setSt('idle')}else if(e.error!=='aborted'&&e.error!=='no-speech')setSt('idle')};
+  r.onend=()=>{if(S.state==='listening')setSt('idle')};
+  return r;
+}
+
+// ── STT Correction ──
+async function correctAndSend(raw){
+  setSt('thinking');
+  if(recog)try{recog.stop()}catch(e){}
+  let fixed=raw;
+  try{
+    const r=await fetch(S.ep,{method:'POST',headers:{'Content-Type':'application/json','api-key':S.key},
+      body:JSON.stringify({model:S.chatM,messages:[{role:'system',content:'语音识别纠错助手。只返回纠正后的文字，不解释。原文没错就原样返回。'},{role:'user',content:raw}],max_completion_tokens:128,temperature:0,stream:false,thinking:{type:'disabled'}})});
+    if(r.ok){const d=await r.json();const c=d.choices?.[0]?.message?.content?.trim();if(c)fixed=c}
+  }catch(e){}
+  if(fixed!==raw)setStatus(`"${raw}" → "${fixed}"`);
+  sendChat(fixed);
+}
+
+// ── Chat ──
+async function sendChat(text){
+  setSt('thinking');
+  let sys=S.sys;if(S.mem.length)sys+='\n\n[你的长期记忆]\n'+S.mem.join('\n');
+  const msgs=[{role:'system',content:sys},...S.msgs.slice(-80),{role:'user',content:text}];
+  S.abort=new AbortController();
+  let reply='';
+  try{
+    const r=await fetch(S.ep,{method:'POST',headers:{'Content-Type':'application/json','api-key':S.key},
+      body:JSON.stringify({model:S.chatM,messages:msgs,stream:true,max_completion_tokens:1024}),signal:S.abort.signal});
+    if(!r.ok){const e=await r.text();throw new Error(`API ${r.status}: ${e.slice(0,200)}`)}
+    const rd=r.body.getReader(),dc=new TextDecoder();let buf='';
+    while(true){const{done,value}=await rd.read();if(done)break;buf+=dc.decode(value,{stream:true});
+      const lines=buf.split('\n');buf=lines.pop()||'';
+      for(const l of lines){const t=l.trim();if(!t||!t.startsWith('data: '))continue;const d=t.slice(6);if(d==='[DONE]')continue;
+        try{const p=JSON.parse(d);const delta=p.choices?.[0]?.delta?.content;if(delta)reply+=delta}catch(e){}}}
+  }catch(e){
+    if(e.name==='AbortError'){setSt('idle');return}
+    setSt('idle');setStatus(e.message.includes('Failed to fetch')?'网络错误（CORS限制，请用代理）':`错误: ${e.message.slice(0,80)}`);
+    setTimeout(()=>{if(S.state==='idle')setStatus('')},8000);return;
+  }
+  if(!reply.trim()){setSt('idle');setStatus('没有收到回复');setTimeout(()=>{if(S.state==='idle')setStatus('')},5000);return}
+
+  S.msgs.push({role:'user',content:text},{role:'assistant',content:reply});
+  localStorage.setItem('mmg',JSON.stringify(S.msgs));
+
+  const mm=reply.match(/\[记忆:([^\]]+)\]\s*$/);
+  if(mm&&mm[1].trim()!=='无'){S.mem.push(mm[1].trim());localStorage.setItem('mm',JSON.stringify(S.mem))}
+
+  const tts=reply.replace(/\n?\[记忆:[^\]]*\]\s*$/g,'');
+  await speakTts(tts);
+}
+
+// ── TTS ──
+async function speakTts(text){
+  const pm=text.match(/^<style>([^<]+)<\/style>\s*/i);
+  const style=pm?pm[1].trim():'';
+  const clean=pm?text.slice(pm[0].length).trim():text;
+  const finalStyle=S.style||style;
+  let content=clean;if(finalStyle)content=`<style>${finalStyle}</style>${content}`;
+
+  setStatus('正在生成语音...',1);
+  const ttsTimer=setTimeout(()=>{if(S.state==='thinking')setStatus('语音生成中，请耐心等待…',1)},3000);
+
+  // 绝对保底：不管发生什么，最多 N 秒后强制回到 idle
+  let forceIdle=null;
+
+  try{
+    const r=await fetch(S.ep,{method:'POST',headers:{'Content-Type':'application/json','api-key':S.key},
+      body:JSON.stringify({model:S.ttsM,messages:[{role:'user',content:clean},{role:'assistant',content}],audio:{format:'wav',voice:S.voice}})});
+    if(!r.ok){const e=await r.text();throw new Error(`TTS ${r.status}: ${e.slice(0,200)}`)}
+    const d=await r.json();
+    if(d.error)throw new Error('TTS: '+JSON.stringify(d.error).slice(0,200));
+    const b64=d.choices?.[0]?.message?.audio?.data;
+    if(!b64)throw new Error('TTS: 无音频数据');
+
+    clearTimeout(ttsTimer);
+    setSt('speaking');
+
+    // 算音频时长，设保底 = 时长×1000 + 2s
+    const bin=atob(b64);const raw=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++)raw[i]=bin.charCodeAt(i);
+    const wav=ensureWav(raw);
+    const durSec=wav.length/(24000*2); // PCM16 mono: totalBytes / (sampleRate * 2)
+    const safetyMs=Math.max(durSec*1000+2000,5000);
+    forceIdle=setTimeout(()=>{stopAll();setSt('idle')},safetyMs);
+
+    await playWav(wav);
+  }catch(e){
+    clearTimeout(ttsTimer);
+    if(e.name!=='AbortError'){setStatus(`语音错误: ${e.message.slice(0,60)}`)}
+  }finally{
+    if(forceIdle)clearTimeout(forceIdle);
+    stopVis();
+    // 强制清理 UI，不依赖 setSt 内部逻辑
+    S.state='idle';
+    orb.className='orb idle';
+    canvas.classList.remove('on');
+    stopBtn.classList.add('hidden');
+    status.textContent='';
+    status.classList.remove('on');
+  }
+}
+
+function ensureWav(b){
+  if(b.length>4&&b[0]===0x52&&b[1]===0x49&&b[2]===0x46&&b[3]===0x46)return b;
+  const sr=24000,bps=16,ch=1,h=44;const buf=new ArrayBuffer(h+b.length);const v=new DataView(buf);
+  ws(v,0,'RIFF');v.setUint32(4,36+b.length,true);ws(v,8,'WAVE');ws(v,12,'fmt ');v.setUint32(16,16,true);
+  v.setUint16(20,1,true);v.setUint16(22,ch,true);v.setUint32(24,sr,true);v.setUint32(28,sr*ch*bps/8,true);
+  v.setUint16(32,ch*bps/8,true);v.setUint16(34,bps,true);ws(v,36,'data');v.setUint32(40,b.length,true);
+  new Uint8Array(buf).set(b,h);return new Uint8Array(buf);
+}
+function ws(v,o,s){for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))}
+
+// ── Controls ──
+orb.addEventListener('click',()=>{
+  if(textBar.classList.contains('show')){textInput.focus();return}
+  if(S.state!=='idle')return;
+  if(!S.key){$('gearBtn').click();return}
+  stopAll();
+  if(!recog)recog=initRec();
+  if(!recog){setStatus('浏览器不支持语音识别');return}
+  try{recog.start();setSt('listening')}catch(e){}
+});
+
+stopBtn.onclick=()=>{stopAll();setSt('idle')};
+$('pauseBtn').onclick=()=>{stopAll();setSt('idle')};
+
+// ── Text mode (5 rapid mouse clicks) ──
+let clicks=[];
+orb.addEventListener('pointerdown',e=>{
+  if(e.pointerType!=='mouse'||e.button!==0)return;
+  const now=Date.now();clicks.push(now);clicks=clicks.filter(t=>now-t<1500);
+  if(clicks.length>=5){clicks=[];textBar.classList.toggle('show');if(textBar.classList.contains('show'))setTimeout(()=>textInput.focus(),300)}
+});
+textInput.oninput=()=>{sendBtn.disabled=!textInput.value.trim()};
+textInput.onkeydown=e=>{if(e.key==='Enter'&&textInput.value.trim())doSend()};
+sendBtn.onclick=doSend;
+function doSend(){const t=textInput.value.trim();if(!t)return;textInput.value='';sendBtn.disabled=true;sendChat(t)}
+
+// ── Init ──
+if(!S.key)setStatus('点击右上角设置 API Key');
+</script>
+</body>
+</html>
