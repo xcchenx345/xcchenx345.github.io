@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>MiMo · 朋友圈</title>
+<link rel="icon" type="image/png" href="icon.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#f5f1eb;height:100vh;display:flex;justify-content:center}
+
+#app{width:100%;max-width:500px;min-height:100vh;background:#faf8f5;position:relative}
+
+/* 顶栏 */
+.hdr{padding:12px 16px;background:linear-gradient(135deg,#f8a432,#f59e0b);color:#fff;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;box-shadow:0 2px 12px rgba(248,164,50,.25)}
+.hdr .back{background:rgba(255,255,255,.2);border:none;color:#fff;font-size:18px;cursor:pointer;padding:6px 10px;border-radius:50%;transition:background .15s}
+.hdr .back:active{background:rgba(255,255,255,.35)}
+.hdr .title{font-size:17px;font-weight:600;letter-spacing:.5px}
+
+/* 发帖区 */
+.compose{padding:14px 16px;background:#fff;border-bottom:1px solid #f0ebe3;display:flex;gap:10px;align-items:flex-start}
+.compose .cav{width:40px;height:40px;border-radius:10px;background:#fef3e2;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;overflow:hidden;border:2px solid #fde8c8}
+.compose .cav img{width:100%;height:100%;object-fit:cover}
+.compose .cinput{flex:1}
+.compose textarea{width:100%;border:1.5px solid #f0ebe3;border-radius:12px;padding:10px 12px;font-size:14px;resize:none;height:60px;outline:none;font-family:inherit;background:#fefcfa;color:#3d3020;transition:border-color .2s}
+.compose textarea:focus{border-color:#f8a432}
+.compose .cbtn{display:flex;justify-content:flex-end;margin-top:8px;gap:8px}
+.compose .cbtn button{padding:7px 18px;border:none;border-radius:18px;font-size:13px;cursor:pointer;font-weight:500;transition:all .15s}
+.compose .post-btn{background:linear-gradient(135deg,#f8a432,#f59e0b);color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(248,164,50,.3)}
+.compose .post-btn:active{transform:scale(.96)}
+.compose .ai-btn{background:#fef3e2;color:#c77c0a;border:1px solid #fde8c8}
+.compose .ai-btn:active{background:#fde8c8}
+
+/* Feed */
+.feed{padding:0}
+.post{border-bottom:8px solid #f5f1eb;padding:14px 16px;background:#fff}
+.post-header{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.post-avatar{width:42px;height:42px;border-radius:10px;background:#fef3e2;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;overflow:hidden;border:2px solid #fde8c8}
+.post-avatar img{width:100%;height:100%;object-fit:cover}
+.post-info{flex:1}
+.post-name{font-size:15px;font-weight:600;color:#3d3020}
+.post-time{font-size:12px;color:#b8a080;margin-top:2px}
+.post-content{font-size:15px;line-height:1.7;color:#4a3c2e;margin-bottom:10px;word-break:break-word}
+.post-actions{display:flex;gap:20px;padding:8px 0 0;border-top:1px solid #f0ebe3}
+.post-act{display:flex;align-items:center;gap:4px;font-size:13px;color:#b8a080;cursor:pointer;background:none;border:none;padding:4px 0;transition:color .15s}
+.post-act:active{color:#f8a432}
+.post-act.liked{color:#f15a24}
+
+/* 评论区 */
+.comments{margin-top:8px;background:#fef9f3;border-radius:10px;padding:10px;border:1px solid #f0ebe3}
+.comment{display:flex;gap:8px;margin-bottom:8px}
+.comment:last-child{margin-bottom:0}
+.comment .cmav{width:24px;height:24px;border-radius:50%;background:#fef3e2;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;overflow:hidden}
+.comment .cmav img{width:100%;height:100%;object-fit:cover}
+.comment .cmbody{flex:1}
+.comment .cmname{font-size:12px;font-weight:600;color:#c77c0a}
+.comment .cmtext{font-size:13px;color:#5a4a3a;margin-top:1px}
+.comment-input{display:flex;gap:6px;margin-top:8px}
+.comment-input input{flex:1;border:1.5px solid #f0ebe3;border-radius:18px;padding:6px 12px;font-size:13px;outline:none;background:#fff;color:#3d3020;transition:border-color .2s}
+.comment-input input:focus{border-color:#f8a432}
+.comment-input button{padding:6px 14px;border:none;border-radius:18px;background:linear-gradient(135deg,#f8a432,#f59e0b);color:#fff;font-size:12px;cursor:pointer;font-weight:500}
+
+/* 空状态 */
+.empty{padding:60px 20px;text-align:center;color:#d4c4a8}
+.empty .icon{font-size:48px;margin-bottom:12px}
+.empty p{font-size:14px;margin-top:4px}
+
+/* Toast */
+.toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:12px;font-size:14px;color:#fff;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;background:rgba(61,48,32,.8)}
+.toast.show{opacity:1}
+
+/* ===== 宽屏 ===== */
+@media (min-width:768px){
+  body{background:#f0ebe3;padding:0}
+  #app{box-shadow:0 0 30px rgba(0,0,0,.08);border-radius:0}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="hdr">
+    <button class="back" id="goBack">←</button>
+    <span class="title">朋友圈</span>
+    <div style="width:28px"></div>
+  </div>
+
+  <!-- 发帖 -->
+  <div class="compose">
+    <div class="cav" id="compAv">👤</div>
+    <div class="cinput">
+      <textarea id="compText" placeholder="分享新鲜事…"></textarea>
+      <div class="cbtn">
+        <button class="ai-btn" id="aiPost">🎲 AI发帖</button>
+        <button class="post-btn" id="doPost">发布</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feed -->
+  <div class="feed" id="feed">
+    <div class="empty"><div class="icon">📱</div>还没有动态<p>来发第一条吧</p></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+// ===== 数据 =====
+var posts=[];
+
+// DOM
+var $=function(i){return document.getElementById(i)};
+var $feed=$('feed'),$compText=$('compText'),$compAv=$('compAv');
+
+// ===== 读取主程序数据 =====
+function getSessions(){try{return JSON.parse(localStorage.getItem('mimo_s'))||[]}catch(e){return[]}}
+function getAk(){return localStorage.getItem('mimo_a')||''}
+function getDak(){return localStorage.getItem('mimo_da')||''}
+function getUserAv(){return localStorage.getItem('mimo_uav')||'👤'}
+function getUserName(){return localStorage.getItem('mimo_my')||'用户'}
+function getModel(){return localStorage.getItem('mimo_cm')||'mimo-v2-flash'}
+
+var CFG={
+  'mimo-v2-flash':{p:'m',u:'https://api.xiaomimimo.com/v1/chat/completions',r:0},
+  'mimo-v2-pro':{p:'m',u:'https://api.xiaomimimo.com/v1/chat/completions',r:0},
+  'mimo-v2-omni':{p:'m',u:'https://api.xiaomimimo.com/v1/chat/completions',r:0},
+  'deepseek-chat':{p:'d',u:'https://api.deepseek.com/v1/chat/completions',r:1},
+  'deepseek-reasoner':{p:'d',u:'https://api.deepseek.com/v1/chat/completions',r:1}
+};
+
+// ===== 工具 =====
+function escH(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''}
+function showToast(t){var b=$('toast');b.textContent=t;b.classList.add('show');setTimeout(function(){b.classList.remove('show')},2000)}
+function timeAgo(ts){
+  var d=Date.now()-ts;
+  if(d<60000) return '刚刚';
+  if(d<3600000) return Math.floor(d/60000)+'分钟前';
+  if(d<86400000) return Math.floor(d/3600000)+'小时前';
+  return Math.floor(d/86400000)+'天前';
+}
+
+// ===== 存储 =====
+function sv(){localStorage.setItem('mimo_moments',JSON.stringify(posts))}
+function ld(){var d=localStorage.getItem('mimo_moments');if(d)try{posts=JSON.parse(d)}catch(e){posts=[]}}
+
+// ===== 发布（仅用户身份） =====
+function publish(){
+  var text=$compText.value.trim();
+  if(!text){showToast('写点什么吧');return}
+  var post={id:Date.now(),text:text,time:Date.now(),likes:[],comments:[],
+    author:{type:'user',name:getUserName(),avatar:getUserAv()}};
+  posts.unshift(post);
+  $compText.value='';
+  sv();renderFeed();
+  showToast('✅ 已发布');
+  // AI自动点赞 + 评论
+  setTimeout(function(){aiAutoLike(post.id)},1000+Math.random()*2000);
+  setTimeout(function(){aiAutoComment(post.id)},3000+Math.random()*4000);
+}
+
+// ===== AI 发帖 =====
+function aiPost(){
+  var ss=getSessions();
+  if(!ss.length){showToast('没有AI角色');return}
+  var s=ss[Math.floor(Math.random()*ss.length)];
+  var model=getModel();
+  var c=CFG[model];if(!c){showToast('未知模型');return}
+  var key=c.p==='m'?getAk():getDak();
+  if(!key){showToast('请先设置API密钥');return}
+
+  var sp='你是'+(s.aiName||s.name)+'，性格：'+(s.personality||'友善')+'。请发一条朋友圈动态，简短有趣，可以分享心情、日常、感悟。只输出动态内容，不要加任何前缀或引号。';
+  var body={model:model,messages:[{role:'system',content:sp},{role:'user',content:'发一条朋友圈吧'}],max_completion_tokens:256,temperature:0.9,stream:false};
+
+  showToast('🎲 AI正在创作…');
+  fetch(c.u,{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify(body)})
+  .then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})
+  .then(function(d){
+    var reply=d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content;
+    if(!reply)throw new Error('无回复');
+    var post={id:Date.now(),text:reply.trim(),time:Date.now(),likes:[],comments:[],
+      author:{type:'ai',id:s.id,name:s.aiName||s.name,avatar:s.aiAvatar||'🤖',personality:s.personality||''}};
+    posts.unshift(post);
+    sv();renderFeed();
+    showToast('✅ AI已发布');
+    // 其他AI自动点赞+评论
+    setTimeout(function(){aiAutoLike(post.id)},2000+Math.random()*3000);
+    setTimeout(function(){aiAutoComment(post.id)},4000+Math.random()*5000);
+  }).catch(function(e){showToast('❌ '+e.message)});
+}
+
+// ===== AI 自动点赞 =====
+function aiAutoLike(postId){
+  var post=posts.find(function(p){return p.id===postId});
+  if(!post)return;
+  var ss=getSessions();
+  var candidates=ss.filter(function(s){return !post.author||s.id!=post.author.id});
+  if(!candidates.length)candidates=ss;
+  if(!candidates.length)return;
+  var s=candidates[Math.floor(Math.random()*candidates.length)];
+  if(post.likes.indexOf('ai_'+s.id)<0){
+    post.likes.push('ai_'+s.id);
+    sv();renderFeed();
+  }
+}
+
+// ===== AI 自动评论 =====
+function aiAutoComment(postId){
+  var post=posts.find(function(p){return p.id===postId});
+  if(!post)return;
+  var ss=getSessions();
+  var candidates=ss.filter(function(s){return !post.author||s.id!=post.author.id});
+  if(!candidates.length)candidates=ss;
+  if(!candidates.length)return;
+  var s=candidates[Math.floor(Math.random()*candidates.length)];
+  var model=getModel();
+  var c=CFG[model];if(!c)return;
+  var key=c.p==='m'?getAk():getDak();
+  if(!key)return;
+
+  var sp='你是'+(s.aiName||s.name)+'，性格：'+(s.personality||'友善')+'。你看到了朋友圈的一条动态，想评论一下。只输出评论内容，简短自然，像真人在社交平台上评论。';
+  var msgs=[{role:'system',content:sp},{role:'user',content:'动态内容：'+post.text}];
+  var body={model:model,messages:msgs,max_completion_tokens:128,temperature:0.9,stream:false};
+
+  fetch(c.u,{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify(body)})
+  .then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})
+  .then(function(d){
+    var reply=d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content;
+    if(!reply)return;
+    post.comments.push({name:s.aiName||s.name,avatar:s.aiAvatar||'🤖',text:reply.trim(),time:Date.now()});
+    sv();renderFeed();
+  }).catch(function(){});
+}
+
+// ===== 渲染 Feed =====
+function renderFeed(){
+  if(!posts.length){$feed.innerHTML='<div class="empty"><div class="icon">📱</div>还没有动态<p>来发第一条吧</p></div>';return}
+  $feed.innerHTML='';
+  posts.forEach(function(p){
+    var d=document.createElement('div');
+    d.className='post';
+    var av=p.author?((p.author.avatar&&p.author.avatar.startsWith('http'))?'<img src="'+escH(p.author.avatar)+'">':escH(p.author.avatar||'🤖')):'👤';
+    var name=p.author?p.author.name:getUserName();
+    var isLiked=p.likes.indexOf('user')>=0;
+
+    var html='<div class="post-header"><div class="post-avatar">'+av+'</div><div class="post-info"><div class="post-name">'+escH(name)+'</div><div class="post-time">'+timeAgo(p.time)+'</div></div></div>';
+    html+='<div class="post-content">'+escH(p.text)+'</div>';
+    html+='<div class="post-actions">';
+    html+='<button class="post-act'+(isLiked?' liked':'')+'" data-act="like" data-id="'+p.id+'">'+(isLiked?'❤️':'🤍')+' '+p.likes.length+'</button>';
+    html+='<button class="post-act" data-act="comment" data-id="'+p.id+'">💬 '+p.comments.length+'</button>';
+    html+='<button class="post-act" data-act="delete" data-id="'+p.id+'">🗑️</button>';
+    html+='</div>';
+
+    if(p.comments.length){
+      html+='<div class="comments">';
+      p.comments.forEach(function(c){
+        var cav=(c.avatar&&c.avatar.startsWith('http'))?'<img src="'+escH(c.avatar)+'">':escH(c.avatar||'🤖');
+        html+='<div class="comment"><div class="cmav">'+cav+'</div><div class="cmbody"><div class="cmname">'+escH(c.name)+'</div><div class="cmtext">'+escH(c.text)+'</div></div></div>';
+      });
+      html+='<div class="comment-input"><input placeholder="评论…" data-pid="'+p.id+'"><button data-reply="'+p.id+'">发送</button></div>';
+      html+='</div>';
+    }
+
+    d.innerHTML=html;
+    $feed.appendChild(d);
+  });
+
+  $feed.querySelectorAll('[data-act]').forEach(function(btn){
+    btn.onclick=function(){
+      var id=parseInt(btn.dataset.id);
+      var act=btn.dataset.act;
+      if(act==='like') toggleLike(id);
+      else if(act==='comment') toggleComment(id);
+      else if(act==='delete') deletePost(id);
+    };
+  });
+  $feed.querySelectorAll('[data-reply]').forEach(function(btn){
+    btn.onclick=function(){
+      var pid=parseInt(btn.dataset.reply);
+      var inp=$feed.querySelector('input[data-pid="'+pid+'"]');
+      if(inp&&inp.value.trim()) addComment(pid,inp.value.trim());
+    };
+  });
+  // 回车发送评论
+  $feed.querySelectorAll('.comment-input input').forEach(function(inp){
+    inp.onkeypress=function(e){if(e.key==='Enter'){
+      var pid=parseInt(inp.dataset.pid);
+      if(inp.value.trim()) addComment(pid,inp.value.trim());
+    }};
+  });
+}
+
+function toggleLike(id){
+  var p=posts.find(function(x){return x.id===id});
+  if(!p)return;
+  var idx=p.likes.indexOf('user');
+  if(idx>=0) p.likes.splice(idx,1); else p.likes.push('user');
+  sv();renderFeed();
+}
+
+function toggleComment(id){
+  var p=posts.find(function(x){return x.id===id});
+  if(!p)return;
+  if(!p.comments) p.comments=[];
+  sv();renderFeed();
+  var inp=$feed.querySelector('input[data-pid="'+id+'"]');
+  if(inp) inp.focus();
+}
+
+function addComment(pid,text){
+  var p=posts.find(function(x){return x.id===pid});
+  if(!p)return;
+  p.comments=p.comments.filter(function(c){return c.text});
+  p.comments.push({name:getUserName(),avatar:getUserAv(),text:text,time:Date.now()});
+  sv();renderFeed();
+  // AI 自动回复评论
+  setTimeout(function(){aiAutoComment(pid)},1500+Math.random()*2000);
+}
+
+function deletePost(id){
+  if(!confirm('删除这条动态？'))return;
+  posts=posts.filter(function(x){return x.id!==id});
+  sv();renderFeed();
+  showToast('🗑️ 已删除');
+}
+
+// ===== 事件 =====
+$('doPost').onclick=publish;
+$('aiPost').onclick=aiPost;
+$('goBack').onclick=function(){window.close()};
+
+// ===== 初始化 =====
+ld();
+var uav=getUserAv();
+$compAv.innerHTML=uav.startsWith('http')?'<img src="'+escH(uav)+'">':escH(uav);
+renderFeed();
+
+})();
+</script>
+</body>
+</html>
