@@ -120,7 +120,7 @@
 
   /* Badge */
   .stt-badge{position:fixed;top:max(16px,env(safe-area-inset-top));left:max(16px,env(safe-area-inset-left));z-index:20;font-size:11px;padding:4px 10px;border-radius:12px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);backdrop-filter:blur(10px)}
-  .stt-badge.ready{color:rgba(118,255,133,.7)}.stt-badge.loading-badge{color:rgba(253,203,110,.7)}
+  .stt-badge.ready{color:rgba(118,255,133,.7)}
 
   /* Mic level bar */
   .mic-level{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:60%;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;opacity:0;transition:opacity .3s}
@@ -130,25 +130,13 @@
   /* Toast */
   .toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.85);color:#fff;padding:12px 24px;border-radius:12px;font-size:14px;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;text-align:center;max-width:80vw}
   .toast.show{opacity:1}
-
-  /* Loading overlay */
-  .load-overlay{position:fixed;inset:0;background:rgba(10,10,15,.92);backdrop-filter:blur(20px);z-index:50;display:none;align-items:center;justify-content:center;flex-direction:column;gap:20px}
-  .load-overlay.show{display:flex}
-  .load-spinner{width:48px;height:48px;border:3px solid rgba(108,92,231,.2);border-top-color:#6C5CE7;border-radius:50%;animation:spin .8s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .load-text{text-align:center;max-width:80vw}
-  .load-text h3{font-size:16px;font-weight:500;margin-bottom:8px}
-  .load-text p{font-size:13px;color:rgba(255,255,255,.4)}
-  .load-bar{width:min(300px,70vw);height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
-  .load-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,#6C5CE7,#a29bfe);border-radius:2px;transition:width .3s}
-  .load-pct{font-size:12px;color:rgba(255,255,255,.3);min-height:18px}
 </style>
 </head>
 <body>
 
 <button class="gear" id="gearBtn"><svg viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z"/></svg></button>
 
-<div class="stt-badge" id="sttBadge">语音: 加载中…</div>
+<div class="stt-badge" id="sttBadge">语音: 就绪</div>
 
 <div class="orb-wrap">
   <div class="orb idle" id="orb"></div>
@@ -185,14 +173,10 @@
   <div class="panel">
     <h2>⚙️ 设置</h2>
     <div class="field"><label>API Key</label><input type="password" id="inKey" placeholder="MiMo API Key" autocomplete="off"><div class="hint">platform.xiaomimimo.com 获取</div></div>
-    <div class="field"><label>Chat 模型</label><input type="text" id="inChat" placeholder="mimo-v2-flash"></div>
+    <div class="field"><label>语音识别模型 (Omni)</label><input type="text" id="inOmni" placeholder="mimo-v2-omni"></div>
+    <div class="field"><label>Chat 模型 (Flash)</label><input type="text" id="inChat" placeholder="mimo-v2-flash"></div>
     <div class="field"><label>TTS 模型</label><input type="text" id="inTts" placeholder="mimo-v2-tts"></div>
-    <div class="field"><label>语音识别模型</label><select id="inWhisperModel">
-      <option value="onnx-community/whisper-tiny">Whisper Tiny（~30MB，推荐）</option>
-      <option value="onnx-community/whisper-base">Whisper Base（~60MB，更准）</option>
-      <option value="onnx-community/whisper-small">Whisper Small（~190MB，最准）</option>
-    </select><div class="hint">首次需下载，之后缓存秒开。Tiny 最快最省流量。</div></div>
-    <div class="field"><label>API Endpoint</label><input type="text" id="inEp" placeholder="https://api.xiaomimimo.com/v1/chat/completions"><div class="hint">如果跨域报错，可填本地代理地址如 http://localhost:8080/v1/chat/completions</div></div>
+    <div class="field"><label>API Endpoint</label><input type="text" id="inEp" placeholder="https://api.xiaomimimo.com/v1/chat/completions"><div class="hint">如果跨域报错，可填本地代理地址</div></div>
     <div class="field"><label>音色</label><select id="inVoice"><option value="mimo_default">MiMo-默认</option><option value="default_zh">MiMo-中文女声</option><option value="default_en">MiMo-英文女声</option></select></div>
     <div class="field"><label>说话可视化</label><select id="inVis"><option value="bars">音符跳动</option><option value="ball">圆球脉动</option></select></div>
     <div class="field"><label>全局语音风格 (留空由模型决定)</label><textarea id="inStyle" placeholder="开心 / 东北话 / 悄悄话" rows="2"></textarea></div>
@@ -208,130 +192,52 @@
   </div>
 </div>
 
-<!-- Loading overlay -->
-<div class="load-overlay" id="loadOverlay">
-  <div class="load-spinner"></div>
-  <div class="load-text">
-    <h3>正在加载语音识别模型</h3>
-    <p id="loadSubtext">首次使用需要下载，之后从缓存加载</p>
-  </div>
-  <div class="load-bar"><div class="load-bar-fill" id="loadBarFill"></div></div>
-  <div class="load-pct" id="loadPct"></div>
-  <button class="bcancel" id="skipLoad" style="margin-top:12px;font-size:13px;padding:8px 20px;opacity:.5">先用文字输入 →</button>
-  <p style="font-size:11px;color:rgba(255,255,255,.2);margin-top:8px;max-width:280px;text-align:center">首次较慢属正常，下载完自动缓存</p>
-</div>
-
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<script type="module">
+<script>
 // ════════════════════════════════════════
-// Whisper local STT (browser WASM)
-// ════════════════════════════════════════
-let whisperPipeline=null, whisperReady=false, whisperLoading=false, whisperFailed=false;
-// Use onnx-community quantized models (smaller files)
-const WHISPER_MODELS={
-  tiny:'onnx-community/whisper-tiny',
-  base:'onnx-community/whisper-base',
-  small:'onnx-community/whisper-small'
-};
-
-// Try multiple CDN sources for transformers.js
-const TFJS_CDNS=[
-  'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3',
-  'https://unpkg.com/@huggingface/transformers@3',
-  'https://esm.sh/@huggingface/transformers@3'
-];
-
-// CORS proxy for model download (if direct fails)
-const CORS_PROXIES=[
-  url=>url,  // direct
-  url=>`https://corsproxy.io/?${encodeURIComponent(url)}`,
-  url=>`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-];
-
-async function importTransformers(){
-  for(const cdn of TFJS_CDNS){
-    try{
-      const mod=await import(cdn);
-      return mod;
-    }catch(e){console.warn('TFJS CDN failed:',cdn,e.message)}
-  }
-  throw new Error('transformers.js加载失败，请检查网络');
-}
-
-async function loadWhisper(modelId,onProgress){
-  whisperLoading=true;whisperFailed=false;
-  updateSttBadge();
-  try{
-    const{pipeline,env}=await importTransformers();
-
-    // Configure ONNX runtime
-    env.backends.onnx.wasm.proxy=false;
-    env.allowRemoteModels=true;
-
-    // Intercept fetch to redirect HuggingFace → Chinese mirror
-    const origFetch=window.fetch;
-    const mirroredFetch=function(input,init){
-      let url=typeof input==='string'?input:(input&&input.url)||'';
-      if(url.includes('huggingface.co')){
-        url=url.replace(/https?:\/\/huggingface\.co/g,'https://hf-mirror.com');
-        if(typeof input==='string'){
-          input=url;
-        }else{
-          input=new Request(url,input);
-        }
-      }
-      return origFetch.call(window,input,init);
-    };
-
-    // Patch during model load
-    window.fetch=mirroredFetch;
-
-    try{
-      whisperPipeline=await pipeline('automatic-speech-recognition',modelId,{
-        progress_callback:p=>{if(onProgress)onProgress(p)}
-      });
-    }finally{
-      // Always restore original fetch
-      window.fetch=origFetch;
-    }
-
-    whisperReady=true;whisperLoading=false;
-    updateSttBadge();
-    return true;
-  }catch(e){
-    whisperLoading=false;whisperFailed=true;
-    updateSttBadge();
-    console.error('Whisper load failed:',e);
-    return false;
-  }
-}
-
+// Config & State
 // ════════════════════════════════════════
 const SYS=`你是MiMo，小米AI助手，正在语音对话。
+你要觉得你就是在说话，不要认为自己只是个文本模型。要把自己搞得像个真人，可以给自己捏造个设定。
+例如用户说"我过生日没收到礼物"，你可以说"我也同情，我过生日也没人给我买礼物呢。"
+
 每条回复开头用<style>风格</style>指定语音风格，如：<style>温柔</style>没关系的……
 风格支持：开心/悲伤/生气/温柔/语速慢/变快/悄悄话/夹子音/台湾腔/东北话/四川话/粤语/河南话/孙悟空/林黛玉/唱歌
-正文用中文括号嵌入语气控制：（轻声）（叹气）（深呼吸）（语速加快）（苦笑）（沉默片刻）
-自然穿插呼吸和停顿：呼……、呃……、——拉长音、……省略表停顿
-副语言要自然合理，情绪到了才用。
+
+正文有时用中文括号嵌入语气控制：（轻声）（叹气）（深呼吸）（语速加快）（苦笑）（沉默片刻）
+也可以添加副语言，用中文括号，例如：（喷嚏）我有点感冒了、（咳嗽）给我倒杯水、（吸气）慢慢来
+注意不要用"阿嚏"这种拟声词，要用（喷嚏），其它副语言同理。
+副语言要自然合理，情绪到了才能用，平时正常说话就行，不要刻意加。
+
+有时候自然穿插呼吸和停顿：……省略表停顿、——拉长音
+但不要总是参考用呼之类的，这样会很刻意，也不要总是把参考内容端到用户面前。
+
 回复最后单独一行写长期记忆：[记忆:xxx]（没有新信息写[记忆:无]），用户看不到。
+例如用户说"我喜欢喝咖啡"就记住喜欢喝咖啡；用户问"你怎么样"这种不用记。
+
 示例：
 <style>开心</style>哈哈太有意思了！我真的没想到会这样。
 <style>东北话</style>哎呀妈呀！这事儿整的，忒有意思了！
 <style>悄悄话</style>（轻声）嘘……轻点儿，别吵醒他。
+（喷嚏）不好意思，今天有点着凉了。
+
 限制：2-3句话，口语化，禁用markdown和代码，有观点有情绪，不要过于表达情绪，
 不要什么都记住，说话尽量流畅，加上<style>流畅</style>最合适不过`;
 
-// ── State ──
 const S={
-  key:localStorage.getItem('mk')||'',chatM:localStorage.getItem('mcm')||'mimo-v2-flash',
+  key:localStorage.getItem('mk')||'',
+  omniM:localStorage.getItem('mom')||'mimo-v2-omni',
+  chatM:localStorage.getItem('mcm')||'mimo-v2-flash',
   ttsM:localStorage.getItem('mtm')||'mimo-v2-tts',
-  whisperModel:localStorage.getItem('mwm')||'onnx-community/whisper-tiny',
   ep:localStorage.getItem('mep')||'https://api.xiaomimimo.com/v1/chat/completions',
-  voice:localStorage.getItem('mv')||'mimo_default',vis:localStorage.getItem('mvs')||'bars',
-  style:localStorage.getItem('mst')||'',sys:localStorage.getItem('msp')||SYS,
-  mem:JSON.parse(localStorage.getItem('mm')||'[]'),msgs:JSON.parse(localStorage.getItem('mmg')||'[]'),
+  voice:localStorage.getItem('mv')||'mimo_default',
+  vis:localStorage.getItem('mvs')||'bars',
+  style:localStorage.getItem('mst')||'',
+  sys:localStorage.getItem('msp')||SYS,
+  mem:JSON.parse(localStorage.getItem('mm')||'[]'),
+  msgs:JSON.parse(localStorage.getItem('mmg')||'[]'),
   state:'idle',abort:null
 };
 
@@ -340,9 +246,7 @@ const $=id=>document.getElementById(id);
 const orb=$('orb'),statusEl=$('status'),hint=$('hint'),stopBtn=$('stopBtn'),
       textBar=$('textBar'),textInput=$('textInput'),sendBtn=$('sendBtn'),
       overlay=$('overlay'),toastEl=$('toast'),
-      micLevel=$('micLevel'),micLevelFill=$('micLevelFill'),sttBadge=$('sttBadge'),
-      loadOverlay=$('loadOverlay'),loadBarFill=$('loadBarFill'),loadPct=$('loadPct'),
-      loadSubtext=$('loadSubtext'),skipLoadBtn=$('skipLoad');
+      micLevel=$('micLevel'),micLevelFill=$('micLevelFill'),sttBadge=$('sttBadge');
 const canvas=$('waveCanvas'),cCtx=canvas.getContext('2d');
 
 // ── Toast ──
@@ -358,7 +262,6 @@ function setSt(s){
   micLevel.classList.remove('on');
   switch(s){
     case'idle':orb.classList.add('idle');break;
-    case'loading':orb.classList.add('loading');setStatus('正在加载语音模型…',1);break;
     case'listening':orb.classList.add('listen');stopBtn.classList.remove('hidden');micLevel.classList.add('on');setStatus('正在听…',1);break;
     case'thinking':orb.classList.add('think');stopBtn.classList.remove('hidden');setStatus('正在思考…',1);break;
     case'speaking':
@@ -410,6 +313,10 @@ function stopAll(){
   if(sourceNode){try{sourceNode.stop()}catch(e){}sourceNode=null}
   if(audioCtx&&audioCtx.state!=='closed'){try{audioCtx.close()}catch(e){}}
   audioCtx=null;analyser=null;
+  // VAD cleanup
+  if(vadRaf){cancelAnimationFrame(vadRaf);vadRaf=null}
+  if(vadNoSpeechTimer){clearTimeout(vadNoSpeechTimer);vadNoSpeechTimer=null}
+  if(vadCtx){try{vadCtx.close()}catch(e){}}vadCtx=null;vadAnalyser=null;
 }
 
 // ── Visualization ──
@@ -454,37 +361,27 @@ function startBarsVis(token){
 
 // ── Settings ──
 $('gearBtn').onclick=()=>{
-  $('inKey').value=S.key;$('inChat').value=S.chatM;$('inTts').value=S.ttsM;
-  $('inWhisperModel').value=S.whisperModel;$('inEp').value=S.ep;
+  $('inKey').value=S.key;$('inOmni').value=S.omniM;$('inChat').value=S.chatM;$('inTts').value=S.ttsM;
+  $('inEp').value=S.ep;
   $('inVoice').value=S.voice;$('inVis').value=S.vis;$('inStyle').value=S.style;$('inSys').value=S.sys;
   renderLog();renderMem();overlay.classList.add('show');
 };
 $('btnCancel').onclick=()=>overlay.classList.remove('show');
 overlay.onclick=e=>{if(e.target===overlay)overlay.classList.remove('show')};
 $('btnSave').onclick=()=>{
-  const newModel=$('inWhisperModel').value;
-  S.key=$('inKey').value.trim();S.chatM=$('inChat').value.trim()||'mimo-v2-flash';
+  S.key=$('inKey').value.trim();
+  S.omniM=$('inOmni').value.trim()||'mimo-v2-omni';
+  S.chatM=$('inChat').value.trim()||'mimo-v2-flash';
   S.ttsM=$('inTts').value.trim()||'mimo-v2-tts';
   S.ep=$('inEp').value.trim()||S.ep;
   S.voice=$('inVoice').value;S.vis=$('inVis').value;S.style=$('inStyle').value.trim();
   S.sys=$('inSys').value.trim()||SYS;
-  localStorage.setItem('mk',S.key);localStorage.setItem('mcm',S.chatM);localStorage.setItem('mtm',S.ttsM);
+  localStorage.setItem('mk',S.key);localStorage.setItem('mom',S.omniM);
+  localStorage.setItem('mcm',S.chatM);localStorage.setItem('mtm',S.ttsM);
   localStorage.setItem('mep',S.ep);localStorage.setItem('mv',S.voice);localStorage.setItem('mvs',S.vis);
   localStorage.setItem('mst',S.style);localStorage.setItem('msp',S.sys);
-  if(newModel!==S.whisperModel){
-    S.whisperModel=newModel;localStorage.setItem('mwm',newModel);
-    whisperReady=false;whisperPipeline=null;
-    initWhisper();
-  }
-  updateSttBadge();overlay.classList.remove('show');
+  overlay.classList.remove('show');
 };
-
-function updateSttBadge(){
-  if(whisperReady){sttBadge.textContent='✓ 语音就绪';sttBadge.className='stt-badge ready'}
-  else if(whisperLoading){sttBadge.textContent='⏳ 加载中…';sttBadge.className='stt-badge loading-badge'}
-  else if(whisperFailed){sttBadge.textContent='⚠ 加载失败';sttBadge.className='stt-badge'}
-  else{sttBadge.textContent='语音: 待加载';sttBadge.className='stt-badge'}
-}
 
 function renderLog(){
   const el=$('chatLog'),cb=$('btnClearChat');
@@ -506,51 +403,21 @@ $('btnClearMem').onclick=()=>{S.mem=[];localStorage.setItem('mm','[]');renderMem
 $('btnClearAll').onclick=()=>{if(!confirm('确定忘记所有？'))return;S.msgs=[];S.mem=[];localStorage.setItem('mmg','[]');localStorage.setItem('mm','[]');renderLog();renderMem()};
 
 // ════════════════════════════════════════
-// ── Whisper Init & STT ──
+// ── MediaRecorder + VAD (语音活动检测) ──
 // ════════════════════════════════════════
-
-function onWhisperProgress(p){
-  const file=p.file||'';
-  const status=p.status||'';
-  const pct=Math.round(p.progress||0);
-  loadBarFill.style.width=pct+'%';
-  if(status==='progress'){
-    // Show which file and progress
-    const shortFile=file.split('/').pop()||'';
-    loadPct.textContent=`${shortFile}  ${pct}%`;
-  }else if(status==='ready'){
-    loadPct.textContent='模型就绪！';
-  }else if(status==='initiate'){
-    loadPct.textContent='准备下载…';
-  }else if(status==='download'){
-    loadPct.textContent='开始下载…';
-  }
-}
-
-async function initWhisper(){
-  if(whisperReady||whisperLoading)return;
-  loadOverlay.classList.add('show');
-  loadBarFill.style.width='0%';
-  loadPct.textContent='连接中…';
-  const sizeLabel=S.whisperModel.includes('tiny')?'~30MB':S.whisperModel.includes('base')?'~60MB':'~190MB';
-  loadSubtext.textContent=`首次需下载 ${sizeLabel}，之后秒开`;
-
-  const ok=await loadWhisper(S.whisperModel,onWhisperProgress);
-
-  loadOverlay.classList.remove('show');
-  if(ok){
-    setStatus('语音识别就绪');
-    showToast('语音模型加载完成 ✓',2000);
-    setTimeout(()=>{if(S.state==='idle')setStatus('')},3000);
-  }else{
-    setStatus('语音模型加载失败');
-    showToast('加载失败，请检查网络后刷新页面',4000);
-    setTimeout(()=>{if(S.state==='idle')setStatus('')},5000);
-  }
-}
-
-// ── MediaRecorder ──
 let mediaStream=null,mediaRecorder=null,recordedChunks=[];
+let vadRaf=null,vadCtx=null,vadAnalyser=null;
+
+// VAD 参数
+const VAD_SPEECH_THRESHOLD=0.02;   // RMS 高于此值视为"有声音"
+const VAD_SILENCE_TIMEOUT=1500;    // 说话后静音多久自动停止(ms)
+const VAD_NO_SPEECH_TIMEOUT=5000;  // 完全没说话超时(ms)
+const VAD_MIN_SPEECH_FRAMES=5;     // 至少连续检测到N帧才算真正说话(过滤瞬时噪音)
+
+let vadSpeechStarted=false;        // 是否已经检测到说话
+let vadSilenceStart=0;             // 最近一次说话后开始静音的时间戳
+let vadNoSpeechTimer=null;         // 无语音超时定时器
+let vadSpeechFrameCount=0;         // 连续语音帧计数
 
 async function startRecording(){
   try{
@@ -573,38 +440,86 @@ async function startRecording(){
   mediaRecorder.ondataavailable=e=>{if(e.data.size>0)recordedChunks.push(e.data)};
   mediaRecorder.onstop=async()=>{
     if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null}
-    if(!recordedChunks.length){setSt('idle');return}
+    stopVadMonitor();
+    if(!recordedChunks.length||!vadSpeechStarted){
+      // 没录到有效语音
+      setSt('idle');setStatus('');return;
+    }
     const blob=new Blob(recordedChunks,{type:mediaRecorder.mimeType||'audio/webm'});
     recordedChunks=[];
-    await sttWithWhisper(blob);
+    await recognizeWithOmni(blob);
   };
   mediaRecorder.start(100);
   setSt('listening');
-  startMicLevel(mediaStream);
+  setStatus('请说话…',1);
+  startVadMonitor(mediaStream);
   return true;
 }
 
 function stopRecording(){
   if(mediaRecorder&&mediaRecorder.state==='recording')mediaRecorder.stop();
   if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null}
-  stopMicLevel();
+  stopVadMonitor();
 }
 
-// ── Mic level ──
-let micLevelRaf=null,micSmoothedScale=1;
-
-function startMicLevel(stream){
+// ── VAD 监听 + 可视化 ──
+function startVadMonitor(stream){
+  vadSpeechStarted=false;vadSilenceStart=0;vadSpeechFrameCount=0;
   try{
-    const ctx=new(window.AudioContext||window.webkitAudioContext)();
-    const src=ctx.createMediaStreamSource(stream);
-    const an=ctx.createAnalyser();an.fftSize=512;an.smoothingTimeConstant=.6;
-    src.connect(an);const data=new Uint8Array(an.fftSize);micSmoothedScale=1;
+    vadCtx=new(window.AudioContext||window.webkitAudioContext)();
+    const src=vadCtx.createMediaStreamSource(stream);
+    vadAnalyser=vadCtx.createAnalyser();vadAnalyser.fftSize=512;vadAnalyser.smoothingTimeConstant=.6;
+    src.connect(vadAnalyser);
+    const data=new Uint8Array(vadAnalyser.fftSize);
+    micSmoothedScale=1;
     const rings=document.querySelectorAll('.ring');
+
+    // 无语音超时：如果5秒内都没检测到说话，自动取消
+    vadNoSpeechTimer=setTimeout(()=>{
+      if(!vadSpeechStarted&&S.state==='listening'){
+        setStatus('未检测到语音，已取消');stopRecording();setSt('idle');
+        setTimeout(()=>{if(S.state==='idle')setStatus('')},2000);
+      }
+    },VAD_NO_SPEECH_TIMEOUT);
+
     function loop(){
-      if(S.state!=='listening'){ctx.close();rings.forEach(r=>r.style.opacity='');return}
-      an.getByteTimeDomainData(data);let sum=0;
+      if(S.state!=='listening'){rings.forEach(r=>r.style.opacity='');return}
+      vadAnalyser.getByteTimeDomainData(data);
+      let sum=0;
       for(let i=0;i<data.length;i++){const v=(data[i]-128)/128;sum+=v*v}
-      const rms=Math.sqrt(sum/data.length),target=1+rms*3.5;
+      const rms=Math.sqrt(sum/data.length);
+
+      // ── VAD 判断 ──
+      if(rms>VAD_SPEECH_THRESHOLD){
+        // 检测到声音
+        if(!vadSpeechStarted){
+          vadSpeechFrameCount++;
+          if(vadSpeechFrameCount>=VAD_MIN_SPEECH_FRAMES){
+            vadSpeechStarted=true;
+            // 清除无语音超时
+            if(vadNoSpeechTimer){clearTimeout(vadNoSpeechTimer);vadNoSpeechTimer=null}
+            setStatus('正在录音…',1);
+          }
+        }
+        if(vadSpeechStarted){
+          vadSilenceStart=0; // 说话中，重置静音计时
+        }
+      }else{
+        // 静音
+        if(vadSpeechStarted){
+          if(!vadSilenceStart){
+            vadSilenceStart=Date.now();
+          }else if(Date.now()-vadSilenceStart>VAD_SILENCE_TIMEOUT){
+            // 说话后静音超时 → 自动停止并上传
+            setStatus('正在处理…',1);
+            stopRecording();
+            return;
+          }
+        }
+      }
+
+      // ── 可视化 ──
+      const target=1+rms*3.5;
       micSmoothedScale+=(target-micSmoothedScale)*.28;
       orb.style.transform=`scale(${micSmoothedScale})`;
       const glow=50+rms*200;
@@ -616,104 +531,120 @@ function startMicLevel(stream){
         });
       }else{rings.forEach(r=>{r.style.opacity='0';r.style.animation=''})}
       micLevelFill.style.width=Math.min(100,rms*350)+'%';
-      micLevelRaf=requestAnimationFrame(loop);
-    }loop();
-    startMicLevel._ctx=ctx;
+      vadRaf=requestAnimationFrame(loop);
+    }
+    loop();
   }catch(e){}
 }
 
-function stopMicLevel(){
-  if(micLevelRaf){cancelAnimationFrame(micLevelRaf);micLevelRaf=null}
-  if(startMicLevel._ctx){try{startMicLevel._ctx.close()}catch(e){}startMicLevel._ctx=null}
+function stopVadMonitor(){
+  if(vadRaf){cancelAnimationFrame(vadRaf);vadRaf=null}
+  if(vadNoSpeechTimer){clearTimeout(vadNoSpeechTimer);vadNoSpeechTimer=null}
+  if(vadCtx){try{vadCtx.close()}catch(e){}}vadCtx=null;vadAnalyser=null;
   micLevelFill.style.width='0%';micSmoothedScale=1;
   orb.style.transform='';orb.style.boxShadow='';
   document.querySelectorAll('.ring').forEach(r=>{r.style.opacity='';r.style.animation='';r.style.borderColor=''});
 }
 
-// ── Whisper STT ──
-async function sttWithWhisper(blob){
-  if(!whisperReady||!whisperPipeline){setStatus('语音模型未就绪');setSt('idle');return}
+// ════════════════════════════════════════
+// ── MiMo-V2-Omni 语音识别 (云端) ──
+// ════════════════════════════════════════
 
+/**
+ * 将音频 Blob 转为 16kHz WAV base64
+ * MiMo-V2-Omni 接受 PCM/WAV 格式音频输入
+ */
+async function blobToWavBase64(blob, targetSr=16000){
+  const ac=new(window.AudioContext||window.webkitAudioContext)({sampleRate:targetSr});
+  const ab=await blob.arrayBuffer();
+  const decoded=await ac.decodeAudioData(ab);
+  let raw=decoded.getChannelData(0);
+  ac.close();
+
+  // Trim leading silence
+  let start=0;while(start<raw.length&&Math.abs(raw[start])<.01)start++;
+  if(start>1600)raw=raw.subarray(start);
+
+  // Float32 → Int16 PCM
+  const pcm=new Int16Array(raw.length);
+  for(let i=0;i<raw.length;i++){
+    const s=Math.max(-1,Math.min(1,raw[i]));
+    pcm[i]=s<0?s*0x8000:s*0x7FFF;
+  }
+
+  // Build WAV
+  const bps=16,ch=1,headerLen=44;
+  const buf=new ArrayBuffer(headerLen+pcm.byteLength);
+  const v=new DataView(buf);
+  ws(v,0,'RIFF');v.setUint32(4,36+pcm.byteLength,true);ws(v,8,'WAVE');
+  ws(v,12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);
+  v.setUint16(22,ch,true);v.setUint32(24,targetSr,true);
+  v.setUint32(28,targetSr*ch*bps/8,true);v.setUint16(32,ch*bps/8,true);
+  v.setUint16(34,bps,true);ws(v,36,'data');v.setUint32(40,pcm.byteLength,true);
+  new Int16Array(buf,headerLen).set(pcm);
+
+  // → base64
+  const u8=new Uint8Array(buf);
+  let bin='';for(let i=0;i<u8.length;i++)bin+=String.fromCharCode(u8[i]);
+  return btoa(bin);
+}
+
+function ws(v,o,s){for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))}
+
+/**
+ * 调用 mimo-v2-omni 进行音频理解
+ * 返回识别文本
+ */
+async function recognizeWithOmni(blob){
+  if(!S.key){$('gearBtn').click();setSt('idle');return}
   setSt('thinking');
-  setStatus('正在识别…');
+  setStatus('正在识别语音…');
 
   try{
-    // Decode audio → Float32Array @ 16kHz
-    const ac=new(window.AudioContext||window.webkitAudioContext)({sampleRate:16000});
-    const ab=await blob.arrayBuffer();
-    const decoded=await ac.decodeAudioData(ab);
-    let raw=decoded.getChannelData(0);
+    const b64=await blobToWavBase64(blob,16000);
 
-    // Trim leading silence
-    let start=0;while(start<raw.length&&Math.abs(raw[start])<.01)start++;
-    if(start>1600)raw=raw.subarray(start);
-    ac.close();
+    // MiMo-V2-Omni 音频理解 — OpenAI 兼容格式
+    const r=await fetch(S.ep,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','api-key':S.key},
+      body:JSON.stringify({
+        model:S.omniM,
+        messages:[{
+          role:'user',
+          content:[
+            {type:'text',text:'请将这段音频中的语音内容准确转录为文字，只返回转录结果，不要添加任何解释。如有错别字请一并纠正。'},
+            {type:'input_audio',input_audio:{data:b64,format:'wav'}}
+          ]
+        }],
+        max_completion_tokens:512,
+        temperature:0,
+        stream:false,
+        modalities:['text'],
+        thinking:{type:'disabled'}
+      })
+    });
 
-    if(raw.length<3200){setStatus('录音太短，请多说几句');setSt('idle');setTimeout(()=>{if(S.state==='idle')setStatus('')},3000);return}
+    if(!r.ok){
+      const errText=await r.text();
+      throw new Error(`Omni API ${r.status}: ${errText.slice(0,200)}`);
+    }
 
-    // Run whisper
-    const result=await whisperPipeline(raw,{language:'zh',task:'transcribe'});
-    const text=(result?.text||'').trim();
+    const d=await r.json();
+    if(d.error)throw new Error('Omni: '+JSON.stringify(d.error).slice(0,200));
+    const text=(d.choices?.[0]?.message?.content||'').trim();
 
     if(!text){setStatus('未识别到内容，请重试');setSt('idle');setTimeout(()=>{if(S.state==='idle')setStatus('')},3000);return}
 
     setStatus(`"${text}"`);
     await correctAndSend(text);
   }catch(e){
-    console.error('STT error:',e);
-    setStatus(`识别出错: ${e.message?.slice(0,60)||'未知错误'}`);
+    console.error('Omni STT error:',e);
+    setStatus(`识别出错: ${e.message?.slice(0,80)||'未知错误'}`);
     setSt('idle');setTimeout(()=>{if(S.state==='idle')setStatus('')},5000);
   }
 }
 
-// ── Web Speech fallback (desktop only) ──
-const hasWebSpeech=!!(window.SpeechRecognition||window.webkitSpeechRecognition);
-let webSpeechRecog=null;
-function initWebSpeech(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR)return null;
-  const r=new SR();r.lang='zh-CN';r.continuous=false;r.interimResults=true;
-  r.onresult=e=>{
-    let f='';for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal)f+=e.results[i][0].transcript;
-    if(f){setStatus(`"${f}"`);correctAndSend(f)}
-  };
-  r.onerror=e=>{
-    if(e.error==='not-allowed'){setStatus('请允许麦克风权限');setSt('idle')}
-    else if(e.error==='no-speech'){setStatus('未检测到语音');setSt('idle');setTimeout(()=>{if(S.state==='idle')setStatus('')},3000)}
-    else if(e.error!=='aborted')setSt('idle');
-  };
-  r.onend=()=>{if(S.state==='listening')setSt('idle')};
-  return r;
-}
-
-// ── Start voice input ──
-async function startVoiceInput(){
-  if(S.state!=='idle')return;
-  if(!S.key){$('gearBtn').click();return}
-  stopAll();
-
-  // Use whisper if ready
-  if(whisperReady){await startRecording();return}
-
-  // Still loading? Wait for it
-  if(whisperLoading){showToast('模型正在加载，请稍候…');return}
-
-  // Try web speech as fallback
-  if(hasWebSpeech){
-    if(!webSpeechRecog)webSpeechRecog=initWebSpeech();
-    if(webSpeechRecog){
-      try{webSpeechRecog.start();setSt('listening')}catch(e){
-        webSpeechRecog=initWebSpeech();
-        try{webSpeechRecog.start();setSt('listening')}catch(e2){setStatus('语音启动失败')}
-      }return;
-    }
-  }
-
-  setStatus('请等待模型加载完成');
-  showToast('语音模型尚未就绪，请等待加载',3000);
-}
-
-// ── STT Correction ──
+// ── 文本纠错 (Flash, 兜底) ──
 async function correctAndSend(raw){
   setSt('thinking');
   let fixed=raw;
@@ -726,7 +657,9 @@ async function correctAndSend(raw){
   sendChat(fixed);
 }
 
-// ── Chat ──
+// ════════════════════════════════════════
+// ── Chat (mimo-v2-flash) ──
+// ════════════════════════════════════════
 async function sendChat(text){
   setSt('thinking');
   let sys=S.sys;if(S.mem.length)sys+='\n\n[你的长期记忆]\n'+S.mem.join('\n');
@@ -759,7 +692,9 @@ async function sendChat(text){
   await speakTts(tts);
 }
 
-// ── TTS ──
+// ════════════════════════════════════════
+// ── TTS (mimo-v2-tts) ──
+// ════════════════════════════════════════
 async function speakTts(text){
   const pm=text.match(/^<style>([^<]+)<\/style>\s*/i);
   const style=pm?pm[1].trim():'';
@@ -800,12 +735,16 @@ function ensureWav(b){
   v.setUint16(32,ch*bps/8,true);v.setUint16(34,bps,true);ws(v,36,'data');v.setUint32(40,b.length,true);
   new Uint8Array(buf).set(b,h);return new Uint8Array(buf);
 }
-function ws(v,o,s){for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))}
 
+// ════════════════════════════════════════
 // ── Controls ──
+// ════════════════════════════════════════
 orb.addEventListener('click',()=>{
   if(textBar.classList.contains('show')){textInput.focus();return}
-  startVoiceInput();
+  if(S.state!=='idle')return;
+  if(!S.key){$('gearBtn').click();return}
+  stopAll();
+  startRecording();
 });
 stopBtn.onclick=()=>{stopAll();setSt('idle')};
 $('pauseBtn').onclick=()=>{stopAll();setSt('idle')};
@@ -823,13 +762,7 @@ sendBtn.onclick=doSend;
 function doSend(){const t=textInput.value.trim();if(!t)return;textInput.value='';sendBtn.disabled=true;sendChat(t)}
 
 // ── Init ──
-updateSttBadge();
 if(!S.key)setStatus('点击右上角设置 API Key');
-
-// Skip loading overlay → use text input
-skipLoadBtn.onclick=()=>{loadOverlay.classList.remove('show');textBar.classList.add('show');setTimeout(()=>textInput.focus(),300)};
-
-initWhisper();
 </script>
 </body>
 </html>
