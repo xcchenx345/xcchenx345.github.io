@@ -612,7 +612,7 @@ async function recognizeWithOmni(blob){
         messages:[{
           role:'user',
           content:[
-            {type:'text',text:'请将这段音频中的语音内容准确转录为文字，只返回转录结果，不要添加任何解释。如有错别字请一并纠正。'},
+            {type:'text',text:'请将这段音频中的语音内容准确转录为文字，只返回转录结果，不要添加任何解释。如有错别字请一并纠正。加上标点符号，记住你只是转录文字纠错，不要回答任何内容。'},
             {type:'input_audio',input_audio:{data:b64,format:'wav'}}
           ]
         }],
