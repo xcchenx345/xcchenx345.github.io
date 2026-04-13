@@ -7,33 +7,45 @@
 <title>MiMo 语音对话</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  :root{--bg:#0a0a0f;--accent:#6C5CE7;--accent2:#a29bfe;--danger:#ff6b6b;--ball:min(200px,42vw)}
-  body{background:var(--bg);color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;height:100dvh;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;user-select:none}
+  :root{
+    --bg:#0a0a0f;--text:#fff;--text2:rgba(255,255,255,.5);--text3:rgba(255,255,255,.3);
+    --accent:#6C5CE7;--accent2:#a29bfe;--danger:#ff6b6b;--ball:min(200px,42vw);
+    --panel-bg:rgba(30,30,40,.95);--panel-border:rgba(255,255,255,.1);
+    --input-bg:rgba(255,255,255,.06);--input-border:rgba(255,255,255,.1);
+    --btn-bg:rgba(255,255,255,.08);--btn-hover:rgba(255,255,255,.14);
+    --overlay-bg:rgba(0,0,0,.7);--bar-bg:rgba(20,20,30,.95);--bar-border:rgba(255,255,255,.08);
+    --c-idle:#6C5CE7;--c-listen:#ff6348;--c-think:#fdcb6e;--c-speak:#6C5CE7;
+  }
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;height:100dvh;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;user-select:none;transition:background .5s,color .5s}
 
   /* ── Orb ── */
   .orb-wrap{position:relative;width:var(--ball);height:var(--ball);display:flex;align-items:center;justify-content:center}
-  .orb{width:100%;height:100%;border-radius:50%;background:#6C5CE7;box-shadow:0 0 60px rgba(108,92,231,.35);cursor:pointer;will-change:transform,border-radius,background;transition:background .3s}
+  .orb{width:100%;height:100%;border-radius:50%;background:var(--c-idle);box-shadow:0 0 60px color-mix(in srgb,var(--c-idle) 35%,transparent);cursor:pointer;will-change:transform,border-radius,background,box-shadow;transition:background .6s ease,border-radius .8s ease,transform .6s ease,box-shadow .6s ease}
   .orb:hover{transform:scale(1.04)}.orb:active{transform:scale(.97)}
+  /* Disable transition during active animation so CSS @keyframes have full control */
+  .orb[class*="think"],.orb[class*="speak"],.orb.listen,.orb.loading{transition:none}
 
   /* ── Deco rings ── */
-  .ring{position:absolute;border-radius:50%;border:1.5px solid rgba(108,92,231,.2);pointer-events:none;opacity:0;transition:opacity .3s}
+  .ring{position:absolute;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--c-idle) 20%,transparent);pointer-events:none;opacity:0;transition:opacity .3s}
   .ring:nth-child(2){width:115%;height:115%}.ring:nth-child(3){width:130%;height:130%}.ring:nth-child(4){width:145%;height:145%}
 
   /* ═══ IDLE ═══ */
-  .orb.idle{background:#6C5CE7;animation:orb-breathe 3s ease-in-out infinite}
+  .orb.idle{background:var(--c-idle);animation:orb-breathe 3s ease-in-out infinite}
   @keyframes orb-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 
   /* ═══ LOADING ═══ */
-  .orb.loading{background:#a29bfe;animation:orb-pulse-load 1.5s ease-in-out infinite;cursor:default}
+  .orb.loading{background:color-mix(in srgb,var(--c-idle) 64%,white);animation:orb-pulse-load 1.5s ease-in-out infinite;cursor:default}
   @keyframes orb-pulse-load{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.04);opacity:.7}}
 
   /* ═══ LISTENING ═══ */
-  .orb.listen{background:#ff6348;box-shadow:0 0 60px rgba(255,99,72,.4)}
+  .orb.listen{background:var(--c-listen);box-shadow:0 0 60px color-mix(in srgb,var(--c-listen) 40%,transparent)}
   .orb.listen{animation:orb-listen .9s ease-in-out infinite}
   @keyframes orb-listen{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
 
   /* ═══ THINKING ═══ */
-  .orb.think{background:#fdcb6e;box-shadow:0 0 60px rgba(253,203,110,.4);animation:orb-morph 1.6s ease-in-out infinite}
+
+  /* 1. 原始变形 */
+  .orb.think-morph{background:var(--c-think);box-shadow:0 0 60px color-mix(in srgb,var(--c-think) 40%,transparent);animation:orb-morph 1.6s ease-in-out infinite}
   @keyframes orb-morph{
     0%{border-radius:50%;transform:scale(1)}
     20%{border-radius:42% 58% 55% 45%/55% 42% 58% 45%;transform:scale(1.04)}
@@ -43,8 +55,110 @@
     100%{border-radius:50%;transform:scale(1)}
   }
 
+  /* 2. 思考云朵 — 真正的云朵形状，扁圆 + 顶部隆起 */
+  .orb.think-cloud{
+    background:linear-gradient(180deg,color-mix(in srgb,var(--c-think) 80%,white) 0%,var(--c-think) 40%,color-mix(in srgb,var(--c-think) 70%,#333) 100%);
+    border-radius:50% 50% 40% 40% / 60% 60% 35% 35%;
+    box-shadow:
+      0 0 60px color-mix(in srgb,var(--c-think) 35%,transparent),
+      -22px -18px 0 -4px color-mix(in srgb,var(--c-think) 90%,transparent),
+      25px -14px 0 -6px color-mix(in srgb,var(--c-think) 85%,transparent),
+      -10px -28px 0 -8px color-mix(in srgb,var(--c-think) 75%,transparent),
+      14px -26px 0 -10px color-mix(in srgb,var(--c-think) 70%,transparent),
+      0px -32px 0 -12px color-mix(in srgb,var(--c-think) 60%,transparent);
+    animation:orb-cloud 3s ease-in-out infinite;
+  }
+  @keyframes orb-cloud{
+    0%,100%{
+      border-radius:50% 50% 40% 40% / 60% 60% 35% 35%;
+      transform:scale(1) translateY(0);
+      box-shadow:
+        0 0 60px color-mix(in srgb,var(--c-think) 35%,transparent),
+        -22px -18px 0 -4px color-mix(in srgb,var(--c-think) 90%,transparent),
+        25px -14px 0 -6px color-mix(in srgb,var(--c-think) 85%,transparent),
+        -10px -28px 0 -8px color-mix(in srgb,var(--c-think) 75%,transparent),
+        14px -26px 0 -10px color-mix(in srgb,var(--c-think) 70%,transparent),
+        0px -32px 0 -12px color-mix(in srgb,var(--c-think) 60%,transparent);
+    }
+    25%{
+      border-radius:52% 48% 38% 42% / 58% 62% 33% 37%;
+      transform:scale(1.04) translateY(-5px) translateX(3px);
+      box-shadow:
+        0 0 70px color-mix(in srgb,var(--c-think) 40%,transparent),
+        -26px -16px 0 -2px color-mix(in srgb,var(--c-think) 95%,transparent),
+        28px -12px 0 -4px color-mix(in srgb,var(--c-think) 90%,transparent),
+        -12px -30px 0 -6px color-mix(in srgb,var(--c-think) 80%,transparent),
+        16px -28px 0 -8px color-mix(in srgb,var(--c-think) 75%,transparent),
+        2px -35px 0 -10px color-mix(in srgb,var(--c-think) 65%,transparent);
+    }
+    50%{
+      border-radius:48% 52% 42% 38% / 62% 58% 37% 33%;
+      transform:scale(1.06) translateY(-3px) translateX(-2px);
+      box-shadow:
+        0 0 80px color-mix(in srgb,var(--c-think) 45%,transparent),
+        -20px -20px 0 -1px color-mix(in srgb,var(--c-think) 95%,transparent),
+        23px -16px 0 -3px color-mix(in srgb,var(--c-think) 90%,transparent),
+        -8px -32px 0 -5px color-mix(in srgb,var(--c-think) 80%,transparent),
+        12px -30px 0 -7px color-mix(in srgb,var(--c-think) 75%,transparent),
+        -2px -36px 0 -9px color-mix(in srgb,var(--c-think) 65%,transparent);
+    }
+    75%{
+      border-radius:50% 50% 40% 40% / 60% 60% 35% 35%;
+      transform:scale(1.02) translateY(-6px) translateX(1px);
+      box-shadow:
+        0 0 65px color-mix(in srgb,var(--c-think) 38%,transparent),
+        -24px -17px 0 -3px color-mix(in srgb,var(--c-think) 92%,transparent),
+        26px -13px 0 -5px color-mix(in srgb,var(--c-think) 87%,transparent),
+        -11px -29px 0 -7px color-mix(in srgb,var(--c-think) 77%,transparent),
+        15px -27px 0 -9px color-mix(in srgb,var(--c-think) 72%,transparent),
+        1px -34px 0 -11px color-mix(in srgb,var(--c-think) 62%,transparent);
+    }
+  }
+
+  /* 3. 到处乱撞 — 在容器内弹来弹去 */
+  .orb.think-bounce{background:var(--c-think);box-shadow:0 0 60px color-mix(in srgb,var(--c-think) 40%,transparent);animation:orb-bounce 2.8s cubic-bezier(.36,.07,.19,.97) infinite}
+  .orb-wrap:has(.think-bounce){overflow:visible}
+  @keyframes orb-bounce{
+    0%{transform:translate(0,0) scale(1)}
+    8%{transform:translate(28px,-32px) scale(.92);border-radius:48% 52% 46% 54%}
+    18%{transform:translate(-35px,22px) scale(1.06);border-radius:54% 46% 52% 48%}
+    28%{transform:translate(20px,30px) scale(.95);border-radius:46% 54% 48% 52%}
+    40%{transform:translate(-25px,-18px) scale(1.08);border-radius:52% 48% 54% 46%}
+    52%{transform:translate(32px,12px) scale(.93);border-radius:48% 52% 50% 50%}
+    64%{transform:translate(-18px,-28px) scale(1.05);border-radius:50% 50% 46% 54%}
+    76%{transform:translate(15px,25px) scale(.97);border-radius:54% 46% 52% 48%}
+    88%{transform:translate(-22px,10px) scale(1.03);border-radius:46% 54% 48% 52%}
+    100%{transform:translate(0,0) scale(1);border-radius:50%}
+  }
+
+  /* 4. 螺旋旋转 — 快速旋转 + 拉伸 */
+  .orb.think-spiral{background:linear-gradient(135deg,var(--c-think),var(--c-idle));box-shadow:0 0 70px color-mix(in srgb,var(--c-think) 40%,transparent);animation:orb-spiral 1.2s linear infinite}
+  @keyframes orb-spiral{
+    0%{transform:rotate(0deg) scale(1);border-radius:50%}
+    25%{transform:rotate(90deg) scale(1.08);border-radius:55% 45% 55% 45%}
+    50%{transform:rotate(180deg) scale(1);border-radius:50%}
+    75%{transform:rotate(270deg) scale(1.08);border-radius:45% 55% 45% 55%}
+    100%{transform:rotate(360deg) scale(1);border-radius:50%}
+  }
+
+  /* 5. 脉冲波纹 — 同心圆扩散 */
+  .orb.think-pulse{background:var(--c-think);box-shadow:0 0 40px color-mix(in srgb,var(--c-think) 50%,transparent);animation:orb-pulse-t 1.8s ease-out infinite}
+  @keyframes orb-pulse-t{
+    0%{transform:scale(.85);opacity:.9;box-shadow:0 0 40px color-mix(in srgb,var(--c-think) 50%,transparent)}
+    30%{transform:scale(1.15);opacity:1;box-shadow:0 0 80px color-mix(in srgb,var(--c-think) 70%,transparent),0 0 120px color-mix(in srgb,var(--c-think) 20%,transparent)}
+    60%{transform:scale(.95);opacity:.85;box-shadow:0 0 50px color-mix(in srgb,var(--c-think) 40%,transparent)}
+    80%{transform:scale(1.08);opacity:.95;box-shadow:0 0 70px color-mix(in srgb,var(--c-think) 60%,transparent)}
+    100%{transform:scale(.85);opacity:.9;box-shadow:0 0 40px color-mix(in srgb,var(--c-think) 50%,transparent)}
+  }
+
+  /* Shared think ring behavior */
+  .orb[class*="think"]~.ring{opacity:1;animation:think-ring 2s ease-out infinite;border-color:color-mix(in srgb,var(--c-think) 20%,transparent)}
+  .orb[class*="think"]~.ring:nth-child(3){animation-delay:.6s}
+  .orb[class*="think"]~.ring:nth-child(4){animation-delay:1.2s}
+  @keyframes think-ring{0%{transform:scale(.9);opacity:.4}100%{transform:scale(1.2);opacity:0}}
+
   /* ═══ SPEAKING ball ═══ */
-  .orb.speak-ball{background:#6C5CE7;box-shadow:0 0 80px rgba(108,92,231,.5)}
+  .orb.speak-ball{background:var(--c-speak);box-shadow:0 0 80px color-mix(in srgb,var(--c-speak) 50%,transparent)}
   .orb.speak-ball~.ring{opacity:1;animation:sp-ring-pulse 1.8s ease-out infinite}
   .ring:nth-child(3){animation-delay:.5s}.ring:nth-child(4){animation-delay:1s}
   @keyframes sp-ring-pulse{0%{transform:scale(.85);opacity:.5}100%{transform:scale(1.15);opacity:0}}
@@ -58,77 +172,81 @@
   #waveCanvas.on{opacity:1}
 
   /* ── Status ── */
-  .status{margin-top:32px;font-size:15px;color:rgba(255,255,255,.5);min-height:22px;transition:color .3s;text-align:center;padding:0 20px}
-  .status.on{color:rgba(255,255,255,.85)}
-  .hint{position:fixed;bottom:120px;font-size:13px;color:rgba(255,255,255,.3);animation:fade-pulse 3s ease-in-out infinite}
+  .status{margin-top:32px;font-size:15px;color:var(--text2);min-height:22px;transition:color .3s;text-align:center;padding:0 20px}
+  .status.on{color:var(--text)}
+  .hint{position:fixed;bottom:120px;font-size:13px;color:var(--text3);animation:fade-pulse 3s ease-in-out infinite}
   @keyframes fade-pulse{0%,100%{opacity:.3}50%{opacity:.7}}
 
   /* ── Buttons ── */
   .ctrl{position:fixed;bottom:max(40px,env(safe-area-inset-bottom));left:0;right:0;display:flex;align-items:center;justify-content:center;gap:32px;z-index:10}
-  .btn{width:56px;height:56px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);backdrop-filter:blur(10px);transition:all .25s}
-  .btn:hover{background:rgba(255,255,255,.14);color:#fff}.btn:active{transform:scale(.92)}
+  .btn{width:56px;height:56px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--btn-bg);color:var(--text2);backdrop-filter:blur(10px);transition:all .25s}
+  .btn:hover{background:var(--btn-hover);color:var(--text)}.btn:active{transform:scale(.92)}
   .btn svg{width:24px;height:24px;fill:currentColor}
   .btn.stop{background:rgba(255,107,107,.15);color:var(--danger)}.btn.stop:hover{background:rgba(255,107,107,.3)}
   .btn.hidden{display:none}
   .pause-wrap{position:fixed;bottom:max(40px,env(safe-area-inset-bottom));left:max(24px,env(safe-area-inset-left));z-index:10}
 
   /* ── Settings ── */
-  .gear{position:fixed;top:max(16px,env(safe-area-inset-top));right:max(16px,env(safe-area-inset-right));z-index:20;width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(10px);transition:all .25s}
-  .gear:hover{background:rgba(255,255,255,.12);color:#fff}
+  .gear{position:fixed;top:max(16px,env(safe-area-inset-top));right:max(16px,env(safe-area-inset-right));z-index:20;width:44px;height:44px;border-radius:50%;border:none;background:var(--btn-bg);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(10px);transition:all .25s}
+  .gear:hover{background:var(--btn-hover);color:var(--text)}
   .gear svg{width:22px;height:22px;fill:currentColor}
 
-  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(16px);z-index:100;display:none;align-items:center;justify-content:center}
+  .overlay{position:fixed;inset:0;background:var(--overlay-bg);backdrop-filter:blur(16px);z-index:100;display:none;align-items:center;justify-content:center}
   .overlay.show{display:flex}
-  .panel{background:rgba(30,30,40,.95);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px;width:min(440px,92vw);max-height:90vh;overflow-y:auto}
+  .panel{background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:20px;padding:28px;width:min(440px,92vw);max-height:90vh;overflow-y:auto}
   .panel h2{font-size:20px;font-weight:600;margin-bottom:24px}
-  .panel h3{font-size:15px;font-weight:600;margin:24px 0 12px;color:rgba(255,255,255,.6)}
+  .panel h3{font-size:15px;font-weight:600;margin:24px 0 12px;color:var(--text2)}
   .field{margin-bottom:18px}
-  .field label{display:block;font-size:13px;color:rgba(255,255,255,.5);margin-bottom:6px;font-weight:500}
-  .field input,.field select,.field textarea{width:100%;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#fff;font-size:14px;outline:none}
+  .field label{display:block;font-size:13px;color:var(--text2);margin-bottom:6px;font-weight:500}
+  .field input,.field select,.field textarea{width:100%;padding:12px 14px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:10px;color:var(--text);font-size:14px;outline:none}
+  .field select option{background:var(--panel-bg);color:var(--text)}
   .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
   .field textarea{resize:vertical;min-height:60px}
-  .field .hint{font-size:11px;color:rgba(255,255,255,.3);margin-top:4px}
+  .field .hint{font-size:11px;color:var(--text3);margin-top:4px}
   .sactions{display:flex;gap:12px;margin-top:24px}
   .sactions button{flex:1;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer}
   .bsave{background:var(--accent);color:#fff}.bsave:hover{background:#5a4bd1}
-  .bcancel{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7)}
+
+  /* Color grid */
+  .color-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+  .color-cell{display:flex;flex-direction:column;align-items:center;gap:6px}
+  .color-cell label{font-size:12px;color:var(--text2);font-weight:500}
+  .color-cell input[type="color"]{width:40px;height:40px;border:none;border-radius:12px;cursor:pointer;background:none;padding:0}
+  .color-cell input[type="color"]::-webkit-color-swatch-wrapper{padding:2px}
+  .color-cell input[type="color"]::-webkit-color-swatch{border-radius:8px;border:2px solid var(--input-border)}
+  .bcancel{background:var(--btn-bg);color:var(--text2)}
 
   /* Chat log */
   .log{max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
-  .log::-webkit-scrollbar{width:4px}.log::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px}
+  .log::-webkit-scrollbar{width:4px}.log::-webkit-scrollbar-thumb{background:var(--input-border);border-radius:4px}
   .msg{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6;word-break:break-word;white-space:pre-wrap}
-  .msg.u{background:rgba(108,92,231,.2);border:1px solid rgba(108,92,231,.25);align-self:flex-end;max-width:85%;color:rgba(255,255,255,.9)}
+  .msg.u{background:color-mix(in srgb,var(--accent) 20%,transparent);border:1px solid color-mix(in srgb,var(--accent) 25%,transparent);align-self:flex-end;max-width:85%;color:var(--text)}
   .msg.u::before{content:'你';display:block;font-size:11px;font-weight:600;color:var(--accent2);margin-bottom:4px}
-  .msg.a{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);align-self:flex-start;max-width:85%;color:rgba(255,255,255,.85)}
+  .msg.a{background:var(--btn-bg);border:1px solid var(--input-border);align-self:flex-start;max-width:85%;color:var(--text)}
   .msg.a::before{content:'MiMo';display:block;font-size:11px;font-weight:600;color:#ffeaa7;margin-bottom:4px}
-  .empty{text-align:center;color:rgba(255,255,255,.25);font-size:13px;padding:24px 0}
+  .empty{text-align:center;color:var(--text3);font-size:13px;padding:24px 0}
   .clearbtn{display:block;margin:12px auto 0;padding:8px 20px;background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.2);border-radius:8px;color:var(--danger);font-size:12px;cursor:pointer}
   .clearbtn:hover{background:rgba(255,107,107,.2)}.clearbtn.hid{display:none}
   .membtn{border-color:rgba(253,203,110,.3);color:#fdcb6e;background:rgba(253,203,110,.08)}
   .membtn:hover{background:rgba(253,203,110,.15)}
 
   /* Text input */
-  .textbar{position:fixed;bottom:0;left:0;right:0;padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));background:rgba(20,20,30,.95);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;z-index:20;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+  .textbar{position:fixed;bottom:0;left:0;right:0;padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));background:var(--bar-bg);backdrop-filter:blur(20px);border-top:1px solid var(--bar-border);display:flex;align-items:center;gap:10px;z-index:20;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
   .textbar.show{transform:translateY(0)}
-  .textbar input{flex:1;padding:12px 16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:24px;color:#fff;font-size:15px;outline:none}
+  .textbar input{flex:1;padding:12px 16px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:24px;color:var(--text);font-size:15px;outline:none}
   .textbar input:focus{border-color:var(--accent)}
-  .textbar input::placeholder{color:rgba(255,255,255,.3)}
+  .textbar input::placeholder{color:var(--text3)}
   .sendbtn{width:44px;height:44px;border-radius:50%;border:none;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
   .sendbtn:hover{background:#5a4bd1}.sendbtn:active{transform:scale(.9)}
   .sendbtn svg{width:20px;height:20px;fill:currentColor}
   .sendbtn:disabled{opacity:.3}
 
   /* Badge */
-  .stt-badge{position:fixed;top:max(16px,env(safe-area-inset-top));left:max(16px,env(safe-area-inset-left));z-index:20;font-size:11px;padding:4px 10px;border-radius:12px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);backdrop-filter:blur(10px)}
+  .stt-badge{position:fixed;top:max(16px,env(safe-area-inset-top));left:max(16px,env(safe-area-inset-left));z-index:20;font-size:11px;padding:4px 10px;border-radius:12px;background:var(--btn-bg);color:var(--text2);backdrop-filter:blur(10px)}
   .stt-badge.ready{color:rgba(118,255,133,.7)}
 
-  /* Mic level bar */
-  .mic-level{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:60%;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;opacity:0;transition:opacity .3s}
-  .mic-level.on{opacity:1}
-  .mic-level-fill{height:100%;width:0%;background:#ff6348;border-radius:2px;transition:width .1s}
-
   /* Toast */
-  .toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.85);color:#fff;padding:12px 24px;border-radius:12px;font-size:14px;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;text-align:center;max-width:80vw}
+  .toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:color-mix(in srgb,var(--bg) 85%,white);color:var(--text);padding:12px 24px;border-radius:12px;font-size:14px;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;text-align:center;max-width:80vw}
   .toast.show{opacity:1}
 </style>
 </head>
@@ -177,7 +295,19 @@
     <div class="field"><label>Chat 模型 (Flash)</label><input type="text" id="inChat" placeholder="mimo-v2-flash"></div>
     <div class="field"><label>TTS 模型</label><input type="text" id="inTts" placeholder="mimo-v2-tts"></div>
     <div class="field"><label>API Endpoint</label><input type="text" id="inEp" placeholder="https://api.xiaomimimo.com/v1/chat/completions"><div class="hint">如果跨域报错，可填本地代理地址</div></div>
+    <h3>🎨 外观</h3>
+    <div class="field"><label>主题</label><select id="inTheme">
+      <option value="dark">深色 🌙</option>
+      <option value="light">浅色 ☀️</option>
+    </select></div>
+    <div class="color-grid">
+      <div class="color-cell"><label>待机</label><input type="color" id="cIdle" value="#6C5CE7"></div>
+      <div class="color-cell"><label>聆听</label><input type="color" id="cListen" value="#ff6348"></div>
+      <div class="color-cell"><label>思考</label><input type="color" id="cThink" value="#fdcb6e"></div>
+      <div class="color-cell"><label>说话</label><input type="color" id="cSpeak" value="#6C5CE7"></div>
+    </div>
     <div class="field"><label>音色</label><select id="inVoice"><option value="mimo_default">MiMo-默认</option><option value="default_zh">MiMo-中文女声</option><option value="default_en">MiMo-英文女声</option></select></div>
+    <div class="field"><label>思考动画</label><select id="inThink"><option value="morph">原始变形</option><option value="cloud">思考云朵 ☁️</option><option value="bounce">到处乱撞 💥</option><option value="spiral">螺旋旋转 🌀</option><option value="pulse">脉冲波纹 💫</option></select></div>
     <div class="field"><label>说话可视化</label><select id="inVis"><option value="bars">音符跳动</option><option value="ball">圆球脉动</option></select></div>
     <div class="field"><label>全局语音风格 (留空由模型决定)</label><textarea id="inStyle" placeholder="开心 / 东北话 / 悄悄话" rows="2"></textarea></div>
     <div class="field"><label>系统提示词</label><textarea id="inSys" rows="8"></textarea></div>
@@ -236,10 +366,47 @@ const S={
   vis:localStorage.getItem('mvs')||'bars',
   style:localStorage.getItem('mst')||'',
   sys:localStorage.getItem('msp')||SYS,
+  thinkStyle:localStorage.getItem('mth')||'morph',
+  theme:localStorage.getItem('mt')||'dark',
+  colors:{
+    idle:localStorage.getItem('mc_idle')||'#6C5CE7',
+    listen:localStorage.getItem('mc_listen')||'#ff6348',
+    think:localStorage.getItem('mc_think')||'#fdcb6e',
+    speak:localStorage.getItem('mc_speak')||'#6C5CE7',
+  },
   mem:JSON.parse(localStorage.getItem('mm')||'[]'),
   msgs:JSON.parse(localStorage.getItem('mmg')||'[]'),
   state:'idle',abort:null
 };
+
+// ── Theme & Colors ──
+const themes={
+  dark:{bg:'#0a0a0f',text:'#fff',text2:'rgba(255,255,255,.5)',text3:'rgba(255,255,255,.3)',
+    panelBg:'rgba(30,30,40,.95)',panelBorder:'rgba(255,255,255,.1)',
+    inputBg:'rgba(255,255,255,.06)',inputBorder:'rgba(255,255,255,.1)',
+    btnBg:'rgba(255,255,255,.08)',btnHover:'rgba(255,255,255,.14)',
+    overlayBg:'rgba(0,0,0,.7)',barBg:'rgba(20,20,30,.95)',barBorder:'rgba(255,255,255,.08)'},
+  light:{bg:'#f0f0f5',text:'#1a1a2e',text2:'rgba(26,26,46,.5)',text3:'rgba(26,26,46,.3)',
+    panelBg:'rgba(255,255,255,.95)',panelBorder:'rgba(0,0,0,.1)',
+    inputBg:'rgba(0,0,0,.04)',inputBorder:'rgba(0,0,0,.12)',
+    btnBg:'rgba(0,0,0,.06)',btnHover:'rgba(0,0,0,.1)',
+    overlayBg:'rgba(255,255,255,.7)',barBg:'rgba(245,245,250,.95)',barBorder:'rgba(0,0,0,.08)'},
+};
+function applyTheme(){
+  const t=themes[S.theme]||themes.dark;
+  const r=document.documentElement.style;
+  const c=S.colors;
+  r.setProperty('--bg',t.bg);r.setProperty('--text',t.text);r.setProperty('--text2',t.text2);r.setProperty('--text3',t.text3);
+  r.setProperty('--panel-bg',t.panelBg);r.setProperty('--panel-border',t.panelBorder);
+  r.setProperty('--input-bg',t.inputBg);r.setProperty('--input-border',t.inputBorder);
+  r.setProperty('--btn-bg',t.btnBg);r.setProperty('--btn-hover',t.btnHover);
+  r.setProperty('--overlay-bg',t.overlayBg);r.setProperty('--bar-bg',t.barBg);r.setProperty('--bar-border',t.barBorder);
+  r.setProperty('--c-idle',c.idle);r.setProperty('--c-listen',c.listen);r.setProperty('--c-think',c.think);r.setProperty('--c-speak',c.speak);
+  r.setProperty('--accent',c.idle);
+  // accent2 is a lighter version of idle
+  r.setProperty('--accent2',c.idle+'aa');
+}
+applyTheme();
 
 // ── DOM ──
 const $=id=>document.getElementById(id);
@@ -263,7 +430,7 @@ function setSt(s){
   switch(s){
     case'idle':orb.classList.add('idle');break;
     case'listening':orb.classList.add('listen');stopBtn.classList.remove('hidden');micLevel.classList.add('on');setStatus('正在听…',1);break;
-    case'thinking':orb.classList.add('think');stopBtn.classList.remove('hidden');setStatus('正在思考…',1);break;
+    case'thinking':orb.classList.add('think-'+S.thinkStyle);stopBtn.classList.remove('hidden');setStatus('正在思考…',1);break;
     case'speaking':
       stopBtn.classList.remove('hidden');setStatus('正在说话…',1);
       if(S.vis==='ball')orb.classList.add('speak-ball');
@@ -275,7 +442,7 @@ function setStatus(t,a){statusEl.textContent=t;statusEl.classList.toggle('on',!!
 
 // ── Audio + Analyser ──
 let audioCtx=null,analyser=null,sourceNode=null;
-let _playToken=0,_visRaf=null;
+let _playToken=0,_visRaf=null,_turnToken=0;
 
 function ensureAudioCtx(){
   if(!audioCtx||audioCtx.state==='closed'){
@@ -307,6 +474,7 @@ function playWav(bytes){
 }
 
 function stopAll(){
+  _turnToken++; // Invalidate all pending async callbacks
   S.abort&&S.abort.abort();S.abort=null;
   stopRecording();
   _playToken++;stopVis();
@@ -321,7 +489,13 @@ function stopAll(){
 
 // ── Visualization ──
 function startVis(token){S.vis==='ball'?startBallVis(token):startBarsVis(token)}
-function stopVis(){if(_visRaf){cancelAnimationFrame(_visRaf);_visRaf=null}cCtx.clearRect(0,0,canvas.width,canvas.height)}
+function stopVis(){
+  if(_visRaf){cancelAnimationFrame(_visRaf);_visRaf=null}
+  cCtx.clearRect(0,0,canvas.width,canvas.height);
+  // Smoothly clear inline styles instead of snapping
+  orb.style.transition='background .6s ease,border-radius .8s ease,transform .6s ease,box-shadow .6s ease';
+  orb.style.transform='';orb.style.boxShadow='';
+}
 
 function startBallVis(token){
   const data=new Uint8Array(analyser.frequencyBinCount);let smooth=1;
@@ -331,7 +505,8 @@ function startBallVis(token){
     let sum=0;for(let i=0;i<data.length;i++){const v=(data[i]-128)/128;sum+=v*v}
     const rms=Math.sqrt(sum/data.length),target=1+rms*1.8;
     smooth+=(target-smooth)*0.25;orb.style.transform=`scale(${smooth})`;
-    orb.style.boxShadow=`0 0 ${60+rms*120}px rgba(108,92,231,${.35+rms*.5}),inset 0 -6px 16px rgba(0,0,0,.3),inset 0 3px 10px rgba(255,255,255,.15)`;
+    const cSpeak=getComputedStyle(orb).getPropertyValue('--c-speak').trim()||'#6C5CE7';
+    orb.style.boxShadow=`0 0 ${60+rms*120}px color-mix(in srgb,${cSpeak} ${Math.round(35+rms*50)}%,transparent),inset 0 -6px 16px rgba(0,0,0,.3),inset 0 3px 10px rgba(255,255,255,.15)`;
     _visRaf=requestAnimationFrame(loop);
   }loop();
 }
@@ -354,7 +529,7 @@ function startBarsVis(token){
       if(val>.15){cCtx.beginPath();cCtx.arc(x2,y2,1.5+val*2,0,Math.PI*2);cCtx.fillStyle=`rgba(180,170,255,${val*.7})`;cCtx.fill()}
     }
     let rms=0;for(let i=0;i<smoothBars.length;i++)rms+=smoothBars[i];rms/=smoothBars.length;
-    if(rms>.05){const g=cCtx.createRadialGradient(cx,cy,baseR*.3,cx,cy,baseR*.9);g.addColorStop(0,`rgba(108,92,231,${rms*.2})`);g.addColorStop(1,'rgba(108,92,231,0)');cCtx.fillStyle=g;cCtx.fillRect(0,0,w,h)}
+    if(rms>.05){const cAccent=getComputedStyle(orb).getPropertyValue('--accent').trim()||'#6C5CE7';const g=cCtx.createRadialGradient(cx,cy,baseR*.3,cx,cy,baseR*.9);g.addColorStop(0,`color-mix(in srgb,${cAccent} ${Math.round(rms*20)}%,transparent)`);g.addColorStop(1,'transparent');cCtx.fillStyle=g;cCtx.fillRect(0,0,w,h)}
     _visRaf=requestAnimationFrame(loop);
   }loop();
 }
@@ -363,7 +538,8 @@ function startBarsVis(token){
 $('gearBtn').onclick=()=>{
   $('inKey').value=S.key;$('inOmni').value=S.omniM;$('inChat').value=S.chatM;$('inTts').value=S.ttsM;
   $('inEp').value=S.ep;
-  $('inVoice').value=S.voice;$('inVis').value=S.vis;$('inStyle').value=S.style;$('inSys').value=S.sys;
+  $('inVoice').value=S.voice;$('inVis').value=S.vis;$('inThink').value=S.thinkStyle;$('inStyle').value=S.style;$('inSys').value=S.sys;
+  $('inTheme').value=S.theme;$('cIdle').value=S.colors.idle;$('cListen').value=S.colors.listen;$('cThink').value=S.colors.think;$('cSpeak').value=S.colors.speak;
   renderLog();renderMem();overlay.classList.add('show');
 };
 $('btnCancel').onclick=()=>overlay.classList.remove('show');
@@ -374,12 +550,18 @@ $('btnSave').onclick=()=>{
   S.chatM=$('inChat').value.trim()||'mimo-v2-flash';
   S.ttsM=$('inTts').value.trim()||'mimo-v2-tts';
   S.ep=$('inEp').value.trim()||S.ep;
-  S.voice=$('inVoice').value;S.vis=$('inVis').value;S.style=$('inStyle').value.trim();
+  S.voice=$('inVoice').value;S.vis=$('inVis').value;S.thinkStyle=$('inThink').value;S.style=$('inStyle').value.trim();
   S.sys=$('inSys').value.trim()||SYS;
+  S.theme=$('inTheme').value;
+  S.colors.idle=$('cIdle').value;S.colors.listen=$('cListen').value;S.colors.think=$('cThink').value;S.colors.speak=$('cSpeak').value;
   localStorage.setItem('mk',S.key);localStorage.setItem('mom',S.omniM);
   localStorage.setItem('mcm',S.chatM);localStorage.setItem('mtm',S.ttsM);
   localStorage.setItem('mep',S.ep);localStorage.setItem('mv',S.voice);localStorage.setItem('mvs',S.vis);
-  localStorage.setItem('mst',S.style);localStorage.setItem('msp',S.sys);
+  localStorage.setItem('mth',S.thinkStyle);localStorage.setItem('mst',S.style);localStorage.setItem('msp',S.sys);
+  localStorage.setItem('mt',S.theme);
+  localStorage.setItem('mc_idle',S.colors.idle);localStorage.setItem('mc_listen',S.colors.listen);
+  localStorage.setItem('mc_think',S.colors.think);localStorage.setItem('mc_speak',S.colors.speak);
+  applyTheme();
   overlay.classList.remove('show');
 };
 
@@ -522,12 +704,13 @@ function startVadMonitor(stream){
       const target=1+rms*3.5;
       micSmoothedScale+=(target-micSmoothedScale)*.28;
       orb.style.transform=`scale(${micSmoothedScale})`;
+      const cListen=getComputedStyle(orb).getPropertyValue('--c-listen').trim()||'#ff6348';
       const glow=50+rms*200;
-      orb.style.boxShadow=`0 0 ${glow}px rgba(255,99,72,${.35+rms*.5}),inset 0 -4px 12px rgba(0,0,0,.25),inset 0 2px 8px rgba(255,255,255,.1)`;
+      orb.style.boxShadow=`0 0 ${glow}px color-mix(in srgb,${cListen} ${Math.round(35+rms*50)}%,transparent),inset 0 -4px 12px rgba(0,0,0,.25),inset 0 2px 8px rgba(255,255,255,.1)`;
       if(rms>.02){
         rings.forEach((r,i)=>{
           r.style.opacity='1';r.style.animation=`ring-voice ${.4+rms*.6}s ease-out ${i*.15}s infinite`;
-          r.style.borderColor=`rgba(255,99,72,${.15+rms*.4})`;
+          r.style.borderColor=`color-mix(in srgb,${cListen} ${Math.round(15+rms*40)}%,transparent)`;
         });
       }else{rings.forEach(r=>{r.style.opacity='0';r.style.animation=''})}
       micLevelFill.style.width=Math.min(100,rms*350)+'%';
@@ -542,6 +725,8 @@ function stopVadMonitor(){
   if(vadNoSpeechTimer){clearTimeout(vadNoSpeechTimer);vadNoSpeechTimer=null}
   if(vadCtx){try{vadCtx.close()}catch(e){}}vadCtx=null;vadAnalyser=null;
   micLevelFill.style.width='0%';micSmoothedScale=1;
+  // Smoothly clear inline styles
+  orb.style.transition='background .6s ease,border-radius .8s ease,transform .6s ease,box-shadow .6s ease';
   orb.style.transform='';orb.style.boxShadow='';
   document.querySelectorAll('.ring').forEach(r=>{r.style.opacity='';r.style.animation='';r.style.borderColor=''});
 }
@@ -597,6 +782,7 @@ function ws(v,o,s){for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))}
  */
 async function recognizeWithOmni(blob){
   if(!S.key){$('gearBtn').click();setSt('idle');return}
+  const turn=_turnToken;
   setSt('thinking');
   setStatus('正在识别语音…');
 
@@ -633,19 +819,22 @@ async function recognizeWithOmni(blob){
     if(d.error)throw new Error('Omni: '+JSON.stringify(d.error).slice(0,200));
     const text=(d.choices?.[0]?.message?.content||'').trim();
 
+    if(turn!==_turnToken)return; // Stopped
     if(!text){setStatus('未识别到内容，请重试');setSt('idle');setTimeout(()=>{if(S.state==='idle')setStatus('')},3000);return}
 
     setStatus(`"${text}"`);
-    await correctAndSend(text);
+    await correctAndSend(text,turn);
   }catch(e){
     console.error('Omni STT error:',e);
+    if(turn!==_turnToken)return; // Stopped
     setStatus(`识别出错: ${e.message?.slice(0,80)||'未知错误'}`);
     setSt('idle');setTimeout(()=>{if(S.state==='idle')setStatus('')},5000);
   }
 }
 
 // ── 文本纠错 (Flash, 兜底) ──
-async function correctAndSend(raw){
+async function correctAndSend(raw,turn){
+  if(turn!==_turnToken)return;
   setSt('thinking');
   let fixed=raw;
   try{
@@ -653,6 +842,7 @@ async function correctAndSend(raw){
       body:JSON.stringify({model:S.chatM,messages:[{role:'system',content:'语音识别纠错助手。只返回纠正后的文字，不解释。原文没错就原样返回。'},{role:'user',content:raw}],max_completion_tokens:128,temperature:0,stream:false,thinking:{type:'disabled'}})});
     if(r.ok){const d=await r.json();const c=d.choices?.[0]?.message?.content?.trim();if(c)fixed=c}
   }catch(e){}
+  if(turn!==_turnToken)return;
   if(fixed!==raw)setStatus(`"${raw}" → "${fixed}"`);
   sendChat(fixed);
 }
@@ -662,6 +852,7 @@ async function correctAndSend(raw){
 // ════════════════════════════════════════
 async function sendChat(text){
   setSt('thinking');
+  const turn=_turnToken;
   let sys=S.sys;if(S.mem.length)sys+='\n\n[你的长期记忆]\n'+S.mem.join('\n');
   const msgs=[{role:'system',content:sys},...S.msgs.slice(-80),{role:'user',content:text}];
   S.abort=new AbortController();
@@ -676,10 +867,13 @@ async function sendChat(text){
       for(const l of lines){const t=l.trim();if(!t||!t.startsWith('data: '))continue;const d=t.slice(6);if(d==='[DONE]')continue;
         try{const p=JSON.parse(d);const delta=p.choices?.[0]?.delta?.content;if(delta)reply+=delta}catch(e){}}}
   }catch(e){
-    if(e.name==='AbortError'){setSt('idle');return}
+    if(e.name==='AbortError'){return} // Stop was pressed — don't save, don't change state (stopAll already did)
     setSt('idle');setStatus(e.message.includes('Failed to fetch')?'网络错误（CORS限制，请用代理）':`错误: ${e.message.slice(0,80)}`);
     setTimeout(()=>{if(S.state==='idle')setStatus('')},8000);return;
   }
+  // If stopped while waiting for response, bail out
+  if(turn!==_turnToken)return;
+
   if(!reply.trim()){setSt('idle');setStatus('没有收到回复');setTimeout(()=>{if(S.state==='idle')setStatus('')},5000);return}
 
   S.msgs.push({role:'user',content:text},{role:'assistant',content:reply});
@@ -689,13 +883,14 @@ async function sendChat(text){
   if(mm&&mm[1].trim()!=='无'){S.mem.push(mm[1].trim());localStorage.setItem('mm',JSON.stringify(S.mem))}
 
   const tts=reply.replace(/\n?\[记忆:[^\]]*\]\s*$/g,'');
-  await speakTts(tts);
+  await speakTts(tts,turn);
 }
 
 // ════════════════════════════════════════
 // ── TTS (mimo-v2-tts) ──
 // ════════════════════════════════════════
-async function speakTts(text){
+async function speakTts(text,turn){
+  if(turn!==_turnToken)return; // Already stopped
   const pm=text.match(/^<style>([^<]+)<\/style>\s*/i);
   const style=pm?pm[1].trim():'';
   const clean=pm?text.slice(pm[0].length).trim():text;
@@ -707,6 +902,7 @@ async function speakTts(text){
   try{
     const r=await fetch(S.ep,{method:'POST',headers:{'Content-Type':'application/json','api-key':S.key},
       body:JSON.stringify({model:S.ttsM,messages:[{role:'user',content:clean},{role:'assistant',content}],audio:{format:'wav',voice:S.voice}})});
+    if(turn!==_turnToken)return; // Stopped during fetch
     if(!r.ok){const e=await r.text();throw new Error(`TTS ${r.status}: ${e.slice(0,200)}`)}
     const d=await r.json();if(d.error)throw new Error('TTS: '+JSON.stringify(d.error).slice(0,200));
     const b64=d.choices?.[0]?.message?.audio?.data;if(!b64)throw new Error('TTS: 无音频数据');
@@ -714,16 +910,18 @@ async function speakTts(text){
     const bin=atob(b64);const raw=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)raw[i]=bin.charCodeAt(i);
     const wav=ensureWav(raw);
     const durSec=wav.length/(24000*2);
-    forceIdle=setTimeout(()=>{stopAll();setSt('idle')},Math.max(durSec*1000+2000,5000));
+    forceIdle=setTimeout(()=>{if(turn===_turnToken){stopAll();setSt('idle')}},Math.max(durSec*1000+2000,5000));
     await playWav(wav);
   }catch(e){
     clearTimeout(ttsTimer);
-    if(e.name!=='AbortError')setStatus(`语音错误: ${e.message.slice(0,60)}`);
+    if(e.name!=='AbortError'&&turn===_turnToken)setStatus(`语音错误: ${e.message.slice(0,60)}`);
   }finally{
     if(forceIdle)clearTimeout(forceIdle);
-    stopVis();S.state='idle';orb.className='orb idle';
-    canvas.classList.remove('on');stopBtn.classList.add('hidden');
-    statusEl.textContent='';statusEl.classList.remove('on');
+    // Only clean up if this turn is still active
+    if(turn===_turnToken){
+      stopVis();
+      setSt('idle'); // Use setSt instead of directly manipulating orb class
+    }
   }
 }
 
