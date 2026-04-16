@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -20,13 +21,11 @@
 
   /* ── Orb ── */
   .orb-wrap{position:relative;width:var(--ball);height:var(--ball);display:flex;align-items:center;justify-content:center}
-  .orb{width:100%;height:100%;border-radius:50%;background:var(--c-idle);box-shadow:0 0 60px color-mix(in srgb,var(--c-idle) 35%,transparent);cursor:pointer;will-change:transform,border-radius,background,box-shadow;transition:background .6s ease,border-radius .8s ease,transform .6s ease,box-shadow .6s ease}
+  .orb{width:100%;height:100%;border-radius:50%;background:var(--c-idle);box-shadow:0 0 60px color-mix(in srgb,var(--c-idle) 35%,transparent);cursor:pointer;will-change:transform,border-radius,background,box-shadow;transition:background .5s ease,border-radius .5s ease,transform .5s ease,box-shadow .5s ease}
   .orb:hover{transform:scale(1.04)}.orb:active{transform:scale(.97)}
-  /* Disable transition during active animation so CSS @keyframes have full control */
-  .orb[class*="think"],.orb[class*="speak"],.orb.listen,.orb.loading{transition:none}
 
   /* ── Deco rings ── */
-  .ring{position:absolute;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--c-idle) 20%,transparent);pointer-events:none;opacity:0;transition:opacity .3s}
+  .ring{position:absolute;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--c-idle) 20%,transparent);pointer-events:none;opacity:0;transition:opacity .5s ease,border-color .5s ease,border-width .4s ease}
   .ring:nth-child(2){width:115%;height:115%}.ring:nth-child(3){width:130%;height:130%}.ring:nth-child(4){width:145%;height:145%}
 
   /* ═══ IDLE ═══ */
@@ -289,16 +288,17 @@
 <!-- Settings -->
 <div class="overlay" id="overlay">
   <div class="panel">
-    <h2>⚙️ 设置</h2>
+    <h2>设置</h2>
     <div class="field"><label>API Key</label><input type="password" id="inKey" placeholder="MiMo API Key" autocomplete="off"><div class="hint">platform.xiaomimimo.com 获取</div></div>
     <div class="field"><label>语音识别模型 (Omni)</label><input type="text" id="inOmni" placeholder="mimo-v2-omni"></div>
     <div class="field"><label>Chat 模型 (Flash)</label><input type="text" id="inChat" placeholder="mimo-v2-flash"></div>
     <div class="field"><label>TTS 模型</label><input type="text" id="inTts" placeholder="mimo-v2-tts"></div>
     <div class="field"><label>API Endpoint</label><input type="text" id="inEp" placeholder="https://api.xiaomimimo.com/v1/chat/completions"><div class="hint">如果跨域报错，可填本地代理地址</div></div>
-    <h3>🎨 外观</h3>
+    <h3>外观</h3>
     <div class="field"><label>主题</label><select id="inTheme">
-      <option value="dark">深色 🌙</option>
-      <option value="light">浅色 ☀️</option>
+      <option value="dark">深色</option>
+      <option value="light">浅色</option>
+      <option value="chatgpt">ChatGPT风格</option>
     </select></div>
     <div class="color-grid">
       <div class="color-cell"><label>待机</label><input type="color" id="cIdle" value="#6C5CE7"></div>
@@ -310,7 +310,6 @@
     <div class="field"><label>思考动画</label><select id="inThink"><option value="morph">原始变形</option><option value="cloud">思考云朵 ☁️</option><option value="bounce">到处乱撞 💥</option><option value="spiral">螺旋旋转 🌀</option><option value="pulse">脉冲波纹 💫</option></select></div>
     <div class="field"><label>说话可视化</label><select id="inVis"><option value="bars">音符跳动</option><option value="ball">圆球脉动</option></select></div>
     <div class="field"><label>全局语音风格 (留空由模型决定)</label><textarea id="inStyle" placeholder="开心 / 东北话 / 悄悄话" rows="2"></textarea></div>
-    <div class="field"><label>系统提示词</label><textarea id="inSys" rows="8"></textarea></div>
     <div class="sactions"><button class="bcancel" id="btnCancel">取消</button><button class="bsave" id="btnSave">保存</button></div>
     <h3>对话记录</h3>
     <div class="log" id="chatLog"><div class="empty">暂无对话</div></div>
@@ -365,7 +364,6 @@ const S={
   voice:localStorage.getItem('mv')||'mimo_default',
   vis:localStorage.getItem('mvs')||'bars',
   style:localStorage.getItem('mst')||'',
-  sys:localStorage.getItem('msp')||SYS,
   thinkStyle:localStorage.getItem('mth')||'morph',
   theme:localStorage.getItem('mt')||'dark',
   colors:{
@@ -391,20 +389,29 @@ const themes={
     inputBg:'rgba(0,0,0,.04)',inputBorder:'rgba(0,0,0,.12)',
     btnBg:'rgba(0,0,0,.06)',btnHover:'rgba(0,0,0,.1)',
     overlayBg:'rgba(255,255,255,.7)',barBg:'rgba(245,245,250,.95)',barBorder:'rgba(0,0,0,.08)'},
+  chatgpt:{bg:'#000000',text:'#ececec',text2:'rgba(236,236,236,.5)',text3:'rgba(236,236,236,.3)',
+    panelBg:'rgba(17,17,17,.97)',panelBorder:'rgba(255,255,255,.08)',
+    inputBg:'rgba(255,255,255,.07)',inputBorder:'rgba(255,255,255,.12)',
+    btnBg:'rgba(255,255,255,.07)',btnHover:'rgba(255,255,255,.12)',
+    overlayBg:'rgba(0,0,0,.8)',barBg:'rgba(10,10,10,.97)',barBorder:'rgba(255,255,255,.06)'},
 };
 function applyTheme(){
   const t=themes[S.theme]||themes.dark;
   const r=document.documentElement.style;
   const c=S.colors;
+  // ChatGPT theme overrides orb colors
+  const isCGT=S.theme==='chatgpt';
   r.setProperty('--bg',t.bg);r.setProperty('--text',t.text);r.setProperty('--text2',t.text2);r.setProperty('--text3',t.text3);
   r.setProperty('--panel-bg',t.panelBg);r.setProperty('--panel-border',t.panelBorder);
   r.setProperty('--input-bg',t.inputBg);r.setProperty('--input-border',t.inputBorder);
   r.setProperty('--btn-bg',t.btnBg);r.setProperty('--btn-hover',t.btnHover);
   r.setProperty('--overlay-bg',t.overlayBg);r.setProperty('--bar-bg',t.barBg);r.setProperty('--bar-border',t.barBorder);
-  r.setProperty('--c-idle',c.idle);r.setProperty('--c-listen',c.listen);r.setProperty('--c-think',c.think);r.setProperty('--c-speak',c.speak);
-  r.setProperty('--accent',c.idle);
-  // accent2 is a lighter version of idle
-  r.setProperty('--accent2',c.idle+'aa');
+  r.setProperty('--c-idle',isCGT?'#10A37F':c.idle);
+  r.setProperty('--c-listen',isCGT?'#ef4444':c.listen);
+  r.setProperty('--c-think',isCGT?'#f59e0b':c.think);
+  r.setProperty('--c-speak',isCGT?'#10A37F':c.speak);
+  r.setProperty('--accent',isCGT?'#10A37F':c.idle);
+  r.setProperty('--accent2',(isCGT?'#10A37F':c.idle)+'aa');
 }
 applyTheme();
 
@@ -420,7 +427,10 @@ const canvas=$('waveCanvas'),cCtx=canvas.getContext('2d');
 function showToast(msg,dur=2500){toastEl.textContent=msg;toastEl.classList.add('show');setTimeout(()=>toastEl.classList.remove('show'),dur)}
 
 // ── State machine ──
+let _prevState='idle';
 function setSt(s){
+  const changing=s!==_prevState;
+  _prevState=s;
   S.state=s;
   orb.className='orb';
   canvas.classList.remove('on');
@@ -538,7 +548,7 @@ function startBarsVis(token){
 $('gearBtn').onclick=()=>{
   $('inKey').value=S.key;$('inOmni').value=S.omniM;$('inChat').value=S.chatM;$('inTts').value=S.ttsM;
   $('inEp').value=S.ep;
-  $('inVoice').value=S.voice;$('inVis').value=S.vis;$('inThink').value=S.thinkStyle;$('inStyle').value=S.style;$('inSys').value=S.sys;
+  $('inVoice').value=S.voice;$('inVis').value=S.vis;$('inThink').value=S.thinkStyle;$('inStyle').value=S.style;
   $('inTheme').value=S.theme;$('cIdle').value=S.colors.idle;$('cListen').value=S.colors.listen;$('cThink').value=S.colors.think;$('cSpeak').value=S.colors.speak;
   renderLog();renderMem();overlay.classList.add('show');
 };
@@ -551,13 +561,12 @@ $('btnSave').onclick=()=>{
   S.ttsM=$('inTts').value.trim()||'mimo-v2-tts';
   S.ep=$('inEp').value.trim()||S.ep;
   S.voice=$('inVoice').value;S.vis=$('inVis').value;S.thinkStyle=$('inThink').value;S.style=$('inStyle').value.trim();
-  S.sys=$('inSys').value.trim()||SYS;
   S.theme=$('inTheme').value;
   S.colors.idle=$('cIdle').value;S.colors.listen=$('cListen').value;S.colors.think=$('cThink').value;S.colors.speak=$('cSpeak').value;
   localStorage.setItem('mk',S.key);localStorage.setItem('mom',S.omniM);
   localStorage.setItem('mcm',S.chatM);localStorage.setItem('mtm',S.ttsM);
   localStorage.setItem('mep',S.ep);localStorage.setItem('mv',S.voice);localStorage.setItem('mvs',S.vis);
-  localStorage.setItem('mth',S.thinkStyle);localStorage.setItem('mst',S.style);localStorage.setItem('msp',S.sys);
+  localStorage.setItem('mth',S.thinkStyle);localStorage.setItem('mst',S.style);
   localStorage.setItem('mt',S.theme);
   localStorage.setItem('mc_idle',S.colors.idle);localStorage.setItem('mc_listen',S.colors.listen);
   localStorage.setItem('mc_think',S.colors.think);localStorage.setItem('mc_speak',S.colors.speak);
@@ -585,10 +594,13 @@ $('btnClearMem').onclick=()=>{S.mem=[];localStorage.setItem('mm','[]');renderMem
 $('btnClearAll').onclick=()=>{if(!confirm('确定忘记所有？'))return;S.msgs=[];S.mem=[];localStorage.setItem('mmg','[]');localStorage.setItem('mm','[]');renderLog();renderMem()};
 
 // ════════════════════════════════════════
-// ── MediaRecorder + VAD (语音活动检测) ──
+// ── 直接 PCM 录音 + VAD (语音活动检测) ──
+// 完全绕过 MediaRecorder / decodeAudioData，兼容所有浏览器（含移动 Edge）
 // ════════════════════════════════════════
-let mediaStream=null,mediaRecorder=null,recordedChunks=[];
-let vadRaf=null,vadCtx=null,vadAnalyser=null;
+const REC_SAMPLE_RATE=16000;       // 采样率 16kHz（MiMo 要求）
+let recStream=null, recAudioCtx=null, recSource=null, recProcessor=null;
+let pcmChunks=[];                  // Float32Array[] 累积原始 PCM
+let vadRaf=null, vadCtx=null, vadAnalyser=null;
 
 // VAD 参数
 const VAD_SPEECH_THRESHOLD=0.02;   // RMS 高于此值视为"有声音"
@@ -603,8 +615,8 @@ let vadSpeechFrameCount=0;         // 连续语音帧计数
 
 async function startRecording(){
   try{
-    mediaStream=await navigator.mediaDevices.getUserMedia({
-      audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}
+    recStream=await navigator.mediaDevices.getUserMedia({
+      audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,sampleRate:REC_SAMPLE_RATE}
     });
   }catch(e){
     if(e.name==='NotAllowedError'||e.name==='PermissionDeniedError'){
@@ -612,36 +624,78 @@ async function startRecording(){
     }else{setStatus('无法访问麦克风: '+e.message);showToast('麦克风访问失败',2500)}
     setSt('idle');return false;
   }
-  recordedChunks=[];
-  const mime=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus'
-    :MediaRecorder.isTypeSupported('audio/webm')?'audio/webm'
-    :MediaRecorder.isTypeSupported('audio/mp4')?'audio/mp4':'';
-  try{mediaRecorder=new MediaRecorder(mediaStream,mime?{mimeType:mime}:{})}
-  catch(e){mediaRecorder=new MediaRecorder(mediaStream)}
+  pcmChunks=[];
 
-  mediaRecorder.ondataavailable=e=>{if(e.data.size>0)recordedChunks.push(e.data)};
-  mediaRecorder.onstop=async()=>{
-    if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null}
-    stopVadMonitor();
-    if(!recordedChunks.length||!vadSpeechStarted){
-      // 没录到有效语音
-      setSt('idle');setStatus('');return;
-    }
-    const blob=new Blob(recordedChunks,{type:mediaRecorder.mimeType||'audio/webm'});
-    recordedChunks=[];
-    await recognizeWithOmni(blob);
-  };
-  mediaRecorder.start(100);
+  try{
+    recAudioCtx=new(window.AudioContext||window.webkitAudioContext)({sampleRate:REC_SAMPLE_RATE});
+    recSource=recAudioCtx.createMediaStreamSource(recStream);
+    // ScriptProcessorNode 直接拿 PCM（AudioWorklet 更好但兼容性差）
+    const bufSize=4096;
+    recProcessor=recAudioCtx.createScriptProcessor(bufSize,1,1);
+    recProcessor.onaudioprocess=e=>{
+      const ch=e.inputBuffer.getChannelData(0);
+      pcmChunks.push(new Float32Array(ch)); // 拷贝一份
+    };
+    recSource.connect(recProcessor);
+    recProcessor.connect(recAudioCtx.destination);
+  }catch(e){
+    setStatus('音频初始化失败: '+e.message);
+    stopRecording();setSt('idle');return false;
+  }
+
   setSt('listening');
   setStatus('请说话…',1);
-  startVadMonitor(mediaStream);
+  startVadMonitor(recStream);
   return true;
 }
 
 function stopRecording(){
-  if(mediaRecorder&&mediaRecorder.state==='recording')mediaRecorder.stop();
-  if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null}
+  // 先断录音链路
+  if(recProcessor){try{recProcessor.disconnect()}catch(e){}}
+  if(recSource){try{recSource.disconnect()}catch(e){}}
+  if(recAudioCtx&&recAudioCtx.state!=='closed'){try{recAudioCtx.close()}catch(e){}}
+  recProcessor=null;recSource=null;recAudioCtx=null;
+  if(recStream){recStream.getTracks().forEach(t=>t.stop());recStream=null}
   stopVadMonitor();
+}
+
+/** 把累积的 PCM Float32 chunks 合并并编码为 WAV base64 */
+function pcmToWavBase64(){
+  // 合并所有 chunks
+  let totalLen=0;for(const c of pcmChunks)totalLen+=c.length;
+  if(totalLen===0)return null;
+  const raw=new Float32Array(totalLen);
+  let off=0;for(const c of pcmChunks){raw.set(c,off);off+=c.length}
+  pcmChunks=[];
+
+  // 裁掉头部静音
+  let start=0;while(start<raw.length&&Math.abs(raw[start])<0.01)start++;
+  const data=start>1600?raw.subarray(start):raw;
+  if(data.length<800)return null; // 太短，不算有效语音
+
+  // Float32 → Int16 PCM
+  const pcm=new Int16Array(data.length);
+  for(let i=0;i<data.length;i++){
+    const s=Math.max(-1,Math.min(1,data[i]));
+    pcm[i]=s<0?s*0x8000:s*0x7FFF;
+  }
+
+  // 构建 WAV
+  const bps=16,ch=1,hl=44;
+  const buf=new ArrayBuffer(hl+pcm.byteLength);
+  const v=new DataView(buf);
+  const ws=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+  ws(0,'RIFF');v.setUint32(4,36+pcm.byteLength,true);ws(8,'WAVE');
+  ws(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);
+  v.setUint16(22,ch,true);v.setUint32(24,REC_SAMPLE_RATE,true);
+  v.setUint32(28,REC_SAMPLE_RATE*ch*bps/8,true);v.setUint16(32,ch*bps/8,true);
+  v.setUint16(34,bps,true);ws(36,'data');v.setUint32(40,pcm.byteLength,true);
+  new Int16Array(buf,hl).set(pcm);
+
+  // → base64
+  const u8=new Uint8Array(buf);
+  let bin='';for(let i=0;i<u8.length;i++)bin+=String.fromCharCode(u8[i]);
+  return btoa(bin);
 }
 
 // ── VAD 监听 + 可视化 ──
@@ -695,6 +749,7 @@ function startVadMonitor(stream){
             // 说话后静音超时 → 自动停止并上传
             setStatus('正在处理…',1);
             stopRecording();
+            recognizeWithOmni();
             return;
           }
         }
@@ -736,58 +791,18 @@ function stopVadMonitor(){
 // ════════════════════════════════════════
 
 /**
- * 将音频 Blob 转为 16kHz WAV base64
- * MiMo-V2-Omni 接受 PCM/WAV 格式音频输入
- */
-async function blobToWavBase64(blob, targetSr=16000){
-  const ac=new(window.AudioContext||window.webkitAudioContext)({sampleRate:targetSr});
-  const ab=await blob.arrayBuffer();
-  const decoded=await ac.decodeAudioData(ab);
-  let raw=decoded.getChannelData(0);
-  ac.close();
-
-  // Trim leading silence
-  let start=0;while(start<raw.length&&Math.abs(raw[start])<.01)start++;
-  if(start>1600)raw=raw.subarray(start);
-
-  // Float32 → Int16 PCM
-  const pcm=new Int16Array(raw.length);
-  for(let i=0;i<raw.length;i++){
-    const s=Math.max(-1,Math.min(1,raw[i]));
-    pcm[i]=s<0?s*0x8000:s*0x7FFF;
-  }
-
-  // Build WAV
-  const bps=16,ch=1,headerLen=44;
-  const buf=new ArrayBuffer(headerLen+pcm.byteLength);
-  const v=new DataView(buf);
-  ws(v,0,'RIFF');v.setUint32(4,36+pcm.byteLength,true);ws(v,8,'WAVE');
-  ws(v,12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);
-  v.setUint16(22,ch,true);v.setUint32(24,targetSr,true);
-  v.setUint32(28,targetSr*ch*bps/8,true);v.setUint16(32,ch*bps/8,true);
-  v.setUint16(34,bps,true);ws(v,36,'data');v.setUint32(40,pcm.byteLength,true);
-  new Int16Array(buf,headerLen).set(pcm);
-
-  // → base64
-  const u8=new Uint8Array(buf);
-  let bin='';for(let i=0;i<u8.length;i++)bin+=String.fromCharCode(u8[i]);
-  return btoa(bin);
-}
-
-function ws(v,o,s){for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))}
-
-/**
  * 调用 mimo-v2-omni 进行音频理解
- * 返回识别文本
+ * 直接使用采集的 PCM 数据（无需 decodeAudioData）
  */
-async function recognizeWithOmni(blob){
+async function recognizeWithOmni(){
   if(!S.key){$('gearBtn').click();setSt('idle');return}
   const turn=_turnToken;
   setSt('thinking');
   setStatus('正在识别语音…');
 
   try{
-    const b64=await blobToWavBase64(blob,16000);
+    const b64=pcmToWavBase64();
+    if(!b64){setStatus('录音数据为空');setSt('idle');return}
 
     // MiMo-V2-Omni 音频理解 — OpenAI 兼容格式
     const r=await fetch(S.ep,{
@@ -795,13 +810,13 @@ async function recognizeWithOmni(blob){
       headers:{'Content-Type':'application/json','api-key':S.key},
       body:JSON.stringify({
         model:S.omniM,
-        messages:[{
-          role:'user',
-          content:[
-            {type:'text',text:'请将这段音频中的语音内容准确转录为文字，只返回转录结果，不要添加任何解释。如有错别字请一并纠正。加上标点符号，记住你只是转录文字纠错，不要回答任何内容。'},
-            {type:'input_audio',input_audio:{data:b64,format:'wav'}}
-          ]
-        }],
+        messages:[
+          {role:'system',content:'你是一个纯语音转录引擎（ASR/STT）。你的唯一任务是将音频中的语音内容转写为文字。严格禁止：回答问题、解释内容、补充信息、任何形式的对话。即使音频中包含问句，也只转写文字，不回答。只输出转录文本'},
+          {role:'user',content:[
+            {type:'input_audio',input_audio:{data:b64,format:'wav'}},
+            {type:'text',text:'转录这段音频中的所有语音内容。只输出文字转录，不要回答、不要解释、不要总结。'}
+          ]}
+        ],
         max_completion_tokens:512,
         temperature:0,
         stream:false,
@@ -839,7 +854,7 @@ async function correctAndSend(raw,turn){
   let fixed=raw;
   try{
     const r=await fetch(S.ep,{method:'POST',headers:{'Content-Type':'application/json','api-key':S.key},
-      body:JSON.stringify({model:S.chatM,messages:[{role:'system',content:'语音识别纠错助手。只返回纠正后的文字，不解释。原文没错就原样返回。'},{role:'user',content:raw}],max_completion_tokens:128,temperature:0,stream:false,thinking:{type:'disabled'}})});
+      body:JSON.stringify({model:S.chatM,messages:[{role:'system',content:'你是语音识别后处理助手。任务：1)纠正错别字和同音字；2)根据语义添加正确的标点符号（逗号、句号、问号、感叹号等）；3)适当断句。只返回纠正后的文字，不解释、不回答。原文没错就原样返回。'},{role:'user',content:raw}],max_completion_tokens:256,temperature:0,stream:false,thinking:{type:'disabled'}})});
     if(r.ok){const d=await r.json();const c=d.choices?.[0]?.message?.content?.trim();if(c)fixed=c}
   }catch(e){}
   if(turn!==_turnToken)return;
@@ -853,7 +868,7 @@ async function correctAndSend(raw,turn){
 async function sendChat(text){
   setSt('thinking');
   const turn=_turnToken;
-  let sys=S.sys;if(S.mem.length)sys+='\n\n[你的长期记忆]\n'+S.mem.join('\n');
+  let sys=SYS;if(S.mem.length)sys+='\n\n[你的长期记忆]\n'+S.mem.join('\n');
   const msgs=[{role:'system',content:sys},...S.msgs.slice(-80),{role:'user',content:text}];
   S.abort=new AbortController();
   let reply='';
@@ -939,13 +954,20 @@ function ensureWav(b){
 // ════════════════════════════════════════
 orb.addEventListener('click',()=>{
   if(textBar.classList.contains('show')){textInput.focus();return}
+  // 打断：AI 说话/思考时点 orb → 停止并立刻开始录音
+  if(S.state==='speaking'||S.state==='thinking'){
+    stopAll();setSt('idle');
+    if(!S.key){$('gearBtn').click();return}
+    startRecording();
+    return;
+  }
   if(S.state!=='idle')return;
   if(!S.key){$('gearBtn').click();return}
   stopAll();
   startRecording();
 });
-stopBtn.onclick=()=>{stopAll();setSt('idle')};
-$('pauseBtn').onclick=()=>{stopAll();setSt('idle')};
+stopBtn.onclick=()=>{stopAll();if(vadSpeechStarted){recognizeWithOmni()}else{setSt('idle')}};
+$('pauseBtn').onclick=()=>{stopAll();if(vadSpeechStarted){recognizeWithOmni()}else{setSt('idle')}};
 
 // ── Text mode (5 rapid clicks) ──
 let clicks=[];
@@ -961,6 +983,84 @@ function doSend(){const t=textInput.value.trim();if(!t)return;textInput.value=''
 
 // ── Init ──
 if(!S.key)setStatus('点击右上角设置 API Key');
+
+// ════════════════════════════════════════
+// ── 开场白：用户每次进入时随机打招呼 ──
+// ════════════════════════════════════════
+const GREETINGS=[
+  '你好呀，今天聊些什么？',
+  '嘿，你来啦！有什么想说的？',
+  '好久不见，最近怎么样？',
+  '欢迎回来，随时准备和你聊天哦。',
+  'Hi~ 今天心情怎么样？',
+  '你终于来了，等你半天了！',
+  '嗨，有什么好玩的事儿跟我分享吗？',
+  '来啦来啦，我们聊点什么好呢？',
+  '哈喽，今天想听笑话还是聊点正经的？',
+  '又见面了，你不说我都想你了。',
+  '哟，来了？今天过得怎么样？',
+  '你好呀～想我了吗？',
+  '欢迎欢迎，今天有什么计划？',
+  '嗨！准备好听我说话了吗？',
+  '嗯哼，有人来了，我可不闲着。',
+];
+
+let _greetingWav=null;      // 预加载的开场白音频
+let _greetingPlayed=false;  // 是否已播放过开场白
+let _greetingNeedPlay=false; // 是否有开场白等待播放
+
+(async function runGreeting(){
+  if(!S.key)return;
+  // 选一条随机开场白
+  const greet=GREETINGS[Math.floor(Math.random()*GREETINGS.length)];
+  // 加入聊天记录
+  S.msgs.push({role:'assistant',content:greet});
+  localStorage.setItem('mmg',JSON.stringify(S.msgs));
+  // 显示文字
+  setStatus(greet);
+  // 预加载 TTS 语音（存到内存，等用户首次点击后播放）
+  const pm=greet.match(/^<style>([^<]+)<\/style>\s*/i);
+  const clean=pm?greet.slice(pm[0].length):greet;
+  const style=pm?pm[1].trim():'温柔';
+  const finalStyle=S.style||style;
+  let content=clean;if(finalStyle)content=`<style>${finalStyle}</style>${content}`;
+  try{
+    const r=await fetch(S.ep,{method:'POST',headers:{'Content-Type':'application/json','api-key':S.key},
+      body:JSON.stringify({model:S.ttsM,messages:[{role:'user',content:clean},{role:'assistant',content}],audio:{format:'wav',voice:S.voice}})});
+    if(!r.ok)return;
+    const d=await r.json();const b64=d.choices?.[0]?.message?.audio?.data;if(!b64)return;
+    const bin=atob(b64);const raw=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)raw[i]=bin.charCodeAt(i);
+    _greetingWav=ensureWav(raw);
+    _greetingNeedPlay=true;
+    // 如果用户已经点了 orb，立即播
+    if(_greetingPlayed)_playGreetingNow();
+  }catch(e){console.log('Greeting TTS failed:',e)}
+})();
+
+function _playGreetingNow(){
+  if(!_greetingWav)return;
+  _greetingPlayed=true;
+  try{
+    ensureAudioCtx();
+    if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();
+    setSt('speaking');
+    playWav(_greetingWav).then(()=>{setSt('idle');setStatus('')});
+  }catch(e){setSt('idle');setStatus('')}
+}
+
+// ── 重写 orb 点击：首次点击优先播放开场白，之后恢复正常逻辑 ──
+orb.addEventListener('click',function greetingHandler(e){
+  e.stopImmediatePropagation(); // 阻止本 click 事件的其他 handler（首次点击只播开场白）
+  orb.removeEventListener('click',greetingHandler, true); // 只拦一次，之后恢复
+  _greetingPlayed=true;
+  if(_greetingNeedPlay){
+    // TTS 已就绪，直接播
+    _playGreetingNow();
+  } else {
+    // TTS 还没回来，等回来后自动播放（runGreeting 里会调）
+    setStatus('正在加载问候…');
+  }
+}, true); // capture 阶段，优先于普通 click
 </script>
 </body>
 </html>
