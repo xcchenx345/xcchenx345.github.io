@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MathChat — 智能公式渲染</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg:#0a0a0c; --s1:#131316; --s2:#1a1a1f; --bd:#252529;
+    --tx:#e8e4dc; --tm:#6e6a62; --ac:#c9a84c; --ad:rgba(201,168,76,.12);
+    --ub:#1c1c22; --er:#d05555;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--tx);font-family:'Noto Sans SC',sans-serif;display:flex;flex-direction:column;overflow:hidden}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E")}
+
+.hd{flex-shrink:0;padding:13px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;background:rgba(10,10,12,.85);backdrop-filter:blur(12px);z-index:10}
+.hd-l{display:flex;align-items:center;gap:11px}
+.logo{width:34px;height:34px;background:var(--ac);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Instrument Serif',serif;font-size:19px;color:#0a0a0c;font-style:italic}
+.hd-t{font-family:'Instrument Serif',serif;font-size:20px}
+.hd-s{font-size:9px;color:var(--tm);letter-spacing:.12em;text-transform:uppercase}
+.hd-r{display:flex;gap:5px}
+.bi{width:32px;height:32px;border-radius:8px;border:1px solid var(--bd);background:var(--s1);color:var(--tm);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
+.bi:hover{color:var(--tx);border-color:#444}
+.bi svg{width:15px;height:15px}
+
+.sp{position:absolute;top:56px;right:16px;width:260px;background:var(--s1);border:1px solid var(--bd);border-radius:13px;padding:16px;z-index:100;display:none;box-shadow:0 16px 48px rgba(0,0,0,.5);animation:fd .2s ease}
+.sp.show{display:block}
+@keyframes fd{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.sr{margin-bottom:14px}.sr:last-child{margin-bottom:0}
+.sl{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--tm);margin-bottom:7px}
+.bsw{display:flex;gap:5px}
+.bs{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:.2s}
+.bs:hover{transform:scale(1.12)}.bs.a{border-color:var(--ac);box-shadow:0 0 0 3px var(--ad)}
+.bs[data-b="white"]{background:#fff}.bs[data-b="dark"]{background:#1a1a1e}.bs[data-b="cream"]{background:#f5f0e6}
+.bs[data-b="transparent"]{background-image:linear-gradient(45deg,#ccc 25%,transparent 25%),linear-gradient(-45deg,#ccc 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ccc 75%),linear-gradient(-45deg,transparent 75%,#ccc 75%);background-size:9px 9px;background-position:0 0,0 4px,4px -4px,-4px 0}
+.ro{display:flex;gap:3px}
+.rb{padding:5px 11px;background:var(--s2);border:1px solid var(--bd);border-radius:6px;color:var(--tm);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:.2s}
+.rb:hover{color:var(--tx);border-color:#444}.rb.a{background:var(--ac);color:#0a0a0c;border-color:var(--ac);font-weight:500}
+
+.ca{flex:1;overflow-y:auto;padding:18px 14px;scroll-behavior:smooth}
+.ca::-webkit-scrollbar{width:5px}.ca::-webkit-scrollbar-track{background:transparent}.ca::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+
+.wc{max-width:500px;margin:50px auto 0;text-align:center;animation:fu .5s ease}
+.wc-i{width:52px;height:52px;margin:0 auto 14px;background:var(--ad);border-radius:15px;display:flex;align-items:center;justify-content:center}
+.wc-i svg{width:26px;height:26px;color:var(--ac)}
+.wc h2{font-family:'Instrument Serif',serif;font-size:24px;font-weight:400;margin-bottom:5px}
+.wc p{color:var(--tm);font-size:12px;line-height:1.7;margin-bottom:20px}
+.qg{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.qb{padding:6px 13px;background:var(--s1);border:1px solid var(--bd);border-radius:16px;color:var(--tm);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:.2s;white-space:nowrap}
+.qb:hover{border-color:var(--ac);color:var(--tx);background:var(--s2)}
+
+.msg{max-width:680px;margin:0 auto 14px;animation:fu .3s ease}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.mu{display:flex;justify-content:flex-end}
+.mu .mb{background:var(--ub);border:1px solid var(--bd);border-radius:13px 13px 3px 13px;padding:9px 15px;max-width:78%;font-family:'DM Mono',monospace;font-size:13px;word-break:break-all;line-height:1.6}
+.ma{display:flex;flex-direction:column;gap:9px}
+.ml{display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--tm)}
+.ml .dt{width:5px;height:5px;border-radius:50%;background:var(--ac)}
+
+.fc{background:var(--s1);border:1px solid var(--bd);border-radius:13px;overflow:hidden}
+.fd{padding:30px 24px;display:flex;align-items:center;justify-content:center;min-height:50px;overflow:hidden}
+.fd.w-bg{background:#fff}.fd.d-bg{background:#1a1a1e}.fd.c-bg{background:#f5f0e6}.fd.t-bg{background-image:linear-gradient(45deg,#e0e0e0 25%,transparent 25%),linear-gradient(-45deg,#e0e0e0 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e0e0e0 75%),linear-gradient(-45deg,transparent 75%,#e0e0e0 75%);background-size:13px 13px;background-position:0 0,0 6px,6px -6px,-6px 0}
+.fd svg{max-width:100%;height:auto;animation:fi .4s ease}
+@keyframes fi{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.fd.d-bg svg{filter:invert(1) brightness(1.6) contrast(.85)}
+
+.fb{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;border-top:1px solid var(--bd);background:rgba(0,0,0,.15);gap:6px;flex-wrap:wrap}
+.fm{display:flex;align-items:center;gap:7px;min-width:0;flex:1}
+.bd{font-size:8px;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:4px;font-weight:500;flex-shrink:0}
+.bd.a{background:rgba(201,168,76,.15);color:var(--ac)}.bd.l{background:rgba(100,180,100,.12);color:#7dbd7d}
+.ft{font-family:'DM Mono',monospace;font-size:10px;color:var(--tm);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.fa{display:flex;gap:4px;flex-shrink:0}
+.bs2{padding:4px 11px;border-radius:6px;border:1px solid var(--bd);background:var(--s2);color:var(--tm);font-family:'DM Mono',monospace;font-size:10px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:3px}
+.bs2:hover{color:var(--tx);border-color:#444}
+.bs2.p{background:var(--ac);color:#0a0a0c;border-color:var(--ac);font-weight:500}
+.bs2.p:hover{background:#d4b355}
+
+.ti{display:flex;gap:4px;padding:13px 16px}
+.ti span{width:6px;height:6px;border-radius:50%;background:var(--ac);opacity:.4;animation:tk 1.2s ease infinite}
+.ti span:nth-child(2){animation-delay:.2s}.ti span:nth-child(3){animation-delay:.4s}
+@keyframes tk{0%,100%{opacity:.4;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+
+.er{padding:13px 16px;color:var(--er);font-size:12px;font-family:'DM Mono',monospace}
+
+.ib{flex-shrink:0;padding:11px 14px 15px;background:rgba(10,10,12,.9);backdrop-filter:blur(12px);border-top:1px solid var(--bd)}
+.ii{max-width:680px;margin:0 auto;display:flex;align-items:center;gap:8px}
+#inp{flex:1;padding:12px 15px;background:var(--s1);border:1px solid var(--bd);border-radius:11px;color:var(--tx);font-family:'DM Mono',monospace;font-size:13px;outline:none;transition:border-color .3s,box-shadow .3s}
+#inp::placeholder{color:var(--tm)}
+#inp:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--ad)}
+.bsd{width:42px;height:42px;border-radius:11px;border:none;background:var(--ac);color:#0a0a0c;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.25s;flex-shrink:0}
+.bsd:hover{background:#d4b355;transform:translateY(-1px);box-shadow:0 4px 14px rgba(201,168,76,.3)}
+.bsd svg{width:17px;height:17px}
+.ih{max-width:680px;margin:4px auto 0;font-size:9px;color:var(--tm);display:flex;justify-content:space-between}
+.ih kbd{background:var(--s1);padding:1px 5px;border-radius:3px;border:1px solid var(--bd);font-size:9px}
+
+#st{position:fixed;bottom:85px;left:50%;transform:translateX(-50%) translateY(8px);padding:8px 18px;background:var(--ac);color:#0a0a0c;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;border-radius:8px;opacity:0;pointer-events:none;transition:.3s;z-index:999;box-shadow:0 6px 20px rgba(201,168,76,.3)}
+#st.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.lh{color:var(--tm);font-size:11px;font-family:'DM Mono',monospace;padding:4px 0}
+
+@media(max-width:600px){
+    .hd{padding:10px 12px}.hd-t{font-size:17px}.ca{padding:12px 8px}.ib{padding:8px 8px 12px}
+    .wc{margin-top:30px}.wc h2{font-size:20px}.fd{padding:18px 12px}
+    .sp{right:8px;width:calc(100vw - 16px)}
+}
+</style>
+</head>
+<body>
+
+<header class="hd">
+    <div class="hd-l">
+        <div class="logo">∫</div>
+        <div><div class="hd-t">MathChat</div><div class="hd-s" id="lh">Loading engine…</div></div>
+    </div>
+    <div class="hd-r">
+        <button class="bi" id="bc" title="清空"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>
+        <button class="bi" id="bs" title="设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></button>
+    </div>
+</header>
+
+<div class="sp" id="sp">
+    <div class="sr"><div class="sl">导出背景</div><div class="bsw"><div class="bs a" data-b="white"></div><div class="bs" data-b="cream"></div><div class="bs" data-b="dark"></div><div class="bs" data-b="transparent"></div></div></div>
+    <div class="sr"><div class="sl">导出分辨率</div><div class="ro"><button class="rb" data-s="2">2x</button><button class="rb a" data-s="4">4x</button><button class="rb" data-s="6">6x</button><button class="rb" data-s="8">8x</button></div></div>
+</div>
+
+<div class="ca" id="ca">
+    <div class="wc" id="wc">
+        <div class="wc-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l6-14h-4"/><path d="M14 20l6-14"/><path d="M2 20h6"/><path d="M16 20h6"/></svg></div>
+        <h2>输入公式，自动渲染</h2>
+        <p>直接输入普通算式即可自动转 LaTeX 渲染<br>也支持直接输入 LaTeX 语法</p>
+        <div class="qg" id="qg"></div>
+    </div>
+</div>
+
+<div class="ib">
+    <div class="ii">
+        <input id="inp" placeholder="试试 x^2 + y^2 = r^2" spellcheck="false" autocomplete="off">
+        <button class="bsd" id="snd" title="发送"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+    </div>
+    <div class="ih"><span>普通算式自动转换 · 也支持 LaTeX</span><span><kbd>Enter</kbd> 发送</span></div>
+</div>
+
+<div id="st"></div>
+
+<!-- ═══ MathJax Config (MUST be before CDN) ═══ -->
+<script>
+window.MathJax = {
+    tex: { inlineMath:[['$','$'],['\\(','\\)']], displayMath:[['$$','$$'],['\\[','\\]']] },
+    svg: { fontCache:'global' },
+    startup: {
+        ready() {
+            MathJax.startup.defaultReady();
+            MathJax.startup.promise.then(function() {
+                window._mjReady = true;
+                document.getElementById('lh').textContent = 'Ready';
+                document.getElementById('lh').style.color = '#6dbd6d';
+            });
+        }
+    }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+
+<!-- ═══ App Logic ═══ -->
+<script>
+(function() {
+"use strict";
+
+// ──────────────────────────────
+// §1  智能转换器
+// ──────────────────────────────
+
+function convertToLatex(input) {
+    var s = input.trim();
+
+    // Raw LaTeX
+    if (/^\\/.test(s)) return { latex: s, converted: false };
+
+    // Strip $ wrappers
+    if (/^\$/.test(s)) s = s.replace(/^\$+|\$+$/g, '').trim();
+
+    var orig = s;
+
+    // Unicode → LaTeX
+    var UM = {
+        '\u221E':'\\infty','\u03C0':'\\pi','\u00B1':'\\pm','\u00F7':'\\div','\u00D7':'\\times',
+        '\u2264':'\\leq','\u2265':'\\geq','\u2260':'\\neq','\u2192':'\\to','\u2190':'\\leftarrow',
+        '\u21D2':'\\Rightarrow','\u221A':'\\sqrt','\u2202':'\\partial','\u2207':'\\nabla',
+        '\u222B':'\\int','\u2211':'\\sum','\u220F':'\\prod',
+        '\u03B1':'\\alpha','\u03B2':'\\beta','\u03B3':'\\gamma','\u03B4':'\\delta',
+        '\u03B5':'\\epsilon','\u03B6':'\\zeta','\u03B7':'\\eta','\u03B8':'\\theta',
+        '\u03B9':'\\iota','\u03BA':'\\kappa','\u03BB':'\\lambda','\u03BC':'\\mu',
+        '\u03BD':'\\nu','\u03BE':'\\xi','\u03C1':'\\rho','\u03C3':'\\sigma',
+        '\u03C4':'\\tau','\u03C5':'\\upsilon','\u03C6':'\\phi','\u03C7':'\\chi',
+        '\u03C8':'\\psi','\u03C9':'\\omega',
+        '\u0393':'\\Gamma','\u0394':'\\Delta','\u0398':'\\Theta','\u039B':'\\Lambda',
+        '\u039E':'\\Xi','\u03A0':'\\Pi','\u03A3':'\\Sigma','\u03A6':'\\Phi',
+        '\u03A8':'\\Psi','\u03A9':'\\Omega'
+    };
+    for (var u in UM) { if (UM.hasOwnProperty(u)) s = s.split(u).join(UM[u]); }
+
+    // Unicode subscript / superscript digits
+    var subD = '\u2080\u2081\u2082\u2083\u2084\u2085\u2086\u2087\u2088\u2089';
+    var supD = '\u2070\u00B9\u00B2\u00B3\u2074\u2075\u2076\u2077\u2078\u2079';
+    for (var i = 0; i < 10; i++) {
+        s = s.split(subD[i]).join('_' + i);
+        s = s.split(supD[i]).join('^' + i);
+    }
+
+    // Greek words (uppercase first to avoid case issues)
+    var GW = [
+        ['Omega','\\Omega'],['Gamma','\\Gamma'],['Delta','\\Delta'],['Theta','\\Theta'],
+        ['Lambda','\\Lambda'],['Sigma','\\Sigma'],['Phi','\\Phi'],['Psi','\\Psi'],
+        ['Xi','\\Xi'],['Pi','\\Pi'],
+        ['alpha','\\alpha'],['beta','\\beta'],['gamma','\\gamma'],['delta','\\delta'],
+        ['epsilon','\\epsilon'],['zeta','\\zeta'],['eta','\\eta'],['theta','\\theta'],
+        ['iota','\\iota'],['kappa','\\kappa'],['lambda','\\lambda'],['mu','\\mu'],
+        ['nu','\\nu'],['xi','\\xi'],['omicron','\\omicron'],['pi','\\pi'],['rho','\\rho'],
+        ['sigma','\\sigma'],['tau','\\tau'],['upsilon','\\upsilon'],['phi','\\phi'],
+        ['chi','\\chi'],['psi','\\psi'],['omega','\\omega']
+    ];
+    for (var g = 0; g < GW.length; g++) {
+        s = s.replace(new RegExp('\\b' + GW[g][0] + '\\b', 'g'), GW[g][1]);
+    }
+
+    // Multi-char operators
+    s = s.replace(/!=/g, '\\neq');
+    s = s.replace(/>=/g, '\\geq');
+    s = s.replace(/<=/g, '\\leq');
+    s = s.replace(/->/g, '\\to');
+    s = s.replace(/=>/g, '\\Rightarrow');
+    s = s.replace(/\+-/g, '\\pm');
+    s = s.replace(/\.\.\./g, '\\cdots');
+
+    // Words
+    s = s.replace(/\binfinity\b/gi, '\\infty');
+    s = s.replace(/\binf\b/g, '\\infty');
+
+    // Functions (longest first)
+    var FN = ['arcsin','arccos','arctan','sinh','cosh','tanh','sin','cos','tan','sec','csc','cot','log','ln','exp'];
+    for (var f = 0; f < FN.length; f++) {
+        s = s.replace(new RegExp('\\b' + FN[f] + '\\b', 'g'), '\\' + FN[f]);
+    }
+
+    // sqrt(x) abs(x)
+    s = s.replace(/sqrt\s*\(([^)]+)\)/gi, '\\sqrt{$1}');
+    s = s.replace(/abs\s*\(([^)]+)\)/gi, '\\left|$1\\right|');
+    s = s.replace(/floor\s*\(([^)]+)\)/gi, '\\lfloor $1 \\rfloor');
+    s = s.replace(/ceil\s*\(([^)]+)\)/gi, '\\lceil $1 \\rceil');
+
+    // Big operators
+    s = s.replace(/\bint\b/g, '\\int');
+    s = s.replace(/\bsum\b/g, '\\sum');
+    s = s.replace(/\bprod\b/g, '\\prod');
+    s = s.replace(/\blim\b/g, '\\lim');
+
+    // Multiplication
+    s = s.replace(/\*/g, '\\cdot ');
+
+    // Fractions: (a)/(b)  — loop for nested
+    var prev, iter;
+    for (iter = 0; iter < 5; iter++) {
+        prev = s;
+        s = s.replace(/\(([^()]+)\)\s*\/\s*\(([^()]+)\)/g, '\\frac{$1}{$2}');
+        if (s === prev) break;
+    }
+    // Fractions: simple a/b
+    for (iter = 0; iter < 5; iter++) {
+        prev = s;
+        s = s.replace(/([\w\\^{}]+)\s*\/\s*([\w\\^{}]+)/g, '\\frac{$1}{$2}');
+        if (s === prev) break;
+    }
+
+    // Superscripts
+    s = s.replace(/\^\(([^)]+)\)/g, '^{$1}');
+    s = s.replace(/\^(-?\w)/g, '^{$1}');
+
+    // Subscripts
+    s = s.replace(/_\(([^)]+)\)/g, '_{$1}');
+    s = s.replace(/_([a-zA-Z0-9])/g, '_{$1}');
+
+    // Cleanup
+    s = s.replace(/\s+/g, ' ').trim();
+
+    return { latex: s, converted: s !== orig };
+}
+
+// ──────────────────────────────
+// §2  State & DOM
+// ──────────────────────────────
+
+var scl = 4, bg = 'white', cnt = 0;
+var ca   = document.getElementById('ca');
+var inp  = document.getElementById('inp');
+var snd  = document.getElementById('snd');
+var stEl = document.getElementById('st');
+var spEl = document.getElementById('sp');
+var bsBtn = document.getElementById('bs');
+var bcBtn = document.getElementById('bc');
+var wcEl  = document.getElementById('wc');
+
+// Quick examples
+var Q = [
+    ['二次公式', 'x = (-b +- sqrt(b^2 - 4ac)) / 2a'],
+    ['欧拉恒等式', 'e^(i*pi) + 1 = 0'],
+    ['高斯积分', 'int_(-inf)^inf e^(-x^2) dx = sqrt(pi)'],
+    ['巴塞尔问题', 'sum_(n=1)^inf 1/n^2 = pi^2 / 6'],
+    ['极限', 'lim_(x->0) sin(x)/x = 1'],
+    ['矩阵( LaTeX )', '\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}']
+];
+var qg = document.getElementById('qg');
+for (var q = 0; q < Q.length; q++) {
+    (function(ex) {
+        var b = document.createElement('button');
+        b.className = 'qb';
+        b.textContent = ex[0];
+        b.onclick = function() { inp.value = ex[1]; doSend(); };
+        qg.appendChild(b);
+    })(Q[q]);
+}
+
+// ──────────────────────────────
+// §3  Helpers
+// ──────────────────────────────
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escA(s) { return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+function sleep(ms) { return new Promise(function(r){setTimeout(r,ms)}); }
+function scrollD() { requestAnimationFrame(function(){ca.scrollTop=ca.scrollHeight}); }
+function toast(msg) { stEl.textContent=msg; stEl.classList.add('show'); setTimeout(function(){stEl.classList.remove('show')},2200); }
+
+// ──────────────────────────────
+// §4  Chat
+// ──────────────────────────────
+
+async function doSend() {
+    var raw = inp.value.trim();
+    if (!raw) return;
+
+    if (!window._mjReady) {
+        toast('公式引擎加载中，请稍候…');
+        return;
+    }
+
+    if (wcEl) wcEl.style.display = 'none';
+    inp.value = '';
+
+    var res = convertToLatex(raw);
+    var latex = res.latex;
+    var conv = res.converted;
+
+    // User bubble
+    var um = document.createElement('div');
+    um.className = 'msg mu';
+    um.innerHTML = '<div class="mb">' + esc(raw) + '</div>';
+    ca.appendChild(um);
+    scrollD();
+
+    // Typing
+    var tm = document.createElement('div');
+    tm.className = 'msg ma';
+    tm.innerHTML = '<div class="ml"><span class="dt"></span>MathChat</div><div class="fc"><div class="ti"><span></span><span></span><span></span></div></div>';
+    ca.appendChild(tm);
+    scrollD();
+
+    await sleep(300 + Math.random() * 300);
+
+    try {
+        var node = await MathJax.tex2svg(latex, { display: true });
+        var svg = node.querySelector('svg');
+        if (!svg) throw new Error('no svg');
+
+        svg.removeAttribute('width');
+        svg.removeAttribute('height');
+        svg.style.maxWidth = '100%';
+        svg.style.height = 'auto';
+        svg.querySelectorAll('text').forEach(function(t){t.style.fill='#1a1a1a';t.style.stroke='none'});
+        svg.querySelectorAll('path').forEach(function(p){
+            if(p.style.fill&&p.style.fill!=='none') p.style.fill='#1a1a1a';
+            p.style.stroke='#1a1a1a';
+        });
+
+        var bgC = bg==='dark'?'d-bg':bg==='cream'?'c-bg':bg==='transparent'?'t-bg':'w-bg';
+        var id = 'f' + (++cnt);
+        var badge = conv ? '<span class="bd a">Auto</span>' : '<span class="bd l">LaTeX</span>';
+
+        tm.innerHTML =
+            '<div class="ml"><span class="dt"></span>MathChat</div>' +
+            '<div class="fc">' +
+                '<div class="fd ' + bgC + '" id="' + id + '"></div>' +
+                '<div class="fb">' +
+                    '<div class="fm">' + badge + '<span class="ft" title="' + esc(latex) + '">' + esc(latex) + '</span></div>' +
+                    '<div class="fa">' +
+                        '<button class="bs2" onclick="window._copy(this,\'' + escA(latex) + '\')">复制</button>' +
+                        '<button class="bs2 p" onclick="window._save(\'' + id + '\')">保存</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+
+        document.getElementById(id).appendChild(svg);
+    } catch(e) {
+        console.error('Render error:', e);
+        tm.innerHTML =
+            '<div class="ml"><span class="dt"></span>MathChat</div>' +
+            '<div class="fc"><div class="er">渲染失败，请检查公式语法。提示：用括号明确范围，如 <code>(a+b)/(c+d)</code></div></div>';
+    }
+
+    scrollD();
+}
+
+// ──────────────────────────────
+// §5  Export
+// ──────────────────────────────
+
+window._save = function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var svg = el.querySelector('svg');
+    if (!svg) return;
+
+    var cl = svg.cloneNode(true);
+    _inline(cl);
+    var vb = svg.viewBox.baseVal;
+    var w = vb ? vb.width : 400;
+    var h = vb ? vb.height : 80;
+    cl.setAttribute('width', w);
+    cl.setAttribute('height', h);
+    cl.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+    var pad = 48, cw = (w+pad*2)*scl, ch = (h+pad*2)*scl;
+    var str = new XMLSerializer().serializeToString(cl);
+    var url = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(str)));
+
+    var img = new Image();
+    img.onload = function() {
+        var c = document.createElement('canvas');
+        c.width = cw; c.height = ch;
+        var ctx = c.getContext('2d');
+        ctx.scale(scl, scl);
+        if (bg==='white') ctx.fillStyle='#fff';
+        else if (bg==='cream') ctx.fillStyle='#f5f0e6';
+        else if (bg==='dark') ctx.fillStyle='#1a1a1e';
+        if (bg!=='transparent') ctx.fillRect(0,0,cw,ch);
+        ctx.drawImage(img, pad, pad, w, h);
+        c.toBlob(function(blob) {
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'formula_' + Date.now() + '.png';
+            a.click();
+            URL.revokeObjectURL(a.href);
+            toast('已保存 ' + cw + '×' + ch + ' px');
+        }, 'image/png', 1.0);
+    };
+    img.onerror = function() { toast('导出失败'); };
+    img.src = url;
+};
+
+window._copy = function(btn, tex) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(tex).then(function() {
+            var o = btn.textContent;
+            btn.textContent = '已复制';
+            setTimeout(function(){btn.textContent=o}, 1500);
+        });
+    }
+};
+
+function _inline(el) {
+    var cs = window.getComputedStyle(el);
+    ['font-family','font-size','font-style','font-weight','fill','fill-opacity',
+     'stroke','stroke-width','stroke-opacity','opacity','dominant-baseline','text-anchor'
+    ].forEach(function(p) {
+        var v = cs.getPropertyValue(p);
+        if (v && v!=='none' && v!=='normal') el.style.setProperty(p, v);
+    });
+    for (var i = 0; i < el.children.length; i++) _inline(el.children[i]);
+}
+
+// ──────────────────────────────
+// §6  Events
+// ──────────────────────────────
+
+snd.addEventListener('click', doSend);
+inp.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSend(); }
+});
+
+bcBtn.addEventListener('click', function() {
+    ca.innerHTML = '';
+    ca.appendChild(wcEl);
+    wcEl.style.display = '';
+    cnt = 0;
+});
+
+bsBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    spEl.classList.toggle('show');
+});
+document.addEventListener('click', function(e) {
+    if (!spEl.contains(e.target) && e.target !== bsBtn) spEl.classList.remove('show');
+});
+
+document.querySelectorAll('.bs').forEach(function(s) {
+    s.addEventListener('click', function() {
+        document.querySelectorAll('.bs').forEach(function(x){x.classList.remove('a')});
+        s.classList.add('a');
+        bg = s.dataset.b;
+    });
+});
+document.querySelectorAll('.rb').forEach(function(b) {
+    b.addEventListener('click', function() {
+        document.querySelectorAll('.rb').forEach(function(x){x.classList.remove('a')});
+        b.classList.add('a');
+        scl = parseInt(b.dataset.s);
+    });
+});
+
+inp.focus();
+
+// Fallback: if MathJax doesn't load in 15s
+setTimeout(function() {
+    if (!window._mjReady) {
+        document.getElementById('lh').textContent = '加载超时，请刷新';
+        document.getElementById('lh').style.color = '#d05555';
+    }
+}, 15000);
+
+})();
+</script>
+</body>
+</html>
