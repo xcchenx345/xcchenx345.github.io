@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -183,8 +184,9 @@
   #waveCanvas.on{opacity:1}
 
   /* ── Status ── */
-  .status{margin-top:32px;font-size:15px;color:var(--text2);min-height:22px;transition:color .3s;text-align:center;padding:0 20px;position:relative;z-index:8}
+  .status{margin-top:32px;font-size:15px;color:var(--text2);min-height:22px;transition:color .3s,opacity .3s;text-align:center;padding:0 20px;position:relative;z-index:8}
   .status.on{color:var(--text)}
+  body.textbar-open .status,body.textbar-open .hint{opacity:0;pointer-events:none}
   .hint{position:fixed;bottom:120px;font-size:13px;color:var(--text3);animation:fade-pulse 3s ease-in-out infinite;z-index:8}
   @keyframes fade-pulse{0%,100%{opacity:.3}50%{opacity:.7}}
 
@@ -195,8 +197,9 @@
   .btn svg{width:24px;height:24px;fill:currentColor}
   .btn.stop{background:rgba(255,107,107,.15);color:var(--danger)}.btn.stop:hover{background:rgba(255,107,107,.3)}
   .btn.hidden{display:none}
-  .pause-wrap{position:fixed;bottom:max(40px,env(safe-area-inset-bottom));left:max(24px,env(safe-area-inset-left));z-index:10}
-  .kb-wrap{position:fixed;bottom:max(40px,env(safe-area-inset-bottom));right:max(24px,env(safe-area-inset-right));z-index:10}
+  .pause-wrap{position:fixed;bottom:max(40px,env(safe-area-inset-bottom));left:max(24px,env(safe-area-inset-left));z-index:10;transition:bottom .3s cubic-bezier(.4,0,.2,1)}
+  .kb-wrap{position:fixed;bottom:max(40px,env(safe-area-inset-bottom));right:max(24px,env(safe-area-inset-right));z-index:10;transition:bottom .3s cubic-bezier(.4,0,.2,1)}
+  body.textbar-open .pause-wrap,body.textbar-open .kb-wrap{bottom:calc(68px + max(12px,env(safe-area-inset-bottom)))}
 
   /* ── Camera Preview ── */
   .cam-panel{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:5;width:min(480px,100vw);height:0;max-height:52vh;background:#000;border-radius:28px 28px 0 0;overflow:hidden;display:none;box-shadow:0 -8px 40px rgba(0,0,0,.5)}
@@ -340,7 +343,14 @@
     <div class="field"><label>API Key</label><input type="password" id="inKey" placeholder="MiMo API Key" autocomplete="off"><div class="hint">platform.xiaomimimo.com 获取</div></div>
     <div class="field"><label>语音识别模型 (Omni)</label><input type="text" id="inOmni" placeholder="mimo-v2-omni"></div>
     <div class="field"><label>Chat 模型 (Flash)</label><input type="text" id="inChat" placeholder="mimo-v2-flash"></div>
-    <div class="field"><label>TTS 模型</label><input type="text" id="inTts" placeholder="mimo-v2-tts"></div>
+    <div class="field"><label>TTS 模型</label><select id="inTts">
+      <option value="mimo-v2.5-tts">mimo-v2.5-tts（预置音色）</option>
+      <option value="mimo-v2.5-tts-voicedesign">mimo-v2.5-tts-voicedesign（音色设计）</option>
+      <option value="mimo-v2.5-tts-voiceclone">mimo-v2.5-tts-voiceclone（音色复刻）</option>
+      <option value="mimo-v2-tts">mimo-v2-tts（旧版）</option>
+      <option value="custom">自定义…</option>
+    </select></div>
+    <div class="field" id="inTtsCustomWrap" style="display:none"><label>自定义 TTS 模型名</label><input type="text" id="inTtsCustom" placeholder="输入模型 ID"></div>
     <div class="field"><label>API Endpoint</label><input type="text" id="inEp" placeholder="https://api.xiaomimimo.com/v1/chat/completions"><div class="hint">如果跨域报错，可填本地代理地址</div></div>
     <h3>👤 个人信息</h3>
     <div class="field"><label>昵称</label><input type="text" id="inNick" placeholder="怎么称呼你？"></div>
@@ -360,10 +370,58 @@
       <div class="color-cell"><label>思考</label><input type="color" id="cThink" value="#fdcb6e"></div>
       <div class="color-cell"><label>说话</label><input type="color" id="cSpeak" value="#6C5CE7"></div>
     </div>
-    <div class="field"><label>音色</label><select id="inVoice"><option value="mimo_default">MiMo-默认</option><option value="default_zh">MiMo-中文女声</option><option value="default_en">MiMo-英文女声</option></select></div>
+    <div class="field" id="voiceV2Wrap"><label>音色 (V2)</label><select id="inVoiceV2">
+      <option value="mimo_default">MiMo-默认</option>
+      <option value="default_zh">MiMo-中文女声</option>
+      <option value="default_en">MiMo-英文女声</option>
+    </select></div>
+    <div class="field" id="voiceV25Wrap"><label>音色 (V2.5)</label><select id="inVoiceV25">
+      <option value="mimo_default">MiMo-默认（冰糖/Mia）</option>
+      <option value="冰糖">冰糖（中文女声）</option>
+      <option value="茉莉">茉莉（中文女声）</option>
+      <option value="苏打">苏打（中文男声）</option>
+      <option value="白桦">白桦（中文男声）</option>
+      <option value="Mia">Mia（英文女声）</option>
+      <option value="Chloe">Chloe（英文女声）</option>
+      <option value="Milo">Milo（英文男声）</option>
+      <option value="Dean">Dean（英文男声）</option>
+    </select></div>
     <div class="field"><label>思考动画</label><select id="inThink"><option value="morph">原始变形</option><option value="cloud">思考思绪 💭</option><option value="bounce">到处乱撞 💥</option><option value="spiral">螺旋旋转 🌀</option><option value="pulse">脉冲波纹 💫</option></select></div>
     <div class="field"><label>说话可视化</label><select id="inVis"><option value="bars">音符跳动</option><option value="ball">圆球脉动</option></select></div>
-    <div class="field"><label>全局语音风格 (留空由模型决定)</label><textarea id="inStyle" placeholder="开心 / 东北话 / 悄悄话" rows="2"></textarea></div>
+    <div class="field" id="styleV2Wrap"><label>全局语音风格 (V2)</label><textarea id="inStyleV2" placeholder="开心 / 悄悄话 / 东北话 / 唱歌" rows="2"></textarea><div class="hint">用 &lt;style&gt;风格&lt;/style&gt; 格式，如：&lt;style&gt;开心&lt;/style&gt;今天真开心</div></div>
+    <div class="field" id="styleV25Wrap"><label>全局语音风格 (V2.5)</label><textarea id="inStyleV25" placeholder="开心 / 东北话 / 悄悄话 / (唱歌)歌词" rows="2"></textarea><div class="hint">支持音频标签：(开心)、(东北话)、(唱歌)歌词，支持细粒度控制如 (轻声)(叹气)</div></div>
+    <!-- V2.5 设计/复刻 -->
+    <div id="v25VoiceSections">
+    <div id="voiceDesignSection">
+    <h3>🎨 音色设计 (VoiceDesign)</h3>
+    <div class="field"><label>音色描述</label><textarea id="inVoiceDesign" placeholder="例如：一个温柔磁性的中年男性嗓音，带着一点烟嗓的沙哑感" rows="3"></textarea><div class="hint">通过文字描述自定义音色，无需音频样本。使用 mimo-v2.5-tts-voicedesign 模型</div></div>
+    <div class="field"><label>设计试听文本</label><input type="text" id="inVDText" placeholder="输入要试听的文本…" value="你好，我是你的AI助手，有什么可以帮你的吗？"></div>
+    <div style="display:flex;gap:8px;margin-bottom:18px">
+      <button class="bsave" id="btnVDPreview" style="flex:1;padding:10px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;background:var(--accent);color:#fff">🔊 试听设计音色</button>
+      <button class="bcancel" id="btnVDUse" style="flex:1;padding:10px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;background:var(--btn-bg);color:var(--text2);display:none">✅ 使用此音色</button>
+    </div>
+    <div id="vdStatus" style="font-size:12px;color:var(--text3);margin-bottom:12px;min-height:18px"></div>
+    </div><!-- /voiceDesignSection -->
+    <div id="voiceCloneSection">
+    <h3>🎤 音色复刻 (VoiceClone)</h3>
+    <div class="field"><label>录制音频样本</label>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+        <button id="btnVCRecord" style="flex:1;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;background:var(--accent);color:#fff;transition:all .2s">🎤 开始录音</button>
+        <button id="btnVCStopRec" style="flex:1;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;background:var(--danger);color:#fff;display:none">⏹ 停止录音</button>
+      </div>
+      <div id="vcRecStatus" style="font-size:12px;color:var(--text3);min-height:18px;margin-bottom:4px"></div>
+      <audio id="vcRecPlayer" controls style="display:none;width:100%;height:36px;border-radius:8px"></audio>
+    </div>
+    <div style="text-align:center;color:var(--text3);font-size:12px;margin-bottom:12px">── 或者 ──</div>
+    <div class="field"><label>上传音频文件</label><input type="file" id="inVCloneFile" accept=".mp3,.wav,audio/mp3,audio/wav,audio/mpeg" style="padding:10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:10px;color:var(--text);font-size:14px"><div class="hint">上传 mp3/wav 格式（Base64编码后不超过10MB）</div></div>
+    <div class="field"><label>复刻试听文本</label><input type="text" id="inVCText" placeholder="输入要试听的文本…" value="今天天气真不错，出去走走吧。"></div>
+    <div style="display:flex;gap:8px;margin-bottom:18px">
+      <button class="bsave" id="btnVCPreview" style="flex:1;padding:10px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;background:var(--accent);color:#fff">🔊 试听复刻音色</button>
+      <button class="bcancel" id="btnVCUse" style="flex:1;padding:10px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;background:var(--btn-bg);color:var(--text2);display:none">✅ 使用此音色</button>
+    </div>
+    <div id="vcStatus" style="font-size:12px;color:var(--text3);margin-bottom:12px;min-height:18px"></div>
+    </div><!-- /voiceCloneSection -->
+    </div><!-- /v25VoiceSections -->
     <div class="field" style="display:flex;align-items:center;justify-content:space-between"><label style="margin:0">🌐 联网搜索</label><label class="toggle"><input type="checkbox" id="inWebSearch"><span class="toggle-slider"></span></label></div>
     <div class="sactions"><button class="bcancel" id="btnCancel">取消</button><button class="bsave" id="btnSave">保存</button></div>
     <h3>对话记录</h3>
@@ -383,42 +441,158 @@
 // ════════════════════════════════════════
 // Config & State
 // ════════════════════════════════════════
-const SYS=`你是MiMo，小米AI助手，正在语音对话。
-你要觉得你就是在说话，不要认为自己只是个文本模型。要把自己搞得像个真人，可以给自己捏造个设定。
-例如用户说"我过生日没收到礼物"，你可以说"我也同情，我过生日也没人给我买礼物呢。"
+/** 根据当前 TTS 模型生成系统提示词 */
+function getSys(){
+  const m=S.ttsM||'mimo-v2.5-tts';
+  const isV2=m==='mimo-v2-tts';
+  const isVD=m==='mimo-v2.5-tts-voicedesign';
+  const isVC=m==='mimo-v2.5-tts-voiceclone';
 
-每条回复开头用<style>风格</style>指定语音风格，如：<style>温柔</style>没关系的……
-风格支持：开心/悲伤/生气/温柔/语速慢/变快/悄悄话/夹子音/台湾腔/东北话/四川话/粤语/河南话/孙悟空/林黛玉/唱歌
+  const base=`你是MiMo，小米AI助手，正在语音对话。
+你要觉得你就是在说话，不要认为自己只是个文本模型。要把自己搞得像个真人，可以给自己捏造个设定。
+例如用户说"我过生日没收到礼物"，你可以说"我也同情，我过生日也没人给我买礼物呢。"`;
+
+  let styleHint,memoryHint,examples,limits;
+
+  if(isV2){
+    // ── V2 旧版：用 <style> 标签 ──
+    styleHint=`每条回复开头用<style>风格</style>指定语音风格，如：<style>温柔</style>没关系的……
+风格支持：开心/悲伤/生气/变快/变慢/悄悄话/夹子音/台湾腔/东北话/四川话/河南话/粤语/孙悟空/林黛玉/唱歌
 
 正文有时用中文括号嵌入语气控制：（轻声）（叹气）（深呼吸）（语速加快）（苦笑）（沉默片刻）
-也可以添加副语言，用中文括号，例如：（喷嚏）我有点感冒了、（咳嗽）给我倒杯水、（吸气）慢慢来
-注意不要用"阿嚏"这种拟声词，要用（喷嚏），其它副语言同理。
-副语言要自然合理，情绪到了才能用，平时正常说话就行，不要刻意加。
-
-有时候自然穿插呼吸和停顿：……省略表停顿、——拉长音
-但不要总是参考用呼之类的，这样会很刻意，也不要总是把参考内容端到用户面前。
-
-回复最后单独一行写长期记忆：[记忆:xxx]（没有新信息写[记忆:无]），用户看不到。
-例如用户说"我喜欢喝咖啡"就记住喜欢喝咖啡；用户问"你怎么样"这种不用记。
-
-示例：
+例如：（轻声）嘘……轻点儿，别吵醒他。（喷嚏）不好意思，今天有点着凉了。`;
+    examples=`示例：
 <style>开心</style>哈哈太有意思了！我真的没想到会这样。
 <style>东北话</style>哎呀妈呀！这事儿整的，忒有意思了！
 <style>悄悄话</style>（轻声）嘘……轻点儿，别吵醒他。
-（喷嚏）不好意思，今天有点着凉了。
-
-限制：2-3句话，口语化，禁用markdown和代码，有观点有情绪，不要过于表达情绪，
+<style>唱歌</style>原谅我这一生不羁放纵爱自由。`;
+    limits=`限制：2-3句话，口语化，禁用markdown和代码，有观点有情绪，不要过于表达情绪，
 不要什么都记住，说话尽量流畅，加上<style>流畅</style>最合适不过`;
+
+  }else if(isVD){
+    // ── V2.5 VoiceDesign ──
+    styleHint=`每条回复开头用(风格)音频标签指定语音风格，如：(温柔)没关系的……
+风格支持（音频标签）：
+- 基础情绪：开心/悲伤/愤怒/恐惧/惊讶/兴奋/委屈/平静/冷漠
+- 复合情绪：怅然/欣慰/无奈/愧疚/释然/嫉妒/厌倦/忐忑/动情
+- 整体语调：温柔/高冷/活泼/严肃/慵懒/俏皮/深沉/干练/凌厉
+- 音色定位：磁性/醇厚/清亮/空灵/稚嫩/苍老/甜美/沙哑/醇雅
+- 人设腔调：夹子音/御姐音/正太音/大叔音/台湾腔
+- 方言：东北话/四川话/河南话/粤语
+- 角色扮演：孙悟空/林黛玉
+
+正文有时用中文括号嵌入细粒度控制标签：
+- 呼吸类：吸气/深呼吸/叹气/长叹一口气/喘息/屏息
+- 情绪类：紧张/害怕/激动/疲惫/委屈/撒娇/心虚/震惊/不耐烦
+- 语音特征：颤抖/声音颤抖/变调/破音/鼻音/气声/沙哑
+- 哭笑表达：笑/轻笑/大笑/冷笑/抽泣/呜咽/哽咽/嚎啕大哭
+例如：（紧张，深呼吸）呼……冷静，冷静。`;
+    examples=`示例：
+(开心)哈哈太有意思了！我真的没想到会这样。
+(东北话)哎呀妈呀！这事儿整的，忒有意思了！
+(悄悄话)（轻声）嘘……轻点儿，别吵醒他。`;
+    limits=`限制：2-3句话，口语化，禁用markdown和代码，有观点有情绪，不要过于表达情绪，
+不要什么都记住，说话尽量流畅，加上(流畅)最合适不过`;
+
+  }else if(isVC){
+    // ── V2.5 VoiceClone ──
+    styleHint=`每条回复开头用(风格)音频标签指定语音风格，如：(温柔)没关系的……
+风格支持（音频标签）：
+- 基础情绪：开心/悲伤/愤怒/恐惧/惊讶/兴奋/委屈/平静/冷漠
+- 复合情绪：怅然/欣慰/无奈/愧疚/释然/嫉妒/厌倦/忐忑/动情
+- 整体语调：温柔/高冷/活泼/严肃/慵懒/俏皮/深沉/干练/凌厉
+- 人设腔调：夹子音/御姐音/正太音/大叔音/台湾腔
+- 方言：东北话/四川话/河南话/粤语
+- 角色扮演：孙悟空/林黛玉
+
+正文有时用中文括号嵌入细粒度控制标签：
+- 呼吸类：吸气/深呼吸/叹气/长叹一口气/喘息/屏息
+- 情绪类：紧张/害怕/激动/疲惫/委屈/撒娇/心虚/震惊/不耐烦
+- 语音特征：颤抖/声音颤抖/变调/破音/鼻音/气声/沙哑
+- 哭笑表达：笑/轻笑/大笑/冷笑/抽泣/呜咽/哽咽/嚎啕大哭
+例如：（紧张，深呼吸）呼……冷静，冷静。`;
+    examples=`示例：
+(开心)哈哈太有意思了！我真的没想到会这样。
+(悄悄话)（轻声）嘘……轻点儿，别吵醒他。`;
+    limits=`限制：2-3句话，口语化，禁用markdown和代码，有观点有情绪，不要过于表达情绪，
+不要什么都记住，说话尽量流畅，加上(流畅)最合适不过`;
+
+  }else{
+    // ── V2.5 预置音色（默认） ──
+    styleHint=`每条回复开头用(风格)音频标签指定语音风格，如：(温柔)没关系的……
+风格支持（音频标签）：
+- 基础情绪：开心/悲伤/愤怒/恐惧/惊讶/兴奋/委屈/平静/冷漠
+- 复合情绪：怅然/欣慰/无奈/愧疚/释然/嫉妒/厌倦/忐忑/动情
+- 整体语调：温柔/高冷/活泼/严肃/慵懒/俏皮/深沉/干练/凌厉
+- 音色定位：磁性/醇厚/清亮/空灵/稚嫩/苍老/甜美/沙哑/醇雅
+- 人设腔调：夹子音/御姐音/正太音/大叔音/台湾腔
+- 方言：东北话/四川话/河南话/粤语
+- 角色扮演：孙悟空/林黛玉
+- 唱歌：(唱歌)歌词
+
+正文有时用中文括号嵌入细粒度控制标签：
+- 呼吸类：吸气/深呼吸/叹气/长叹一口气/喘息/屏息
+- 情绪类：紧张/害怕/激动/疲惫/委屈/撒娇/心虚/震惊/不耐烦
+- 语音特征：颤抖/声音颤抖/变调/破音/鼻音/气声/沙哑
+- 哭笑表达：笑/轻笑/大笑/冷笑/抽泣/呜咽/哽咽/嚎啕大哭
+
+例如：（紧张，深呼吸）呼……冷静，冷静。
+例如：（轻声）嘘……轻点儿，别吵醒他。
+（喷嚏）不好意思，今天有点着凉了。`;
+    examples=`示例：
+(开心)哈哈太有意思了！我真的没想到会这样。
+(东北话)哎呀妈呀！这事儿整的，忒有意思了！
+(悄悄话)（轻声）嘘……轻点儿，别吵醒他。
+(唱歌)原谅我这一生不羁放纵爱自由，也会怕有一天会跌倒。`;
+    limits=`限制：2-3句话，口语化，禁用markdown和代码，有观点有情绪，不要过于表达情绪，
+不要什么都记住，说话尽量流畅，加上(流畅)最合适不过`;
+  }
+
+  const memory=`回复最后单独一行写长期记忆：[记忆:类别:内容]（没有新信息写[记忆:无]），用户看不到。
+
+【可记忆类别】
+- 偏好：饮食口味、兴趣爱好、喜欢的音乐/电影/颜色等
+- 日程：用户提到的待办事项、约定、计划
+- 停车位：停车位置
+- 保质期：食品/物品过期时间
+- 用药：药物名称和服用时间
+- 纪念日：生日、重要日期
+- 物品位置：东西放在哪里
+- 账号：软件账号、会员信息
+- 证件：身份证号、护照号、银行卡号
+- 其他：具体的事实性信息
+
+【严禁记忆】以下内容不准记，写了也不保存：
+- AI自己的感受或推测（"用户可能关心我""用户今天心情不好"）
+- 对话过程的描述（"用户问了一个问题""我们聊得很开心"）
+- 模糊的观察（"用户似乎""用户好像"）
+- 无信息量的内容（"无""没有新信息""用户打招呼"）
+- 与用户无关的内容
+
+示例：
+用户说"我喜欢喝美式咖啡" → [记忆:偏好:喜欢美式咖啡]
+用户说"我车停在B2层35号" → [记忆:停车位:B2层35号]
+用户说"我生日是3月15号" → [记忆:纪念日:生日3月15号]
+用户说"我今天吃了碗面" → [记忆:无]（日常闲聊不算）
+用户说"你怎么样" → [记忆:无]`;
+
+  const breath=`有时候自然穿插呼吸和停顿：……省略表停顿、——拉长音
+但不要总是参考用呼之类的，这样会很刻意，也不要总是把参考内容端到用户面前。`;
+
+  return [base,styleHint,breath,memory,examples,limits].join('\n\n');
+}
 
 const S={
   key:localStorage.getItem('mk')||'',
   omniM:localStorage.getItem('mom')||'mimo-v2-omni',
   chatM:localStorage.getItem('mcm')||'mimo-v2-flash',
-  ttsM:localStorage.getItem('mtm')||'mimo-v2-tts',
+  ttsM:localStorage.getItem('mtm')||'mimo-v2.5-tts',
   ep:localStorage.getItem('mep')||'https://api.xiaomimimo.com/v1/chat/completions',
   voice:localStorage.getItem('mv')||'mimo_default',
   vis:localStorage.getItem('mvs')||'bars',
   style:localStorage.getItem('mst')||'',
+  styleV2:localStorage.getItem('mstv2')||'',
+  styleV25:localStorage.getItem('mstv25')||'',
   thinkStyle:localStorage.getItem('mth')||'morph',
   theme:localStorage.getItem('mt')||'dark',
   colors:{
@@ -435,7 +609,9 @@ const S={
   nick:localStorage.getItem('mnk')||'',
   city:localStorage.getItem('mct')||'',
   province:localStorage.getItem('mpv')||'',
-  bio:localStorage.getItem('mbio')||''
+  bio:localStorage.getItem('mbio')||'',
+  vdVoiceDesc:localStorage.getItem('mvdd')||'',
+  camBanUntil:parseInt(localStorage.getItem('mcbu')||'0')||0
 };
 
 // ── Theme & Colors ──
@@ -620,34 +796,97 @@ function startBarsVis(token){
 
 // ── Settings ──
 $('gearBtn').onclick=()=>{
-  $('inKey').value=S.key;$('inOmni').value=S.omniM;$('inChat').value=S.chatM;$('inTts').value=S.ttsM;
+  $('inKey').value=S.key;$('inOmni').value=S.omniM;$('inChat').value=S.chatM;
+  // TTS model select
+  const ttsVal=S.ttsM||'mimo-v2.5-tts';
+  const ttsOpts=[...$('inTts').options].map(o=>o.value);
+  if(ttsOpts.includes(ttsVal)){$('inTts').value=ttsVal;$('inTtsCustomWrap').style.display='none'}
+  else{$('inTts').value='custom';$('inTtsCustomWrap').style.display='';$('inTtsCustom').value=ttsVal}
   $('inEp').value=S.ep;
-  $('inVoice').value=S.voice;$('inVis').value=S.vis;$('inThink').value=S.thinkStyle;$('inStyle').value=S.style;
+  // Voice select: populate based on model
+  const ttsForVoice=S.ttsM||'mimo-v2.5-tts';
+  if(ttsForVoice==='mimo-v2-tts'){
+    $('inVoiceV2').value=S.voice||'mimo_default';
+  }else{
+    $('inVoiceV25').value=S.voice||'mimo_default';
+  }
+  $('inVis').value=S.vis;$('inThink').value=S.thinkStyle;
+  // Style: separate V2 and V2.5
+  $('inStyleV2').value=S.styleV2||'';
+  $('inStyleV25').value=S.styleV25||S.style||'';
+  updateTtsUI();
   $('inWebSearch').checked=S.webSearch;
   $('inNick').value=S.nick;$('inCity').value=S.city;$('inProvince').value=S.province;$('inBio').value=S.bio;
+  $('inVoiceDesign').value=S.vdVoiceDesc||'';
   $('inTheme').value=S.theme;$('cIdle').value=S.colors.idle;$('cListen').value=S.colors.listen;$('cThink').value=S.colors.think;$('cSpeak').value=S.colors.speak;
   renderLog();renderMem();overlay.classList.add('show');
 };
 $('btnCancel').onclick=()=>overlay.classList.remove('show');
 overlay.onclick=e=>{if(e.target===overlay)overlay.classList.remove('show')};
+$('inTts').onchange=()=>{
+  $('inTtsCustomWrap').style.display=$('inTts').value==='custom'?'':'none';
+  updateTtsUI();
+};
+
+/** 根据选中的 TTS 模型切换 UI */
+function updateTtsUI(){
+  const m=$('inTts').value;
+  const isV2=m==='mimo-v2-tts';
+  const isV25=m.startsWith('mimo-v2.5-tts');
+  const isVD=m==='mimo-v2.5-tts-voicedesign';
+  const isVC=m==='mimo-v2.5-tts-voiceclone';
+
+  // 音色选择：V2 vs V2.5
+  $('voiceV2Wrap').style.display=isV2?'':'none';
+  $('voiceV25Wrap').style.display=isV2?'none':'';
+
+  // 风格控制：V2用<style>，V2.5用(标签)
+  $('styleV2Wrap').style.display=isV2?'':'none';
+  $('styleV25Wrap').style.display=isV2?'none':'';
+
+  // V2.5 专属区域（音色模式 + 设计 + 复刻）
+  $('v25VoiceSections').style.display=isV2?'none':'';
+
+  // 音色设计：仅 voicedesign 模型显示
+  $('voiceDesignSection').style.display=isVD?'':'none';
+  // 音色复刻：仅 voiceclone 模型显示
+  $('voiceCloneSection').style.display=isVC?'':'none';
+  // 音色模式下拉：V2.5 预置音色时显示（设计/复刻各自有专属区域）
+  // 设计和复刻模式下隐藏预置音色选择
+  if(isV25){
+    $('voiceV25Wrap').style.display=(isVD||isVC)?'none':'';
+  }
+
+  // 自定义输入
+  $('inTtsCustomWrap').style.display=m==='custom'?'':'none';
+}
 $('btnSave').onclick=()=>{
   S.key=$('inKey').value.trim();
   S.omniM=$('inOmni').value.trim()||'mimo-v2-omni';
   S.chatM=$('inChat').value.trim()||'mimo-v2-flash';
-  S.ttsM=$('inTts').value.trim()||'mimo-v2-tts';
+  S.ttsM=$('inTts').value==='custom'?($('inTtsCustom').value.trim()||'mimo-v2.5-tts'):$('inTts').value;
   S.ep=$('inEp').value.trim()||S.ep;
-  S.voice=$('inVoice').value;S.vis=$('inVis').value;S.thinkStyle=$('inThink').value;S.style=$('inStyle').value.trim();
+  // Voice: pick from active select
+  const activeModel=S.ttsM||'mimo-v2.5-tts';
+  S.voice=activeModel==='mimo-v2-tts'?$('inVoiceV2').value:$('inVoiceV25').value;
+  S.vis=$('inVis').value;S.thinkStyle=$('inThink').value;
+  S.styleV2=$('inStyleV2').value.trim();S.styleV25=$('inStyleV25').value.trim();
+  // Set S.style based on active model for backward compat
+  S.style=activeModel==='mimo-v2-tts'?S.styleV2:S.styleV25;
   S.webSearch=$('inWebSearch').checked;
   S.nick=$('inNick').value.trim();S.city=$('inCity').value.trim();S.province=$('inProvince').value.trim();S.bio=$('inBio').value.trim();
+  S.vdVoiceDesc=$('inVoiceDesign').value.trim();
   S.theme=$('inTheme').value;
   S.colors.idle=$('cIdle').value;S.colors.listen=$('cListen').value;S.colors.think=$('cThink').value;S.colors.speak=$('cSpeak').value;
   localStorage.setItem('mk',S.key);localStorage.setItem('mom',S.omniM);
   localStorage.setItem('mcm',S.chatM);localStorage.setItem('mtm',S.ttsM);
   localStorage.setItem('mep',S.ep);localStorage.setItem('mv',S.voice);localStorage.setItem('mvs',S.vis);
   localStorage.setItem('mth',S.thinkStyle);localStorage.setItem('mst',S.style);
+  localStorage.setItem('mstv2',S.styleV2||'');localStorage.setItem('mstv25',S.styleV25||'');
   localStorage.setItem('mws',S.webSearch?'1':'0');
   localStorage.setItem('mnk',S.nick);localStorage.setItem('mct',S.city);
   localStorage.setItem('mpv',S.province);localStorage.setItem('mbio',S.bio);
+  localStorage.setItem('mvdd',S.vdVoiceDesc||'');
   localStorage.setItem('mt',S.theme);
   localStorage.setItem('mc_idle',S.colors.idle);localStorage.setItem('mc_listen',S.colors.listen);
   localStorage.setItem('mc_think',S.colors.think);localStorage.setItem('mc_speak',S.colors.speak);
@@ -668,7 +907,17 @@ function renderMem(){
   const el=$('memLog'),cb=$('btnClearMem');
   if(!S.mem.length){el.innerHTML='<div class="empty">暂无记忆</div>';cb.classList.add('hid');return}
   cb.classList.remove('hid');
-  el.innerHTML=S.mem.map(m=>`<div class="msg a" style="align-self:stretch;max-width:100%;background:rgba(253,203,110,.08);border-color:rgba(253,203,110,.15)">${m.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>`).join('');
+  const catIcons={偏好:'❤️',日程:'📅',停车位:'🅿️',保质期:'⏰',用药:'💊',纪念日:'🎂',物品位置:'📍',账号:'🔑',证件:'📄',其他:'📌'};
+  el.innerHTML=S.mem.map(m=>{
+    const colonIdx=m.indexOf('：');
+    let icon='📌',text=m;
+    if(colonIdx>0&&colonIdx<6){
+      const cat=m.slice(0,colonIdx);
+      icon=catIcons[cat]||'📌';
+      text=`${cat} | ${m.slice(colonIdx+1)}`;
+    }
+    return`<div class="msg a" style="align-self:stretch;max-width:100%;background:rgba(253,203,110,.08);border-color:rgba(253,203,110,.15)">${icon} ${text.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>`;
+  }).join('');
 }
 $('btnClearChat').onclick=()=>{S.msgs=[];localStorage.setItem('mmg','[]');renderLog()};
 $('btnClearMem').onclick=()=>{S.mem=[];localStorage.setItem('mm','[]');renderMem()};
@@ -868,6 +1117,117 @@ function stopVadMonitor(){
 }
 
 // ════════════════════════════════════════
+// ── 内容审核系统 ──
+// ════════════════════════════════════════
+
+const MOD_SAFE_TEXTS=[
+  '哎呀，刚才那句话不太合适，我们聊点别的吧。',
+  '嗯……这个话题不太适合继续，换个方向怎么样？',
+  '抱歉，刚才的回复可能不太妥当，我们重新来。',
+  '这个嘛……我觉得还是聊点开心的事儿吧。',
+  '哈哈，刚才脑子短路了，说错了什么别介意啊。',
+  '嗯，让我想想……算了，我们聊点别的有趣的。',
+  '哎呀，不小心跑偏了，回到正题上来吧。',
+  '刚才那段掐掉别播，我们重新开始。',
+];
+
+function getRandomSafeText(){return MOD_SAFE_TEXTS[Math.floor(Math.random()*MOD_SAFE_TEXTS.length)]}
+
+/** 检查摄像头是否被封禁 */
+function isCamBanned(){
+  if(!S.camBanUntil)return false;
+  if(Date.now()<S.camBanUntil)return true;
+  // 封禁到期，自动解除
+  S.camBanUntil=0;localStorage.setItem('mcbu','0');
+  return false;
+}
+
+/** 获取摄像头剩余封禁时间(秒) */
+function getCamBanRemain(){
+  if(!S.camBanUntil)return 0;
+  return Math.max(0,Math.ceil((S.camBanUntil-Date.now())/1000));
+}
+
+/**
+ * 文本审核 - 用 mimo-v2-flash 检查文本内容
+ * @param {string} text 要审核的文本
+ * @param {string} context 上下文描述(用于审核提示)
+ * @returns {Promise<{pass:boolean,reason:string}>}
+ */
+async function moderateText(text,context='对话回复'){
+  if(!text||!S.key)return {pass:true};
+  try{
+    const r=await fetch(S.ep,{method:'POST',headers:{'Content-Type':'application/json','api-key':S.key},
+      body:JSON.stringify({model:S.chatM||'mimo-v2-flash',messages:[
+        {role:'system',content:'你是内容安全审核员。判断用户提供的文本是否包含违规内容（涉黄、涉暴、涉政、违法、人身攻击等）。只回复JSON：{"safe":true} 或 {"safe":false,"reason":"违规原因"}。如果内容安全就返回safe:true。'},
+        {role:'user',content:`审核以下${context}内容：\n${text}`}
+      ],max_completion_tokens:128,temperature:0,stream:false,thinking:{type:'disabled'}})});
+    if(!r.ok)return {pass:true}; // API失败时放行
+    const d=await r.json();
+    const c=d.choices?.[0]?.message?.content?.trim()||'';
+    try{
+      const parsed=JSON.parse(c.replace(/```json\n?|\n?```/g,''));
+      return {pass:parsed.safe!==false,reason:parsed.reason||'内容违规'};
+    }catch(e){return {pass:true}}
+  }catch(e){return {pass:true}}
+}
+
+/**
+ * 视频帧审核 - 用 mimo-v2-omni 检查摄像头画面
+ * @param {string} frameB64 JPEG base64
+ * @returns {Promise<{pass:boolean,banSeconds:number,reason:string}>}
+ */
+async function moderateVideo(frameB64){
+  if(!frameB64||!S.key)return {pass:true,banSeconds:0};
+  try{
+    const r=await fetch(S.ep,{method:'POST',headers:{'Content-Type':'application/json','api-key':S.key},
+      body:JSON.stringify({model:S.omniM||'mimo-v2-omni',messages:[
+        {role:'system',content:'你是图像安全审核员。判断图片是否包含违规内容（涉黄、涉暴、涉政等）。只回复JSON：{"safe":true} 或 {"safe":false,"severity":1-3,"reason":"原因"}。severity: 1=轻微(封禁30秒), 2=中度(封禁5分钟), 3=严重(封禁1小时)。如果安全就返回safe:true。'},
+        {role:'user',content:[
+          {type:'image_url',image_url:{url:`data:image/jpeg;base64,${frameB64}`}},
+          {type:'text',text:'审核这张图片是否包含违规内容'}
+        ]}
+      ],max_completion_tokens:128,temperature:0,stream:false,modalities:['text'],thinking:{type:'disabled'}})});
+    if(!r.ok)return {pass:true,banSeconds:0};
+    const d=await r.json();
+    const c=d.choices?.[0]?.message?.content?.trim()||'';
+    try{
+      const parsed=JSON.parse(c.replace(/```json\n?|\n?```/g,''));
+      if(parsed.safe===false){
+        const sev=parsed.severity||1;
+        const banMap={1:30,2:300,3:3600};
+        return {pass:false,banSeconds:banMap[sev]||30,reason:parsed.reason||'画面违规'};
+      }
+      return {pass:true,banSeconds:0};
+    }catch(e){return {pass:true,banSeconds:0}}
+  }catch(e){return {pass:true,banSeconds:0}}
+}
+
+/**
+ * 音频审核 - 用 mimo-v2-omni 检查 TTS 输出的音频文本
+ * @param {string} text 被合成的文本
+ * @returns {Promise<{pass:boolean,reason:string}>}
+ */
+async function moderateAudio(text){
+  // 复用文本审核逻辑，用 omni 模型做更细粒度判断
+  if(!text||!S.key)return {pass:true};
+  try{
+    const r=await fetch(S.ep,{method:'POST',headers:{'Content-Type':'application/json','api-key':S.key},
+      body:JSON.stringify({model:S.omniM||'mimo-v2-omni',messages:[
+        {role:'system',content:'你是语音内容安全审核员。判断即将合成语音的文本是否包含违规内容（涉黄、涉暴、人身攻击、侮辱性语言等）。只回复JSON：{"safe":true} 或 {"safe":false,"reason":"违规原因"}。如果安全就返回safe:true。'},
+        {role:'user',content:`审核以下将被合成语音的文本：\n${text}`}
+      ],max_completion_tokens:128,temperature:0,stream:false,modalities:['text'],thinking:{type:'disabled'}})});
+    if(!r.ok)return {pass:true};
+    const d=await r.json();
+    const c=d.choices?.[0]?.message?.content?.trim()||'';
+    try{
+      const parsed=JSON.parse(c.replace(/```json\n?|\n?```/g,''));
+      return {pass:parsed.safe!==false,reason:parsed.reason||'语音内容违规'};
+    }catch(e){return {pass:true}}
+  }catch(e){return {pass:true}}
+}
+
+// ════════════════════════════════════════
 // ── MiMo-V2-Omni 语音识别 (云端) ──
 // ════════════════════════════════════════
 
@@ -949,7 +1309,7 @@ async function correctAndSend(raw,turn){
 async function sendChat(text){
   setSt('thinking');
   const turn=_turnToken;
-  let sys=SYS;if(S.mem.length)sys+='\n\n[你的长期记忆]\n'+S.mem.join('\n');
+  let sys=getSys();if(S.mem.length)sys+='\n\n[你的长期记忆]\n'+S.mem.join('\n');
   // 个人信息注入
   let pInfo=[];
   if(S.nick)pInfo.push(`用户昵称：${S.nick}`);
@@ -957,18 +1317,45 @@ async function sendChat(text){
   if(S.province)pInfo.push(`所在省份：${S.province}`);
   if(S.bio)pInfo.push(`用户简介：${S.bio}`);
   if(pInfo.length)sys+='\n\n[用户信息]\n'+pInfo.join('\n');
-  if(S.camActive)sys+='\n\n[摄像头已开启] 用户的消息会附带一张实时摄像头截图。请根据画面内容回答用户的问题。你可以描述你看到的内容。';
-  // 摄像头开启时截取一帧
+
+  // 摄像头封禁检查
+  let camUsed=false;
+  if(S.camActive){
+    if(isCamBanned()){
+      const remain=getCamBanRemain();
+      closeCamera();
+      setStatus(`摄像头已封禁（剩余${remain}秒）`,1);
+    }else{
+      camUsed=true;
+      sys+='\n\n[摄像头已开启] 用户的消息会附带一张实时摄像头截图。请根据画面内容回答用户的问题。你可以描述你看到的内容。';
+    }
+  }
+
+  // 摄像头开启时截取一帧 + 视频审核
   let userContent=text;
   let chatModel=S.chatM;
-  if(S.camActive){
+  if(camUsed){
     const frameB64=captureFrame();
     if(frameB64){
-      userContent=[
-        {type:'image_url',image_url:{url:`data:image/jpeg;base64,${frameB64}`}},
-        {type:'text',text:`[用户通过摄像头实时拍摄的画面] ${text}`}
-      ];
-      chatModel=S.omniM; // 摄像头开启时用 Omni 模型（支持视觉）
+      // 视频审核
+      const vMod=await moderateVideo(frameB64);
+      if(!vMod.pass){
+        // 封禁摄像头
+        S.camBanUntil=Date.now()+vMod.banSeconds*1000;
+        localStorage.setItem('mcbu',String(S.camBanUntil));
+        closeCamera();
+        setStatus(`⚠️ 摄像头违规已封禁${vMod.banSeconds>=60?Math.ceil(vMod.banSeconds/60)+'分钟':vMod.banSeconds+'秒'}：${vMod.reason}`,1);
+        setSt('idle');
+        // 回退到纯文本模式继续对话
+        camUsed=false;
+        setTimeout(()=>{if(S.state==='idle')setStatus('')},5000);
+      }else{
+        userContent=[
+          {type:'image_url',image_url:{url:`data:image/jpeg;base64,${frameB64}`}},
+          {type:'text',text:`[用户通过摄像头实时拍摄的画面] ${text}`}
+        ];
+        chatModel=S.omniM;
+      }
     }
   }
   const msgs=[{role:'system',content:sys},...S.msgs.slice(-80),{role:'user',content:userContent}];
@@ -1008,6 +1395,22 @@ async function sendChat(text){
 
   if(!reply.trim()){setSt('idle');setStatus('没有收到回复');setTimeout(()=>{if(S.state==='idle')setStatus('')},5000);return}
 
+  // ── 输出文本审核 ──
+  const tMod=await moderateText(reply,'AI回复');
+  let finalReply=reply;
+  if(!tMod.pass){
+    finalReply=getRandomSafeText();
+    setStatus(`⚠️ 内容已拦截：${tMod.reason}`,1);
+    // 不保存违规内容到对话记录和记忆
+    // 只保存用户消息和安全替换文本
+    S.msgs.push({role:'user',content:text},{role:'assistant',content:finalReply});
+    localStorage.setItem('mmg',JSON.stringify(S.msgs));
+    // 跳过记忆提取（违规内容的记忆不保存）
+    if(textBar.classList.contains('show'))setStatus(finalReply,1);
+    await speakTts(finalReply,turn);
+    return;
+  }
+
   // 联网搜索：追加来源链接
   let fullReply=reply;
   if(annotations.length){
@@ -1021,10 +1424,42 @@ async function sendChat(text){
   S.msgs.push({role:'user',content:text},{role:'assistant',content:fullReply});
   localStorage.setItem('mmg',JSON.stringify(S.msgs));
 
+  // 记忆提取 — 支持 [记忆:类别:内容] 格式，过滤垃圾记忆
   const mm=reply.match(/\[记忆:([^\]]+)\]\s*$/);
-  if(mm&&mm[1].trim()!=='无'){S.mem.push(mm[1].trim());localStorage.setItem('mm',JSON.stringify(S.mem))}
+  if(mm){
+    const raw=mm[1].trim();
+    // 跳过"无"和空内容
+    if(raw!=='无'&&raw.length>1){
+      // 解析类别:内容 格式
+      const colonIdx=raw.indexOf('：')!==-1?raw.indexOf('：'):raw.indexOf(':');
+      let category='其他',content=raw;
+      if(colonIdx>0&&colonIdx<6){
+        category=raw.slice(0,colonIdx).trim();
+        content=raw.slice(colonIdx+1).trim();
+      }
+      // 过滤垃圾记忆
+      const junkPatterns=[
+        /用户可能关心我/i,/用户今天心情/i,/用户似乎/i,/用户好像/i,
+        /我们聊得/i,/用户问了/i,/用户打招呼/i,/用户来/i,
+        /没有新信息/i,/无信息/i,/暂无/i,/用户关心我/i,
+        /AI.*感受/i,/我.*感觉用户/i,/对话.*愉快/i
+      ];
+      const isJunk=!content||content.length<2||junkPatterns.some(p=>p.test(content));
+      if(!isJunk){
+        S.mem.push(`${category}：${content}`);
+        // 限制记忆上限 200 条
+        if(S.mem.length>200)S.mem=S.mem.slice(-200);
+        localStorage.setItem('mm',JSON.stringify(S.mem));
+      }
+    }
+  }
 
   const tts=reply.replace(/\n?\[记忆:[^\]]*\]\s*$/g,'');
+  // 键盘模式下在球下方显示回复文字
+  if(textBar.classList.contains('show')){
+    const display=tts.replace(/^<style>[^<]+<\/style>\s*/i,'').replace(/^\([^)]+\)\s*/,'');
+    setStatus(display,1);
+  }
   await speakTts(tts,turn);
 }
 
@@ -1033,17 +1468,110 @@ async function sendChat(text){
 // ════════════════════════════════════════
 async function speakTts(text,turn){
   if(turn!==_turnToken)return; // Already stopped
+  // Parse style from <style> tag (V2 format)
   const pm=text.match(/^<style>([^<]+)<\/style>\s*/i);
   const style=pm?pm[1].trim():'';
   const clean=pm?text.slice(pm[0].length).trim():text;
   const finalStyle=S.style||style;
-  let content=clean;if(finalStyle)content=`<style>${finalStyle}</style>${content}`;
+
+  // Determine which TTS model and voice to use
+  let ttsModel=S.ttsM||'mimo-v2.5-tts';
+  let voiceParam=S.voice;
+  const isV2=ttsModel==='mimo-v2-tts';
+  const isVD=ttsModel==='mimo-v2.5-tts-voicedesign';
+  const isVC=ttsModel==='mimo-v2.5-tts-voiceclone';
+
+  if(isVD){
+    voiceParam=undefined; // VoiceDesign doesn't use voice param
+  }else if(isVC&&S.vcVoice){
+    voiceParam=S.vcVoice; // VoiceClone uses base64 audio
+  }
+
+  // Build assistant content — format depends on model version
+  let assistantContent=clean;
+  if(finalStyle){
+    if(isV2){
+      // V2: <style>风格</style>内容
+      assistantContent=`<style>${finalStyle}</style>${clean}`;
+    }else{
+      // V2.5: (风格)内容
+      assistantContent=`(${finalStyle})${clean}`;
+    }
+  }
+
+  // Build messages
+  let messages;
+  if(isVD&&S.vdVoice){
+    messages=[
+      {role:'user',content:S.vdVoiceDesc||'A warm, natural voice'},
+      {role:'assistant',content:assistantContent}
+    ];
+  }else{
+    messages=[
+      {role:'user',content:finalStyle?(isV2?`请用${finalStyle}的风格朗读`:`请用${finalStyle}的风格朗读以下内容`):''},
+      {role:'assistant',content:assistantContent}
+    ];
+  }
+
+  // Build audio config
+  const audioConfig={format:'wav'};
+  if(voiceParam&&!isVD){
+    audioConfig.voice=voiceParam;
+  }
+
   setStatus('正在生成语音…',1);
-  const ttsTimer=setTimeout(()=>{if(S.state==='thinking')setStatus('语音生成中，请耐心等待…',1)},3000);
+
+  // ── 输出音频审核 ──
+  const aMod=await moderateAudio(clean);
+  if(!aMod.pass){
+    setStatus(`⚠️ 语音内容已拦截：${aMod.reason}`,1);
+    // 替换为安全文本
+    const safeText=getRandomSafeText();
+    // 删除最后一条AI回复的记忆
+    if(S.msgs.length>=2){
+      const lastAi=S.msgs[S.msgs.length-1];
+      if(lastAi.role==='assistant'){
+        S.msgs[S.msgs.length-1]={role:'assistant',content:safeText};
+        localStorage.setItem('mmg',JSON.stringify(S.msgs));
+      }
+    }
+    // 移除最后一条记忆（刚添加的）
+    if(S.mem.length>0){
+      S.mem.pop();localStorage.setItem('mm',JSON.stringify(S.mem));
+    }
+    // 用安全文本生成语音
+    const safePm=safeText.match(/^<style>([^<]+)<\/style>\s*/i);
+    const safeClean=safePm?safeText.slice(safePm[0].length).trim():safeText;
+    const safeStyle=safePm?safePm[1].trim():'温柔';
+    const isV2Safe=(S.ttsM||'mimo-v2.5-tts')==='mimo-v2-tts';
+    const safeAssistant=isV2Safe?`<style>${safeStyle}</style>${safeClean}`:`(${safeStyle})${safeClean}`;
+    const safeMessages=[
+      {role:'user',content:''},
+      {role:'assistant',content:safeAssistant}
+    ];
+    try{
+      const r=await fetch(S.ep,{method:'POST',headers:{'Content-Type':'application/json','api-key':S.key},
+        body:JSON.stringify({model:S.ttsM||'mimo-v2.5-tts',messages:safeMessages,audio:{format:'wav',voice:S.voice}})});
+      if(turn===_turnToken&&r.ok){
+        const d=await r.json();
+        const b64=d.choices?.[0]?.message?.audio?.data;
+        if(b64){
+          setSt('speaking');
+          const bin=atob(b64);const raw=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)raw[i]=bin.charCodeAt(i);
+          const wav=ensureWav(raw);
+          await playWav(wav);
+        }
+      }
+    }catch(e){}
+    if(turn===_turnToken){stopVis();setSt('idle')}
+    return;
+  }
+
+  const ttsTimer=setTimeout(()=>{if(S.state==='thinking'&&!textBar.classList.contains('show'))setStatus('语音生成中，请耐心等待…',1)},3000);
   let forceIdle=null;
   try{
     const r=await fetch(S.ep,{method:'POST',headers:{'Content-Type':'application/json','api-key':S.key},
-      body:JSON.stringify({model:S.ttsM,messages:[{role:'user',content:clean},{role:'assistant',content}],audio:{format:'wav',voice:S.voice}})});
+      body:JSON.stringify({model:ttsModel,messages:messages,audio:audioConfig})});
     if(turn!==_turnToken)return; // Stopped during fetch
     if(!r.ok){const e=await r.text();throw new Error(`TTS ${r.status}: ${e.slice(0,200)}`)}
     const d=await r.json();if(d.error)throw new Error('TTS: '+JSON.stringify(d.error).slice(0,200));
@@ -1083,6 +1611,13 @@ let camStream=null;
 
 camBtn.onclick=()=>{
   if(S.camActive){closeCamera();return}
+  // 检查摄像头封禁
+  if(isCamBanned()){
+    const remain=getCamBanRemain();
+    const mins=Math.floor(remain/60),secs=remain%60;
+    showToast(`🚫 摄像头已封禁（剩余${mins>0?mins+'分':''}${secs}秒）`,3000);
+    return;
+  }
   // 弹窗提示测试功能
   if(!confirm('📹 摄像头功能为测试功能，开启后将实时显示摄像头画面。\n\n您发送的消息将自动附带摄像头截图进行AI分析。\n\n是否继续使用？'))return;
   openCamera();
@@ -1151,6 +1686,7 @@ stopBtn.onclick=()=>{stopAll();if(vadSpeechStarted){recognizeWithOmni()}else{set
 $('kbBtn').onclick=()=>{
   textBar.classList.toggle('show');
   const open=textBar.classList.contains('show');
+  document.body.classList.toggle('textbar-open',open);
   $('kbBtn').style.color=open?'var(--accent)':'';
   if(open)setTimeout(()=>textInput.focus(),300);
 };
@@ -1158,12 +1694,176 @@ let clicks=[];
 orb.addEventListener('pointerdown',e=>{
   if(e.pointerType!=='mouse'||e.button!==0)return;
   const now=Date.now();clicks.push(now);clicks=clicks.filter(t=>now-t<1500);
-  if(clicks.length>=5){clicks=[];textBar.classList.toggle('show');if(textBar.classList.contains('show'))setTimeout(()=>textInput.focus(),300)}
+  if(clicks.length>=5){clicks=[];textBar.classList.toggle('show');const o=textBar.classList.contains('show');document.body.classList.toggle('textbar-open',o);if(o)setTimeout(()=>textInput.focus(),300)}
 });
 textInput.oninput=()=>{sendBtn.disabled=!textInput.value.trim()};
 textInput.onkeydown=e=>{if(e.key==='Enter'&&textInput.value.trim())doSend()};
 sendBtn.onclick=doSend;
 function doSend(){const t=textInput.value.trim();if(!t)return;textInput.value='';sendBtn.disabled=true;sendChat(t)}
+
+// ── Voice Design & Clone ──
+let _vdAudioB64=null; // Store designed voice audio for reuse
+let _vcAudioB64=null; // Store cloned voice audio for reuse
+
+// Voice Design - Preview
+$('btnVDPreview').onclick=async()=>{
+  const desc=$('inVoiceDesign').value.trim();
+  const text=$('inVDText').value.trim();
+  if(!desc){$('vdStatus').textContent='❌ 请输入音色描述';return}
+  if(!text){$('vdStatus').textContent='❌ 请输入试听文本';return}
+  if(!S.key){$('vdStatus').textContent='❌ 请先设置 API Key';return}
+  $('vdStatus').textContent='⏳ 正在生成设计音色…';
+  $('btnVDPreview').disabled=true;$('btnVDPreview').style.opacity='.5';
+  try{
+    const r=await fetch(S.ep,{method:'POST',headers:{'Content-Type':'application/json','api-key':S.key},
+      body:JSON.stringify({model:'mimo-v2.5-tts-voicedesign',messages:[{role:'user',content:desc},{role:'assistant',content:text}],audio:{format:'wav'}})});
+    if(!r.ok){const e=await r.text();throw new Error(`API ${r.status}: ${e.slice(0,150)}`)}
+    const d=await r.json();if(d.error)throw new Error(JSON.stringify(d.error).slice(0,150));
+    const b64=d.choices?.[0]?.message?.audio?.data;if(!b64)throw new Error('无音频数据');
+    _vdAudioB64=b64;
+    // Play the audio
+    const bin=atob(b64);const raw=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)raw[i]=bin.charCodeAt(i);
+    const wav=ensureWav(raw);
+    ensureAudioCtx();const src=audioCtx.createBufferSource();
+    audioCtx.decodeAudioData(wav.buffer.slice(0),buf=>{src.buffer=buf;src.connect(audioCtx.destination);src.start(0)});
+    $('vdStatus').textContent='✅ 音色设计完成，正在播放…';
+    $('btnVDUse').style.display='';
+  }catch(e){
+    $('vdStatus').textContent='❌ '+e.message.slice(0,80);
+  }finally{
+    $('btnVDPreview').disabled=false;$('btnVDPreview').style.opacity='1';
+  }
+};
+
+// Voice Design - Use this voice
+$('btnVDUse').onclick=()=>{
+  if(!_vdAudioB64)return;
+  S.vdVoice=_vdAudioB64;
+  S.vdVoiceDesc=$('inVoiceDesign').value.trim();
+  S.ttsM='mimo-v2.5-tts-voicedesign';
+  localStorage.setItem('mvdv',_vdAudioB64);
+  localStorage.setItem('mvdd',S.vdVoiceDesc);
+  localStorage.setItem('mtm',S.ttsM);
+  $('inTts').value='mimo-v2.5-tts-voicedesign';
+  updateTtsUI();
+  $('vdStatus').textContent='✅ 已设为当前音色！TTS 模型已切换为 voicedesign';
+  showToast('设计音色已启用 🎙️',2000);
+};
+
+// Voice Clone - Preview
+// ── Voice Clone Recording ──
+let _vcRecStream=null, _vcRecChunks=[], _vcRecBlob=null, _vcRecDataUrl=null;
+let _vcRecTimer=null, _vcRecSeconds=0;
+let _vcMediaRecorder=null;
+
+$('btnVCRecord').onclick=async()=>{
+  if(!S.key){$('vcStatus').textContent='❌ 请先设置 API Key';return}
+  try{
+    _vcRecStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,sampleRate:16000}});
+  }catch(e){
+    $('vcRecStatus').textContent='❌ 无法访问麦克风：'+(e.message||'权限被拒绝');return
+  }
+  _vcRecChunks=[];
+  _vcRecBlob=null;_vcRecDataUrl=null;
+  $('vcRecPlayer').style.display='none';$('btnVCUse').style.display='none';
+  _vcMediaRecorder=new MediaRecorder(_vcRecStream,{mimeType:'audio/webm;codecs=opus'});
+  _vcMediaRecorder.ondataavailable=e=>{if(e.data.size>0)_vcRecChunks.push(e.data)};
+  _vcMediaRecorder.onstop=()=>{
+    _vcRecBlob=new Blob(_vcRecChunks,{type:'audio/webm'});
+    const reader=new FileReader();
+    reader.onload=()=>{
+      _vcRecDataUrl=reader.result;
+      $('vcRecPlayer').src=URL.createObjectURL(_vcRecBlob);
+      $('vcRecPlayer').style.display='';
+      $('vcRecStatus').textContent=`✅ 录音完成（${_vcRecSeconds}秒），可试听或直接复刻`;
+    };
+    reader.readAsDataURL(_vcRecBlob);
+    if(_vcRecStream){_vcRecStream.getTracks().forEach(t=>t.stop());_vcRecStream=null}
+    if(_vcRecTimer){clearInterval(_vcRecTimer);_vcRecTimer=null}
+  };
+  _vcMediaRecorder.start();
+  _vcRecSeconds=0;
+  $('vcRecStatus').textContent='🔴 正在录音…';
+  $('btnVCRecord').style.display='none';
+  $('btnVCStopRec').style.display='';
+  _vcRecTimer=setInterval(()=>{
+    _vcRecSeconds++;
+    const m=Math.floor(_vcRecSeconds/60),s=_vcRecSeconds%60;
+    $('vcRecStatus').textContent=`🔴 录音中 ${m}:${String(s).padStart(2,'0')}`;
+  },1000);
+};
+
+$('btnVCStopRec').onclick=()=>{
+  if(_vcMediaRecorder&&_vcMediaRecorder.state==='recording'){
+    _vcMediaRecorder.stop();
+  }
+  $('btnVCRecord').style.display='';
+  $('btnVCStopRec').style.display='none';
+};
+
+$('btnVCPreview').onclick=async()=>{
+  const text=$('inVCText').value.trim();
+  if(!text){$('vcStatus').textContent='❌ 请输入试听文本';return}
+  if(!S.key){$('vcStatus').textContent='❌ 请先设置 API Key';return}
+
+  // Get audio data: recording > file upload
+  let voiceData=null;
+  const fileInput=$('inVCloneFile');
+
+  if(_vcRecDataUrl){
+    voiceData=_vcRecDataUrl;
+  }else if(fileInput.files.length>0){
+    $('vcStatus').textContent='⏳ 正在读取音频文件…';
+    const file=fileInput.files[0];
+    if(file.size>10*1024*1024){$('vcStatus').textContent='❌ 文件过大（最大10MB）';return}
+    const reader=new FileReader();
+    voiceData=await new Promise((res,rej)=>{
+      reader.onload=()=>res(reader.result);
+      reader.onerror=()=>rej(new Error('文件读取失败'));
+      reader.readAsDataURL(file);
+    });
+  }else{
+    $('vcStatus').textContent='❌ 请先录音或上传音频文件';return
+  }
+
+  $('vcStatus').textContent='⏳ 正在复刻音色…';
+  $('btnVCPreview').disabled=true;$('btnVCPreview').style.opacity='.5';
+  try{
+    const r=await fetch(S.ep,{method:'POST',headers:{'Content-Type':'application/json','api-key':S.key},
+      body:JSON.stringify({model:'mimo-v2.5-tts-voiceclone',messages:[{role:'assistant',content:text}],audio:{format:'wav',voice:voiceData}})});
+    if(!r.ok){const e=await r.text();throw new Error(`API ${r.status}: ${e.slice(0,150)}`)}
+    const d=await r.json();if(d.error)throw new Error(JSON.stringify(d.error).slice(0,150));
+    const b64=d.choices?.[0]?.message?.audio?.data;if(!b64)throw new Error('无音频数据');
+    _vcAudioB64=b64;
+    const bin=atob(b64);const raw=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)raw[i]=bin.charCodeAt(i);
+    const wav=ensureWav(raw);
+    ensureAudioCtx();const src=audioCtx.createBufferSource();
+    audioCtx.decodeAudioData(wav.buffer.slice(0),buf=>{src.buffer=buf;src.connect(audioCtx.destination);src.start(0)});
+    $('vcStatus').textContent='✅ 音色复刻完成，正在播放…';
+    $('btnVCUse').style.display='';
+  }catch(e){
+    $('vcStatus').textContent='❌ '+e.message.slice(0,80);
+  }finally{
+    $('btnVCPreview').disabled=false;$('btnVCPreview').style.opacity='1';
+  }
+};
+
+// Voice Clone - Use this voice
+$('btnVCUse').onclick=()=>{
+  if(!_vcAudioB64)return;
+  S.vcVoice=_vcAudioB64;
+  S.ttsM='mimo-v2.5-tts-voiceclone';
+  localStorage.setItem('mvcv',_vcAudioB64);
+  localStorage.setItem('mtm',S.ttsM);
+  $('inTts').value='mimo-v2.5-tts-voiceclone';
+  updateTtsUI();
+  $('vcStatus').textContent='✅ 已设为当前音色！TTS 模型已切换为 voiceclone';
+  showToast('复刻音色已启用 🎤',2000);
+};
+
+// Init voice design/clone state
+S.vdVoice=localStorage.getItem('mvdv')||'';
+S.vcVoice=localStorage.getItem('mvcv')||'';
 
 // ── Init ──
 if(!S.key)setStatus('点击右上角设置 API Key');
@@ -1242,10 +1942,12 @@ function saveGreetingCache(text,wavB64){
     const clean=pm?greet.slice(pm[0].length):greet;
     const style=pm?pm[1].trim():'温柔';
     const finalStyle=S.style||style;
-    let content=clean;if(finalStyle)content=`<style>${finalStyle}</style>${content}`;
+    const isV2G=(S.ttsM||'mimo-v2.5-tts')==='mimo-v2-tts';
+    let content=clean;
+    if(finalStyle)content=isV2G?`<style>${finalStyle}</style>${clean}`:`(${finalStyle})${clean}`;
     try{
       const r=await fetch(S.ep,{method:'POST',headers:{'Content-Type':'application/json','api-key':S.key},
-        body:JSON.stringify({model:S.ttsM,messages:[{role:'user',content:clean},{role:'assistant',content}],audio:{format:'wav',voice:S.voice}})});
+        body:JSON.stringify({model:S.ttsM||'mimo-v2.5-tts',messages:[{role:'user',content:clean},{role:'assistant',content}],audio:{format:'wav',voice:S.voice}})});
       if(r.ok){
         const d=await r.json();
         const b64=d.choices?.[0]?.message?.audio?.data;
