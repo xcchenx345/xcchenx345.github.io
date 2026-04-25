@@ -284,6 +284,182 @@
   .toggle-slider::before{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;left:3px;top:3px;transition:transform .3s}
   .toggle input:checked+.toggle-slider{background:var(--accent)}
   .toggle input:checked+.toggle-slider::before{transform:translateX(20px)}
+
+  /* ═══ Onboarding Wizard ═══ */
+  .onboard-overlay{position:fixed;inset:0;z-index:500;display:none;align-items:center;justify-content:center;overflow:hidden}
+  .onboard-overlay.show{display:flex}
+  .onboard-bg{position:absolute;inset:0;background:var(--bg);z-index:0}
+  .onboard-bg::before{content:'';position:absolute;inset:-50%;background:radial-gradient(ellipse at 30% 20%,color-mix(in srgb,var(--accent) 12%,transparent) 0%,transparent 60%),radial-gradient(ellipse at 70% 80%,color-mix(in srgb,var(--c-listen) 8%,transparent) 0%,transparent 60%);animation:ob-bgDrift 20s ease-in-out infinite alternate}
+  @keyframes ob-bgDrift{0%{transform:translate(0,0) rotate(0deg)}100%{transform:translate(-5%,3%) rotate(3deg)}}
+  .onboard-container{position:relative;z-index:1;width:min(460px,90vw);max-height:88vh;overflow-y:auto;padding:0;text-align:center}
+  .onboard-container::-webkit-scrollbar{width:0}
+
+  /* Step transitions — pure CSS */
+  .onboard-step{display:none;opacity:0;transform:translateX(40px);transition:none}
+  .onboard-step.active{display:block;opacity:1;transform:translateX(0);animation:ob-slideIn .4s cubic-bezier(.4,0,.2,1)}
+  @keyframes ob-slideIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+
+  /* Progress bar */
+  .ob-progress{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:36px;padding:0 20px}
+  .ob-pbar{flex:1;height:4px;border-radius:2.5px;background:var(--input-border);overflow:hidden;max-width:56px;transition:all .5s cubic-bezier(.4,0,.2,1)}
+  .ob-pbar.active{background:color-mix(in srgb,var(--accent) 30%,var(--input-border));max-width:88px;height:5px}
+  .ob-pbar.done{background:var(--accent);opacity:.4;max-width:56px}
+  .ob-pbar-inner{height:100%;width:0;background:var(--accent);border-radius:2.5px;transition:width .7s cubic-bezier(.4,0,.2,1)}
+  .ob-pbar.active .ob-pbar-inner{width:100%;animation:ob-barShimmer 1.5s ease-in-out}
+  .ob-pbar.done .ob-pbar-inner{width:100%}
+  @keyframes ob-barShimmer{0%{opacity:.5;width:0}50%{opacity:1}100%{opacity:1;width:100%}}
+
+  /* Welcome */
+  .ob-welcome{padding:48px 24px 32px}
+  .ob-logo{font-size:72px;margin-bottom:20px;display:inline-block;animation:ob-float 3s ease-in-out infinite;filter:drop-shadow(0 8px 24px color-mix(in srgb,var(--accent) 30%,transparent))}
+  @keyframes ob-float{0%,100%{transform:translateY(0) rotate(0deg)}25%{transform:translateY(-8px) rotate(2deg)}75%{transform:translateY(-4px) rotate(-1deg)}}
+  .ob-title{font-size:32px;font-weight:800;margin-bottom:10px;background:linear-gradient(135deg,var(--text),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .ob-subtitle{font-size:15px;color:var(--text2);line-height:1.7;margin-bottom:36px}
+  .ob-features{display:flex;flex-direction:column;gap:10px;margin-bottom:40px;text-align:left}
+  .ob-feat{display:flex;align-items:center;gap:14px;padding:14px 18px;background:color-mix(in srgb,var(--accent) 5%,var(--input-bg));border:1px solid color-mix(in srgb,var(--accent) 10%,var(--input-border));border-radius:14px;font-size:14px;transition:all .3s;animation:ob-featIn .5s ease backwards}
+  .ob-feat:nth-child(1){animation-delay:.1s}.ob-feat:nth-child(2){animation-delay:.2s}.ob-feat:nth-child(3){animation-delay:.3s}.ob-feat:nth-child(4){animation-delay:.4s}
+  @keyframes ob-featIn{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+  .ob-feat:hover{transform:translateX(4px);background:color-mix(in srgb,var(--accent) 10%,var(--input-bg))}
+  .ob-feat-icon{font-size:22px;flex-shrink:0;width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--accent) 12%,transparent);border-radius:10px}
+
+  /* Section title */
+  .ob-section{padding:32px 24px 24px}
+  .ob-section-icon{font-size:48px;margin-bottom:12px;display:inline-block;animation:ob-popIn .4s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes ob-popIn{from{transform:scale(0) rotate(-10deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+  .ob-section-title{font-size:24px;font-weight:700;margin-bottom:6px}
+  .ob-section-desc{font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:24px}
+
+  /* Form fields */
+  .ob-field{margin-bottom:20px;text-align:left}
+  .ob-field label{display:block;font-size:13px;color:var(--text2);margin-bottom:8px;font-weight:600;letter-spacing:.3px}
+  .ob-field input,.ob-field select{width:100%;padding:14px 16px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:14px;color:var(--text);font-size:15px;outline:none;transition:all .25s}
+  .ob-field input:focus,.ob-field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 15%,transparent)}
+  .ob-field select option{background:var(--panel-bg);color:var(--text)}
+  .ob-field .hint{font-size:12px;color:var(--text3);margin-top:8px;line-height:1.5}
+  .ob-field .hint a{color:var(--accent2);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent2) 30%,transparent)}
+
+  /* Buttons */
+  .ob-btns{display:flex;gap:12px;margin-top:28px;padding:0 24px}
+  .ob-btn{flex:1;padding:15px;border:none;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden}
+  .ob-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.1),transparent);pointer-events:none}
+  .ob-btn:active{transform:scale(.96)}
+  .ob-primary{background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 80%,#fff));color:#fff;box-shadow:0 4px 16px color-mix(in srgb,var(--accent) 30%,transparent)}.ob-primary:hover{box-shadow:0 6px 24px color-mix(in srgb,var(--accent) 40%,transparent);transform:translateY(-1px)}
+  .ob-primary:disabled{opacity:.35;cursor:not-allowed;box-shadow:none;transform:none}
+  .ob-secondary{background:var(--btn-bg);color:var(--text2);border:1px solid var(--input-border)}.ob-secondary:hover{background:var(--btn-hover);color:var(--text)}
+  .ob-skip{background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;padding:8px;transition:color .2s}.ob-skip:hover{color:var(--text2)}
+
+  /* Model cards */
+  .ob-model-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+  .ob-model-card{padding:18px 14px;background:var(--input-bg);border:2px solid var(--input-border);border-radius:16px;cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);text-align:center;position:relative;overflow:hidden}
+  .ob-model-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 8%,transparent),transparent);opacity:0;transition:opacity .3s}
+  .ob-model-card:hover{border-color:color-mix(in srgb,var(--accent) 50%,var(--input-border));transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.15)}.ob-model-card:hover::before{opacity:1}
+  .ob-model-card.selected{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 15%,transparent),0 4px 20px color-mix(in srgb,var(--accent) 15%,transparent)}.ob-model-card.selected::before{opacity:1}
+  .ob-model-card .ob-mc-icon{font-size:30px;margin-bottom:8px;position:relative;z-index:1}
+  .ob-model-card .ob-mc-name{font-size:14px;font-weight:600;margin-bottom:4px;position:relative;z-index:1}
+  .ob-model-card .ob-mc-desc{font-size:11px;color:var(--text3);line-height:1.4;position:relative;z-index:1}
+  .ob-model-card.full{grid-column:1/-1}
+
+  /* Model section label */
+  .ob-model-label{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;text-align:left}
+
+  /* Voice list */
+  .ob-voice-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;max-height:220px;overflow-y:auto;padding:0 24px}
+  .ob-voice-list::-webkit-scrollbar{width:3px}.ob-voice-list::-webkit-scrollbar-thumb{background:var(--input-border);border-radius:3px}
+  .ob-voice-item{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--input-bg);border:2px solid var(--input-border);border-radius:14px;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1)}
+  .ob-voice-item:hover{border-color:color-mix(in srgb,var(--accent) 50%,var(--input-border));transform:translateX(4px)}
+  .ob-voice-item.selected{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--input-bg));box-shadow:0 2px 12px color-mix(in srgb,var(--accent) 10%,transparent)}
+  .ob-voice-item .ob-vi-name{font-size:14px;font-weight:600;flex:1;text-align:left}
+  .ob-voice-item .ob-vi-desc{font-size:12px;color:var(--text3);text-align:left}
+  .ob-voice-item .ob-vi-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--input-border);transition:all .3s cubic-bezier(.34,1.56,.64,1);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .ob-voice-item.selected .ob-vi-check{border-color:var(--accent);background:var(--accent);transform:scale(1.1)}
+  .ob-voice-item.selected .ob-vi-check::after{content:'✓';color:#fff;font-size:12px;font-weight:700}
+
+  /* Mini orb container */
+  .ob-orb-wrap{display:flex;flex-direction:column;align-items:center;margin:16px 0 8px;padding:0 24px}
+
+  /* Preview area */
+  .ob-preview{background:color-mix(in srgb,var(--accent) 4%,var(--input-bg));border:1px solid color-mix(in srgb,var(--accent) 10%,var(--input-border));border-radius:16px;padding:18px;margin:0 24px 16px;text-align:left}
+  .ob-preview-label{font-size:12px;color:var(--text3);margin-bottom:8px;font-weight:500}
+  .ob-preview-text{font-size:14px;line-height:1.7;margin-bottom:14px;color:var(--text)}
+  .ob-preview-btns{display:flex;gap:8px}
+  .ob-preview-btn{padding:11px 18px;border:none;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s}
+  .ob-play-btn{background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 80%,#fff));color:#fff;flex:1}.ob-play-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+  .ob-play-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+  .ob-retry-btn{background:var(--btn-bg);color:var(--text2);flex:1;border:1px solid var(--input-border)}.ob-retry-btn:hover{background:var(--btn-hover)}
+
+  /* Clone section */
+  .ob-clone-area{margin-bottom:16px;padding:0 24px}
+  .ob-rec-btn{width:100%;padding:16px;border:none;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;transition:all .25s;margin-bottom:10px;position:relative;overflow:hidden}
+  .ob-rec-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.08),transparent);pointer-events:none}
+  .ob-rec-start{background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 80%,#fff));color:#fff;box-shadow:0 4px 16px color-mix(in srgb,var(--accent) 25%,transparent)}.ob-rec-start:hover{transform:translateY(-1px);box-shadow:0 6px 20px color-mix(in srgb,var(--accent) 35%,transparent)}
+  .ob-rec-stop{background:linear-gradient(135deg,var(--danger),color-mix(in srgb,var(--danger) 80%,#fff));color:#fff;box-shadow:0 4px 16px color-mix(in srgb,var(--danger) 25%,transparent)}
+  .ob-rec-status{font-size:13px;color:var(--text3);min-height:20px;margin-bottom:8px}
+  .ob-rec-or{text-align:center;color:var(--text3);font-size:12px;margin:12px 0;position:relative}
+  .ob-rec-or::before,.ob-rec-or::after{content:'';position:absolute;top:50%;width:calc(50% - 24px);height:1px;background:var(--input-border)}
+  .ob-rec-or::before{left:0}.ob-rec-or::after{right:0}
+  .ob-file-input{width:100%;padding:12px;background:var(--input-bg);border:1.5px dashed var(--input-border);border-radius:12px;color:var(--text);font-size:13px;cursor:pointer;transition:border-color .2s}.ob-file-input:hover{border-color:var(--accent)}
+
+  /* Design textarea */
+  .ob-design-area{margin-bottom:16px;text-align:left;padding:0 24px}
+  .ob-design-area textarea{width:100%;padding:14px 16px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:14px;color:var(--text);font-size:14px;outline:none;resize:vertical;min-height:80px;transition:all .25s}
+  .ob-design-area textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 15%,transparent)}
+  .ob-design-area label{display:block;font-size:13px;color:var(--text2);margin-bottom:8px;font-weight:600}
+  .ob-design-area .hint{font-size:12px;color:var(--text3);margin-top:6px}
+
+  /* Complete screen */
+  .ob-complete{padding:48px 24px 32px}
+  .ob-complete-icon{font-size:80px;margin-bottom:20px;display:inline-block;animation:ob-celebrate .6s cubic-bezier(.34,1.56,.64,1);cursor:pointer;transition:transform .2s;user-select:none}
+  .ob-complete-icon:active{transform:scale(.85)}
+  @keyframes ob-celebrate{0%{transform:scale(0) rotate(-20deg);opacity:0}60%{transform:scale(1.15) rotate(5deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+  .ob-complete-title{font-size:28px;font-weight:800;margin-bottom:10px}
+  .ob-complete-desc{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:28px}
+
+  /* ── Confetti cannon ── */
+  .confetti-container{position:fixed;inset:0;z-index:999;pointer-events:none;overflow:hidden}
+  .confetti-piece{position:absolute;width:10px;height:10px;opacity:0;will-change:transform,opacity}
+  @keyframes confetti-fall{
+    0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}
+    25%{opacity:1}
+    100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.3)}
+  }
+
+  /* ── Nuclear explosion ── */
+  .nuke-overlay{position:fixed;inset:0;z-index:10000;pointer-events:none;background:transparent;animation:nuke-flash .15s ease 3}
+  @keyframes nuke-flash{0%,100%{background:transparent}50%{background:rgba(255,200,0,.35)}}
+  .nuke-fragment{position:fixed;z-index:10001;pointer-events:none;overflow:hidden;will-change:transform,opacity;animation:nuke-fly var(--dur) cubic-bezier(.1,.8,.3,1) forwards}
+  @keyframes nuke-fly{
+    0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}
+    15%{opacity:1;transform:translate(calc(var(--dx)*.15),calc(var(--dy)*.15)) rotate(calc(var(--rot)*.15)) scale(1.02)}
+    100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.1)}
+  }
+  .nuke-warning{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10002;font-size:clamp(28px,8vw,72px);font-weight:900;color:#ff4444;text-shadow:0 0 40px rgba(255,68,68,.8),0 0 80px rgba(255,68,68,.4);animation:nuke-pulse .3s ease-in-out infinite alternate,nuke-shake .08s linear infinite;pointer-events:none;white-space:nowrap}
+  @keyframes nuke-pulse{0%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-50%) scale(1.08);opacity:.85}}
+  @keyframes nuke-shake{0%{translate:0 0}25%{translate:3px -2px}50%{translate:-3px 3px}75%{translate:2px 2px}100%{translate:-2px -3px}}
+
+  /* ── Cleanup mini-game ── */
+  .nuke-game{position:fixed;inset:0;z-index:10003;background:rgba(0,0,0,.85);display:none;flex-direction:column;align-items:center;justify-content:center;cursor:crosshair}
+  .nuke-game.on{display:flex}
+  .nuke-game-canvas{position:absolute;inset:0;width:100%;height:100%}
+  .nuke-game-ui{position:relative;z-index:1;text-align:center;pointer-events:none}
+  .nuke-game-title{font-size:clamp(20px,5vw,36px);font-weight:800;color:#ff6b6b;margin-bottom:8px;text-shadow:0 0 20px rgba(255,107,107,.5)}
+  .nuke-game-sub{font-size:clamp(12px,3vw,16px);color:rgba(255,255,255,.5);margin-bottom:16px}
+  .nuke-game-bar-wrap{width:min(300px,70vw);height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;margin:0 auto}
+  .nuke-game-bar{height:100%;width:0%;background:linear-gradient(90deg,#ff6b6b,#feca57,#1dd1a1);border-radius:4px;transition:width .2s ease}
+  .nuke-game-count{font-size:clamp(11px,2.5vw,14px);color:rgba(255,255,255,.4);margin-top:8px}
+  .nuke-game-hint{position:absolute;bottom:clamp(20px,5vh,48px);left:50%;transform:translateX(-50%);font-size:clamp(10px,2.5vw,13px);color:rgba(255,255,255,.25);pointer-events:none;animation:hint-pulse 2s ease-in-out infinite}
+  @keyframes hint-pulse{0%,100%{opacity:.25}50%{opacity:.6}}
+  .ob-summary{display:flex;flex-direction:column;gap:8px;margin-bottom:28px;text-align:left;padding:0 4px}
+  .ob-summary-item{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:color-mix(in srgb,var(--accent) 5%,var(--input-bg));border:1px solid color-mix(in srgb,var(--accent) 8%,var(--input-border));border-radius:12px;font-size:13px;animation:ob-featIn .4s ease backwards}
+  .ob-summary-item:nth-child(1){animation-delay:.1s}.ob-summary-item:nth-child(2){animation-delay:.2s}.ob-summary-item:nth-child(3){animation-delay:.3s}.ob-summary-item:nth-child(4){animation-delay:.4s}
+  .ob-summary-item .label{color:var(--text3);font-weight:500}
+  .ob-summary-item .value{font-weight:600;color:var(--text)}
+
+  /* Status text */
+  .ob-status{font-size:13px;color:var(--text3);min-height:20px;margin-top:10px;text-align:center;transition:all .3s}
+
+  /* Re-enter setup button */
+  .ob-reenter{display:block;width:100%;padding:12px;margin-top:16px;background:color-mix(in srgb,var(--accent) 8%,var(--input-bg));border:1.5px solid color-mix(in srgb,var(--accent) 20%,var(--input-border));border-radius:12px;color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;transition:all .25s}
+  .ob-reenter:hover{background:color-mix(in srgb,var(--accent) 15%,var(--input-bg));transform:translateY(-1px);box-shadow:0 4px 12px color-mix(in srgb,var(--accent) 10%,transparent)}
 </style>
 </head>
 <body>
@@ -320,7 +496,7 @@
 
 <div class="kb-wrap">
   <button class="btn" id="kbBtn" title="键盘">
-    <svg viewBox="0 0 24 24"><path d="M2,4H22V8H2V4M2,10H22V14H2V10M4,16H8V18H4V16M10,16H14V18H10V16M16,16H20V18H16V16M2,20H22V22H2V20Z"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><line x1="6" y1="8" x2="6" y2="8.01"/><line x1="10" y1="8" x2="10" y2="8.01"/><line x1="14" y1="8" x2="14" y2="8.01"/><line x1="18" y1="8" x2="18" y2="8.01"/><line x1="6" y1="12" x2="6" y2="12.01"/><line x1="10" y1="12" x2="10" y2="12.01"/><line x1="14" y1="12" x2="14" y2="12.01"/><line x1="18" y1="12" x2="18" y2="12.01"/><line x1="8" y1="16" x2="16" y2="16"/></svg>
   </button>
 </div>
 
@@ -340,42 +516,42 @@
 <div class="overlay" id="overlay">
   <div class="panel">
     <h2>⚙️ 设置</h2>
-    <div class="field"><label>API Key</label><input type="password" id="inKey" placeholder="MiMo API Key" autocomplete="off"><div class="hint">platform.xiaomimimo.com 获取</div></div>
-    <div class="field"><label>语音识别模型 (Omni)</label><input type="text" id="inOmni" placeholder="mimo-v2-omni"></div>
-    <div class="field"><label>Chat 模型 (Flash)</label><input type="text" id="inChat" placeholder="mimo-v2-flash"></div>
-    <div class="field"><label>TTS 模型</label><select id="inTts">
+    <div class="field"><label for="inKey">API Key</label><input type="password" id="inKey" placeholder="MiMo API Key" autocomplete="off"><div class="hint">platform.xiaomimimo.com 获取</div></div>
+    <div class="field"><label for="inOmni">语音识别模型 (Omni)</label><input type="text" id="inOmni" placeholder="mimo-v2-omni"></div>
+    <div class="field"><label for="inChat">Chat 模型 (Flash)</label><input type="text" id="inChat" placeholder="mimo-v2-flash"></div>
+    <div class="field"><label for="inTts">TTS 模型</label><select id="inTts">
       <option value="mimo-v2.5-tts">mimo-v2.5-tts（预置音色）</option>
       <option value="mimo-v2.5-tts-voicedesign">mimo-v2.5-tts-voicedesign（音色设计）</option>
       <option value="mimo-v2.5-tts-voiceclone">mimo-v2.5-tts-voiceclone（音色复刻）</option>
       <option value="mimo-v2-tts">mimo-v2-tts（旧版）</option>
       <option value="custom">自定义…</option>
     </select></div>
-    <div class="field" id="inTtsCustomWrap" style="display:none"><label>自定义 TTS 模型名</label><input type="text" id="inTtsCustom" placeholder="输入模型 ID"></div>
-    <div class="field"><label>API Endpoint</label><input type="text" id="inEp" placeholder="https://api.xiaomimimo.com/v1/chat/completions"><div class="hint">如果跨域报错，可填本地代理地址</div></div>
+    <div class="field" id="inTtsCustomWrap" style="display:none"><label for="inTtsCustom">自定义 TTS 模型名</label><input type="text" id="inTtsCustom" placeholder="输入模型 ID"></div>
+    <div class="field"><label for="inEp">API Endpoint</label><input type="text" id="inEp" placeholder="https://api.xiaomimimo.com/v1/chat/completions"><div class="hint">如果跨域报错，可填本地代理地址</div></div>
     <h3>👤 个人信息</h3>
-    <div class="field"><label>昵称</label><input type="text" id="inNick" placeholder="怎么称呼你？"></div>
-    <div class="field"><label>城市</label><input type="text" id="inCity" placeholder="如：北京、上海、深圳"></div>
-    <div class="field"><label>省份</label><input type="text" id="inProvince" placeholder="如：广东、湖北"></div>
-    <div class="field"><label>个人简介</label><textarea id="inBio" placeholder="兴趣爱好、职业、喜欢什么…" rows="2"></textarea></div>
+    <div class="field"><label for="inNick">昵称</label><input type="text" id="inNick" placeholder="怎么称呼你？"></div>
+    <div class="field"><label for="inCity">城市</label><input type="text" id="inCity" placeholder="如：北京、上海、深圳"></div>
+    <div class="field"><label for="inProvince">省份</label><input type="text" id="inProvince" placeholder="如：广东、湖北"></div>
+    <div class="field"><label for="inBio">个人简介</label><textarea id="inBio" placeholder="兴趣爱好、职业、喜欢什么…" rows="2"></textarea></div>
     <h3>🎨 外观</h3>
-    <div class="field"><label>主题</label><select id="inTheme">
+    <div class="field"><label for="inTheme">主题</label><select id="inTheme">
       <option value="dark">深色 🌙</option>
       <option value="light">浅色 ☀️</option>
       <option value="chatgpt_dark">ChatGPT 深色 🖤</option>
       <option value="chatgpt_light">ChatGPT 浅色 🤍</option>
     </select></div>
     <div class="color-grid">
-      <div class="color-cell"><label>待机</label><input type="color" id="cIdle" value="#6C5CE7"></div>
-      <div class="color-cell"><label>聆听</label><input type="color" id="cListen" value="#ff6348"></div>
-      <div class="color-cell"><label>思考</label><input type="color" id="cThink" value="#fdcb6e"></div>
-      <div class="color-cell"><label>说话</label><input type="color" id="cSpeak" value="#6C5CE7"></div>
+      <div class="color-cell"><label for="cIdle">待机</label><input type="color" id="cIdle" value="#6C5CE7"></div>
+      <div class="color-cell"><label for="cListen">聆听</label><input type="color" id="cListen" value="#ff6348"></div>
+      <div class="color-cell"><label for="cThink">思考</label><input type="color" id="cThink" value="#fdcb6e"></div>
+      <div class="color-cell"><label for="cSpeak">说话</label><input type="color" id="cSpeak" value="#6C5CE7"></div>
     </div>
-    <div class="field" id="voiceV2Wrap"><label>音色 (V2)</label><select id="inVoiceV2">
+    <div class="field" id="voiceV2Wrap"><label for="inVoiceV2">音色 (V2)</label><select id="inVoiceV2">
       <option value="mimo_default">MiMo-默认</option>
       <option value="default_zh">MiMo-中文女声</option>
       <option value="default_en">MiMo-英文女声</option>
     </select></div>
-    <div class="field" id="voiceV25Wrap"><label>音色 (V2.5)</label><select id="inVoiceV25">
+    <div class="field" id="voiceV25Wrap"><label for="inVoiceV25">音色 (V2.5)</label><select id="inVoiceV25">
       <option value="mimo_default">MiMo-默认（冰糖/Mia）</option>
       <option value="冰糖">冰糖（中文女声）</option>
       <option value="茉莉">茉莉（中文女声）</option>
@@ -386,16 +562,16 @@
       <option value="Milo">Milo（英文男声）</option>
       <option value="Dean">Dean（英文男声）</option>
     </select></div>
-    <div class="field"><label>思考动画</label><select id="inThink"><option value="morph">原始变形</option><option value="cloud">思考思绪 💭</option><option value="bounce">到处乱撞 💥</option><option value="spiral">螺旋旋转 🌀</option><option value="pulse">脉冲波纹 💫</option></select></div>
-    <div class="field"><label>说话可视化</label><select id="inVis"><option value="bars">音符跳动</option><option value="ball">圆球脉动</option></select></div>
-    <div class="field" id="styleV2Wrap"><label>全局语音风格 (V2)</label><textarea id="inStyleV2" placeholder="开心 / 悄悄话 / 东北话 / 唱歌" rows="2"></textarea><div class="hint">用 &lt;style&gt;风格&lt;/style&gt; 格式，如：&lt;style&gt;开心&lt;/style&gt;今天真开心</div></div>
-    <div class="field" id="styleV25Wrap"><label>全局语音风格 (V2.5)</label><textarea id="inStyleV25" placeholder="开心 / 东北话 / 悄悄话 / (唱歌)歌词" rows="2"></textarea><div class="hint">支持音频标签：(开心)、(东北话)、(唱歌)歌词，支持细粒度控制如 (轻声)(叹气)</div></div>
+    <div class="field"><label for="inThink">思考动画</label><select id="inThink"><option value="morph">原始变形</option><option value="cloud">思考思绪 💭</option><option value="bounce">到处乱撞 💥</option><option value="spiral">螺旋旋转 🌀</option><option value="pulse">脉冲波纹 💫</option></select></div>
+    <div class="field"><label for="inVis">说话可视化</label><select id="inVis"><option value="bars">音符跳动</option><option value="ball">圆球脉动</option></select></div>
+    <div class="field" id="styleV2Wrap"><label for="inStyleV2">全局语音风格 (V2)</label><textarea id="inStyleV2" placeholder="开心 / 悄悄话 / 东北话 / 唱歌" rows="2"></textarea><div class="hint">用 &lt;style&gt;风格&lt;/style&gt; 格式，如：&lt;style&gt;开心&lt;/style&gt;今天真开心</div></div>
+    <div class="field" id="styleV25Wrap"><label for="inStyleV25">全局语音风格 (V2.5)</label><textarea id="inStyleV25" placeholder="开心 / 东北话 / 悄悄话 / (唱歌)歌词" rows="2"></textarea><div class="hint">支持音频标签：(开心)、(东北话)、(唱歌)歌词，支持细粒度控制如 (轻声)(叹气)</div></div>
     <!-- V2.5 设计/复刻 -->
     <div id="v25VoiceSections">
     <div id="voiceDesignSection">
     <h3>🎨 音色设计 (VoiceDesign)</h3>
-    <div class="field"><label>音色描述</label><textarea id="inVoiceDesign" placeholder="例如：一个温柔磁性的中年男性嗓音，带着一点烟嗓的沙哑感" rows="3"></textarea><div class="hint">通过文字描述自定义音色，无需音频样本。使用 mimo-v2.5-tts-voicedesign 模型</div></div>
-    <div class="field"><label>设计试听文本</label><input type="text" id="inVDText" placeholder="输入要试听的文本…" value="你好，我是你的AI助手，有什么可以帮你的吗？"></div>
+    <div class="field"><label for="inVoiceDesign">音色描述</label><textarea id="inVoiceDesign" placeholder="例如：一个温柔磁性的中年男性嗓音，带着一点烟嗓的沙哑感" rows="3"></textarea><div class="hint">通过文字描述自定义音色，无需音频样本。使用 mimo-v2.5-tts-voicedesign 模型</div></div>
+    <div class="field"><label for="inVDText">设计试听文本</label><input type="text" id="inVDText" placeholder="输入要试听的文本…" value="你好，我是你的AI助手，有什么可以帮你的吗？"></div>
     <div style="display:flex;gap:8px;margin-bottom:18px">
       <button class="bsave" id="btnVDPreview" style="flex:1;padding:10px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;background:var(--accent);color:#fff">🔊 试听设计音色</button>
       <button class="bcancel" id="btnVDUse" style="flex:1;padding:10px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;background:var(--btn-bg);color:var(--text2);display:none">✅ 使用此音色</button>
@@ -413,8 +589,8 @@
       <audio id="vcRecPlayer" controls style="display:none;width:100%;height:36px;border-radius:8px"></audio>
     </div>
     <div style="text-align:center;color:var(--text3);font-size:12px;margin-bottom:12px">── 或者 ──</div>
-    <div class="field"><label>上传音频文件</label><input type="file" id="inVCloneFile" accept=".mp3,.wav,audio/mp3,audio/wav,audio/mpeg" style="padding:10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:10px;color:var(--text);font-size:14px"><div class="hint">上传 mp3/wav 格式（Base64编码后不超过10MB）</div></div>
-    <div class="field"><label>复刻试听文本</label><input type="text" id="inVCText" placeholder="输入要试听的文本…" value="今天天气真不错，出去走走吧。"></div>
+    <div class="field"><label for="inVCloneFile">上传音频文件</label><input type="file" id="inVCloneFile" accept=".mp3,.wav,audio/mp3,audio/wav,audio/mpeg" style="padding:10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:10px;color:var(--text);font-size:14px"><div class="hint">上传 mp3/wav 格式（Base64编码后不超过10MB）</div></div>
+    <div class="field"><label for="inVCText">复刻试听文本</label><input type="text" id="inVCText" placeholder="输入要试听的文本…" value="今天天气真不错，出去走走吧。"></div>
     <div style="display:flex;gap:8px;margin-bottom:18px">
       <button class="bsave" id="btnVCPreview" style="flex:1;padding:10px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;background:var(--accent);color:#fff">🔊 试听复刻音色</button>
       <button class="bcancel" id="btnVCUse" style="flex:1;padding:10px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;background:var(--btn-bg);color:var(--text2);display:none">✅ 使用此音色</button>
@@ -431,11 +607,258 @@
     <div class="log" id="memLog" style="max-height:160px"><div class="empty">暂无记忆</div></div>
     <button class="clearbtn hid membtn" id="btnClearMem">清空记忆</button>
     <button class="clearbtn" id="btnClearAll" style="margin-top:20px;border-color:rgba(255,107,107,.3);color:#ff6b6b;background:rgba(255,107,107,.08)">🗑️ 忘记所有（对话+记忆）</button>
+    <button class="ob-reenter" id="btnReSetup" onclick="startOnboard(true)">🔄 重新走一遍引导设置</button>
   </div>
 </div>
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
+
+<!-- Onboarding Wizard -->
+<div class="onboard-overlay" id="onboardOverlay">
+<div class="onboard-bg"></div>
+<div class="onboard-container">
+  <div class="ob-progress" id="obProgress"></div>
+
+  <!-- Step 0: Welcome -->
+  <div class="onboard-step" id="obStep0">
+    <div class="ob-welcome">
+      <div class="ob-logo">🎙️</div>
+      <div class="ob-title">MiMo 语音对话</div>
+      <div class="ob-subtitle">你的私人 AI 语音助手<br>实时对话 · 音色设计 · 声音克隆</div>
+      <div class="ob-features">
+        <div class="ob-feat"><span class="ob-feat-icon">🗣️</span><span>自然语音对话，像和朋友聊天一样</span></div>
+        <div class="ob-feat"><span class="ob-feat-icon">🎨</span><span>AI 音色设计，用文字描述你想要的声音</span></div>
+        <div class="ob-feat"><span class="ob-feat-icon">🎤</span><span>声音克隆，复制你的声音或喜欢的音色</span></div>
+        <div class="ob-feat"><span class="ob-feat-icon">⚡</span><span>多种情绪风格，开心/悲伤/东北话/唱歌</span></div>
+      </div>
+      <button class="ob-btn ob-primary" onclick="obNext()" style="max-width:280px;margin:0 auto;display:block">开始设置</button>
+      <button class="ob-skip" onclick="obSkip()" style="margin-top:14px">已有配置？跳过</button>
+    </div>
+  </div>
+
+  <!-- Step 1: API Key -->
+  <div class="onboard-step" id="obStep1">
+    <div class="ob-section">
+      <div class="ob-section-icon">🔑</div>
+      <div class="ob-section-title">设置 API Key</div>
+      <div class="ob-section-desc">在小米 MiMo 开放平台获取你的密钥</div>
+    </div>
+    <div style="padding:0 24px">
+      <div class="ob-field">
+        <label>API Key</label>
+        <input type="password" id="obApiKey" placeholder="粘贴你的 API Key…" autocomplete="off">
+        <div class="hint">前往 <a href="https://platform.xiaomimimo.com" target="_blank" rel="noopener">platform.xiaomimimo.com</a> 注册并获取</div>
+      </div>
+    </div>
+    <div class="ob-btns">
+      <button class="ob-btn ob-secondary" onclick="window.open('https://platform.xiaomimimo.com','_blank')">我没有 API Key 😭</button>
+      <button class="ob-btn ob-primary" id="obKeyNext" onclick="obNext()">下一步</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Models (Chat + TTS) -->
+  <div class="onboard-step" id="obStep2">
+    <div class="ob-section">
+      <div class="ob-section-icon">🧠</div>
+      <div class="ob-section-title">选择模型</div>
+      <div class="ob-section-desc">对话模型负责理解，语音模型负责说话</div>
+    </div>
+    <div style="padding:0 24px">
+      <div class="ob-model-label">💬 对话模型（理解你说的话）</div>
+      <div class="ob-model-grid" id="obChatGrid">
+        <div class="ob-model-card selected" data-model="mimo-v2-flash" onclick="obSelectChatModel(this)">
+          <div class="ob-mc-icon">⚡</div>
+          <div class="ob-mc-name">V2 Flash</div>
+          <div class="ob-mc-desc">快速响应，推荐日常使用</div>
+        </div>
+        <div class="ob-model-card" data-model="mimo-v2-omni" onclick="obSelectChatModel(this)">
+          <div class="ob-mc-icon">🌐</div>
+          <div class="ob-mc-name">V2 Omni</div>
+          <div class="ob-mc-desc">多模态，支持图文理解</div>
+        </div>
+        <div class="ob-model-card full" data-model="custom-chat" onclick="obSelectChatModel(this)">
+          <div class="ob-mc-icon">⚙️</div>
+          <div class="ob-mc-name">自定义对话模型</div>
+          <div class="ob-mc-desc">输入自定义模型 ID</div>
+        </div>
+      </div>
+      <div class="ob-field" id="obCustomChatWrap" style="display:none;margin-top:12px">
+        <label>自定义对话模型 ID</label>
+        <input type="text" id="obCustomChat" placeholder="输入模型名称…">
+      </div>
+
+      <div style="height:24px"></div>
+
+      <div class="ob-model-label">🔊 语音模型（生成说话的声音）</div>
+      <div class="ob-model-grid" id="obTtsGrid">
+        <div class="ob-model-card selected" data-model="mimo-v2.5-tts" onclick="obSelectTtsModel(this)">
+          <div class="ob-mc-icon">🔊</div>
+          <div class="ob-mc-name">V2.5 预置音色</div>
+          <div class="ob-mc-desc">多种高质量音色，开箱即用</div>
+        </div>
+        <div class="ob-model-card" data-model="mimo-v2-tts" onclick="obSelectTtsModel(this)">
+          <div class="ob-mc-icon">📻</div>
+          <div class="ob-mc-name">V2 旧版</div>
+          <div class="ob-mc-desc">经典版本，&lt;style&gt; 标签控制</div>
+        </div>
+        <div class="ob-model-card" data-model="mimo-v2.5-tts-voicedesign" onclick="obSelectTtsModel(this)">
+          <div class="ob-mc-icon">🎨</div>
+          <div class="ob-mc-name">音色设计</div>
+          <div class="ob-mc-desc">用文字描述自定义音色</div>
+        </div>
+        <div class="ob-model-card" data-model="mimo-v2.5-tts-voiceclone" onclick="obSelectTtsModel(this)">
+          <div class="ob-mc-icon">🎤</div>
+          <div class="ob-mc-name">声音克隆</div>
+          <div class="ob-mc-desc">录音或上传音频复刻音色</div>
+        </div>
+        <div class="ob-model-card full" data-model="custom-tts" onclick="obSelectTtsModel(this)">
+          <div class="ob-mc-icon">⚙️</div>
+          <div class="ob-mc-name">自定义语音模型</div>
+          <div class="ob-mc-desc">输入自定义模型 ID</div>
+        </div>
+      </div>
+      <div class="ob-field" id="obCustomTtsWrap" style="display:none;margin-top:12px">
+        <label>自定义语音模型 ID</label>
+        <input type="text" id="obCustomTts" placeholder="输入模型名称…">
+      </div>
+    </div>
+    <div class="ob-btns">
+      <button class="ob-btn ob-secondary" onclick="obPrev()">上一步</button>
+      <button class="ob-btn ob-primary" onclick="obNext()">下一步</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Voice Setup (dynamic) -->
+  <div class="onboard-step" id="obStep3">
+    <div class="ob-section">
+      <div class="ob-section-icon" id="obStep3Icon">🔊</div>
+      <div class="ob-section-title" id="obStep3Title">选择音色</div>
+      <div class="ob-section-desc" id="obStep3Desc">试听并选择你喜欢的音色</div>
+    </div>
+
+    <!-- V2 Voice Select -->
+    <div id="obV2VoiceSection" style="display:none">
+      <div class="ob-voice-list" id="obV2VoiceList"></div>
+      <div class="ob-orb-wrap">
+        <div class="orb-wrap" style="--ball:64px;pointer-events:none">
+          <div class="orb idle" id="obMiniOrbV2" style="transition:background .4s,box-shadow .4s,transform .3s"></div>
+          <div class="ring"></div>
+          <div class="ring"></div>
+          <div class="ring"></div>
+        </div>
+        <div class="ob-status" id="obV2Status" style="margin-top:10px">👆 点击音色立即试听</div>
+      </div>
+    </div>
+
+    <!-- V2.5 Voice Select -->
+    <div id="obV25VoiceSection" style="display:none">
+      <div class="ob-voice-list" id="obV25VoiceList"></div>
+      <div class="ob-orb-wrap">
+        <div class="orb-wrap" style="--ball:64px;pointer-events:none">
+          <div class="orb idle" id="obMiniOrb" style="transition:background .4s,box-shadow .4s,transform .3s"></div>
+          <div class="ring"></div>
+          <div class="ring"></div>
+          <div class="ring"></div>
+        </div>
+        <div class="ob-status" id="obV25Status" style="margin-top:10px">👆 点击音色立即试听</div>
+      </div>
+    </div>
+
+    <!-- Voice Design -->
+    <div id="obDesignSection" style="display:none">
+      <div class="ob-design-area">
+        <label for="obDesignDesc">✨ 描述你想要的音色</label><textarea id="obDesignDesc" rows="3" placeholder="例如：一个温柔磁性的中年男性嗓音，带着一点烟嗓的沙哑感"></textarea>
+        <div class="hint">通过文字描述自定义音色，无需音频样本</div>
+      </div>
+      <div style="padding:0 24px">
+        <div class="ob-field">
+          <label>试听文本</label>
+          <input type="text" id="obDesignText" value="你好，我是你的AI助手，有什么可以帮你的吗？">
+        </div>
+      </div>
+      <div class="ob-preview">
+        <div class="ob-preview-label">🔊 试听</div>
+        <div class="ob-preview-btns">
+          <button class="ob-preview-btn ob-play-btn" id="obDesignPlay" onclick="obPlayDesign()">🔊 生成并试听</button>
+          <button class="ob-preview-btn ob-retry-btn" onclick="obRetryDesign()">🔄 重新设计</button>
+        </div>
+        <div class="ob-status" id="obDesignStatus"></div>
+      </div>
+    </div>
+
+    <!-- Voice Clone -->
+    <div id="obCloneSection" style="display:none">
+      <div class="ob-clone-area">
+        <button class="ob-rec-btn ob-rec-start" id="obRecBtn" onclick="obToggleRec()">🎤 开始录音</button>
+        <div class="ob-rec-status" id="obRecStatus">朗读下方标准文本进行声音采集</div>
+        <div class="ob-preview" style="margin:0">
+          <div class="ob-preview-label">📝 标准朗读文本</div>
+          <div class="ob-preview-text" style="font-size:15px;line-height:1.9">
+            春眠不觉晓，处处闻啼鸟。夜来风雨声，花落知多少。<br>
+            床前明月光，疑是地上霜。举头望明月，低头思故乡。
+          </div>
+        </div>
+        <div class="ob-rec-or">或者上传音频文件</div>
+        <input type="file" class="ob-file-input" id="obCloneFile" accept=".mp3,.wav,audio/mp3,audio/wav,audio/mpeg">
+        <div class="hint" style="margin-top:8px;padding:0">支持 mp3/wav 格式，最大 10MB</div>
+      </div>
+      <div style="padding:0 24px">
+        <div class="ob-field">
+          <label>试听文本</label>
+          <input type="text" id="obCloneText" value="今天天气真不错，出去走走吧。">
+        </div>
+      </div>
+      <div class="ob-preview">
+        <div class="ob-preview-label">🔊 试听</div>
+        <div class="ob-preview-btns">
+          <button class="ob-preview-btn ob-play-btn" id="obClonePlay" onclick="obPlayClone()">🔊 生成并试听</button>
+          <button class="ob-preview-btn ob-retry-btn" onclick="obRetryClone()">🔄 重新录制</button>
+        </div>
+        <div class="ob-status" id="obCloneStatus"></div>
+      </div>
+    </div>
+
+    <!-- Custom model skip -->
+    <div id="obCustomVoiceSection" style="display:none">
+      <div class="ob-preview" style="margin:0 24px">
+        <div class="ob-preview-label">ℹ️</div>
+        <div class="ob-preview-text" style="color:var(--text2)">自定义模型无需在此设置音色，可在进入后于「设置」中详细配置。</div>
+      </div>
+    </div>
+
+    <div class="ob-btns">
+      <button class="ob-btn ob-secondary" onclick="obPrev()">上一步</button>
+      <button class="ob-btn ob-primary" id="obVoiceNext" onclick="obNext()">下一步</button>
+    </div>
+  </div>
+
+  <!-- Step 4: Complete -->
+  <div class="onboard-step" id="obStep4">
+    <div class="ob-complete">
+      <div class="ob-complete-icon" onclick="obPartyClick(this)" title="🎉">🎉</div>
+      <div class="ob-complete-title">一切就绪！</div>
+      <div class="ob-complete-desc">点击下方按钮开始使用<br>随时可在设置中修改所有选项</div>
+    </div>
+    <div class="ob-summary" id="obSummary"></div>
+    <div style="padding:0 24px">
+      <button class="ob-btn ob-primary" onclick="obFinish()" style="width:100%;padding:17px;font-size:16px;border-radius:16px">🚀 开始使用</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Nuke cleanup mini-game -->
+<div class="nuke-game" id="nukeGame">
+  <canvas class="nuke-game-canvas" id="nukeCanvas"></canvas>
+  <div class="nuke-game-ui">
+    <div class="nuke-game-title">💥 清理核爆废墟</div>
+    <div class="nuke-game-sub">点击消灭下落的碎片，恢复页面</div>
+    <div class="nuke-game-bar-wrap"><div class="nuke-game-bar" id="nukeBar"></div></div>
+    <div class="nuke-game-count" id="nukeCount">0 / 30</div>
+  </div>
+  <div class="nuke-game-hint">点击碎片将其消灭 · 集齐 30 个恢复页面</div>
+</div>
 
 <script>
 // ════════════════════════════════════════
@@ -1770,14 +2193,47 @@ $('btnVCRecord').onclick=async()=>{
   _vcMediaRecorder.ondataavailable=e=>{if(e.data.size>0)_vcRecChunks.push(e.data)};
   _vcMediaRecorder.onstop=()=>{
     _vcRecBlob=new Blob(_vcRecChunks,{type:'audio/webm'});
+    $('vcRecPlayer').src=URL.createObjectURL(_vcRecBlob);
+    $('vcRecPlayer').style.display='';
+    // Convert webm → WAV (PCM16 mono) for API
     const reader=new FileReader();
-    reader.onload=()=>{
-      _vcRecDataUrl=reader.result;
-      $('vcRecPlayer').src=URL.createObjectURL(_vcRecBlob);
-      $('vcRecPlayer').style.display='';
-      $('vcRecStatus').textContent=`✅ 录音完成（${_vcRecSeconds}秒），可试听或直接复刻`;
+    reader.onload=async()=>{
+      try{
+        const tmpCtx=new(window.AudioContext||window.webkitAudioContext)();
+        const audioBuf=await tmpCtx.decodeAudioData(reader.result);
+        const sr=audioBuf.sampleRate;
+        let raw;
+        if(audioBuf.numberOfChannels>1){
+          const c0=audioBuf.getChannelData(0),c1=audioBuf.getChannelData(1);
+          raw=new Float32Array(c0.length);
+          for(let i=0;i<c0.length;i++)raw[i]=(c0[i]+c1[i])*0.5;
+        }else{raw=audioBuf.getChannelData(0)}
+        let s=0;while(s<raw.length&&Math.abs(raw[s])<0.005)s++;
+        const trimmed=s>800?raw.subarray(s):raw;
+        const pcm=new Int16Array(trimmed.length);
+        for(let i=0;i<trimmed.length;i++){const v=Math.max(-1,Math.min(1,trimmed[i]));pcm[i]=v<0?v*0x8000:v*0x7FFF}
+        const nCh=1,bps=16,hl=44,dl=pcm.byteLength;
+        const ab=new ArrayBuffer(hl+dl),dv=new DataView(ab);
+        const w=(o,t)=>{for(let i=0;i<t.length;i++)dv.setUint8(o+i,t.charCodeAt(i))};
+        w(0,'RIFF');dv.setUint32(4,36+dl,true);w(8,'WAVE');
+        w(12,'fmt ');dv.setUint32(16,16,true);dv.setUint16(20,1,true);
+        dv.setUint16(22,nCh,true);dv.setUint32(24,sr,true);
+        dv.setUint32(28,sr*nCh*bps/8,true);dv.setUint16(32,nCh*bps/8,true);
+        dv.setUint16(34,bps,true);w(36,'data');dv.setUint32(40,dl,true);
+        new Int16Array(ab,hl).set(pcm);
+        tmpCtx.close();
+        const u8=new Uint8Array(ab);
+        let b='';for(let i=0;i<u8.length;i++)b+=String.fromCharCode(u8[i]);
+        _vcRecDataUrl='data:audio/wav;base64,'+btoa(b);
+        $('vcRecStatus').textContent=`✅ 录音完成（${audioBuf.duration.toFixed(1)}秒），可试听或直接复刻`;
+      }catch(e){
+        console.error('WAV conversion failed:',e);
+        const r2=new FileReader();
+        r2.onload=()=>{_vcRecDataUrl=r2.result;$('vcRecStatus').textContent=`✅ 录音完成（${_vcRecSeconds}秒），可试听或直接复刻`};
+        r2.readAsDataURL(_vcRecBlob);
+      }
     };
-    reader.readAsDataURL(_vcRecBlob);
+    reader.readAsArrayBuffer(_vcRecBlob);
     if(_vcRecStream){_vcRecStream.getTracks().forEach(t=>t.stop());_vcRecStream=null}
     if(_vcRecTimer){clearInterval(_vcRecTimer);_vcRecTimer=null}
   };
@@ -1829,10 +2285,12 @@ $('btnVCPreview').onclick=async()=>{
   $('vcStatus').textContent='⏳ 正在复刻音色…';
   $('btnVCPreview').disabled=true;$('btnVCPreview').style.opacity='.5';
   try{
+    console.log('VoiceClone[Settings] voice data starts with:',voiceData?.substring(0,40));
+    console.log('VoiceClone[Settings] voice data length:',voiceData?.length);
     const r=await fetch(S.ep,{method:'POST',headers:{'Content-Type':'application/json','api-key':S.key},
-      body:JSON.stringify({model:'mimo-v2.5-tts-voiceclone',messages:[{role:'assistant',content:text}],audio:{format:'wav',voice:voiceData}})});
-    if(!r.ok){const e=await r.text();throw new Error(`API ${r.status}: ${e.slice(0,150)}`)}
-    const d=await r.json();if(d.error)throw new Error(JSON.stringify(d.error).slice(0,150));
+      body:JSON.stringify({model:'mimo-v2.5-tts-voiceclone',messages:[{role:'user',content:''},{role:'assistant',content:text}],audio:{format:'wav',voice:voiceData}})});
+    if(!r.ok){const e=await r.text();console.error('VoiceClone API error:',e);throw new Error(`API ${r.status}: ${e.slice(0,300)}`)}
+    const d=await r.json();if(d.error)throw new Error(JSON.stringify(d.error).slice(0,300));
     const b64=d.choices?.[0]?.message?.audio?.data;if(!b64)throw new Error('无音频数据');
     _vcAudioB64=b64;
     const bin=atob(b64);const raw=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)raw[i]=bin.charCodeAt(i);
@@ -1994,6 +2452,1097 @@ orb.addEventListener('click',function greetingHandler(e){
     orb.classList.remove('loading');orb.classList.add('idle');
   }
 }, true);
+
+// ════════════════════════════════════════
+// ── Onboarding Wizard ──
+// ════════════════════════════════════════
+const OB_STEPS=5;
+let obCurrent=0;
+let obSelectedChatModel='mimo-v2-flash';
+let obSelectedTtsModel='mimo-v2.5-tts';
+let obSelectedVoice='mimo_default';
+let obDesignAudioB64=null;
+let obCloneAudioB64=null;
+let obRecStream=null,obRecChunks=[],obRecBlob=null,obRecDataUrl=null,obMediaRecorder=null;
+let obRecTimer=null,obRecSeconds=0;
+let obIsReEntry=false;
+
+function startOnboard(reEntry){
+  obIsReEntry=!!reEntry;
+  obCurrent=0; // Always start from welcome
+  obSelectedChatModel=S.chatM||'mimo-v2-flash';
+  obSelectedTtsModel=S.ttsM||'mimo-v2.5-tts';
+  obSelectedVoice=S.voice||'mimo_default';
+  obDesignAudioB64=null;
+  obCloneAudioB64=null;
+  if(S.key)$('obApiKey').value=S.key;
+  if(S.vdVoiceDesc)$('obDesignDesc').value=S.vdVoiceDesc;
+  renderObProgress();
+  showObStep(obCurrent);
+  $('onboardOverlay').classList.add('show');
+}
+
+function obSkip(){
+  if(obIsReEntry){$('onboardOverlay').classList.remove('show');return}
+  $('onboardOverlay').classList.remove('show');
+  if(!S.key)setStatus('点击右上角设置 API Key');
+}
+
+function obNext(){
+  if(obCurrent===1){
+    const key=$('obApiKey').value.trim();
+    if(!key){showToast('请输入 API Key',2000);return}
+    S.key=key;localStorage.setItem('mk',S.key);
+  }
+  if(obCurrent===2){
+    if(obSelectedChatModel==='custom-chat'){
+      const custom=$('obCustomChat').value.trim();
+      if(!custom){showToast('请输入对话模型 ID',2000);return}
+      S.chatM=custom;
+    }else{S.chatM=obSelectedChatModel}
+    localStorage.setItem('mcm',S.chatM);
+    if(obSelectedTtsModel==='custom-tts'){
+      const custom=$('obCustomTts').value.trim();
+      if(!custom){showToast('请输入语音模型 ID',2000);return}
+      S.ttsM=custom;
+    }else{S.ttsM=obSelectedTtsModel}
+    localStorage.setItem('mtm',S.ttsM);
+  }
+  if(obCurrent===3)obSaveVoiceSettings();
+  obCurrent++;if(obCurrent>=OB_STEPS)obCurrent=OB_STEPS-1;
+  renderObProgress();
+  showObStep(obCurrent);
+}
+
+function obPrev(){
+  obCurrent--;if(obCurrent<0)obCurrent=0;
+  renderObProgress();
+  showObStep(obCurrent);
+}
+
+function renderObProgress(){
+  const names=['欢迎','密钥','模型','音色','完成'];
+  let html='';
+  for(let i=0;i<OB_STEPS;i++){
+    const cls=i===obCurrent?'active':(i<obCurrent?'done':'');
+    html+=`<div class="ob-pbar ${cls}" title="${names[i]}"><div class="ob-pbar-inner"></div></div>`;
+  }
+  $('obProgress').innerHTML=html;
+}
+
+function showObStep(n){
+  document.querySelectorAll('.onboard-step').forEach(s=>s.classList.remove('active'));
+  $('obStep'+n).classList.add('active');
+  setupStep(n);
+}
+
+function setupStep(n){
+  if(n===2)obSetupModelStep();
+  if(n===3)obSetupVoiceStep();
+  if(n===4){obSetupCompleteStep();fireConfetti();}
+}
+
+/* ── Party click: confetti + nuclear easter egg ── */
+let _partyClicks=0,_partyTimer=null;
+function obPartyClick(el){
+  fireConfetti();
+  _partyClicks++;
+  clearTimeout(_partyTimer);
+  _partyTimer=setTimeout(()=>{_partyClicks=0},2000);
+  if(_partyClicks>=10){_partyClicks=0;fireNuke(el);}
+}
+
+/* ── Nuclear explosion ── */
+function fireNuke(origin){
+  // Prevent re-trigger
+  origin.style.pointerEvents='none';
+
+  // Flash overlay
+  const flash=document.createElement('div');
+  flash.className='nuke-overlay';
+  document.body.appendChild(flash);
+
+  // Warning text
+  const warn=document.createElement('div');
+  warn.className='nuke-warning';
+  warn.textContent='💥 别再点了！核爆了！💥';
+  document.body.appendChild(warn);
+
+  // Collect ALL visible interactive elements: buttons, cards, inputs, panels, text blocks
+  const overlay=document.getElementById('onboardOverlay');
+  const container=document.querySelector('.onboard-container');
+  const root=container||overlay||document.body;
+  const rootRect=root.getBoundingClientRect();
+  const cx=rootRect.left+rootRect.width/2;
+  const cy=rootRect.top+rootRect.height/2;
+
+  // Grab everything worth exploding
+  const targets=[
+    ...root.querySelectorAll('button, .ob-btn, .ob-model-card, .ob-voice-item, .ob-summary-item, input, select, .ob-pbar, .ob-complete, .ob-welcome, .ob-feature, .onboard-step.active .ob-desc, .onboard-step.active .ob-label')
+  ].filter(el=>{
+    const r=el.getBoundingClientRect();
+    return r.width>0&&r.height>0;
+  });
+
+  // Hide originals
+  targets.forEach(el=>{el.style.visibility='hidden'});
+
+  // Clone each element and give it physics
+  targets.forEach((el,i)=>{
+    const r=el.getBoundingClientRect();
+    const clone=el.cloneNode(true);
+    clone.style.visibility='visible';
+    clone.style.position='fixed';
+    clone.style.left=r.left+'px';
+    clone.style.top=r.top+'px';
+    clone.style.width=r.width+'px';
+    clone.style.height=r.height+'px';
+    clone.style.margin='0';
+    clone.style.zIndex='10001';
+    clone.style.pointerEvents='none';
+    clone.style.willChange='transform,opacity';
+
+    // Physics: direction from center, with randomness
+    const ex=r.left+r.width/2;
+    const ey=r.top+r.height/2;
+    const angle=Math.atan2(ey-cy,ex-cx)+(Math.random()-.5)*.6;
+    const dist=250+Math.random()*500;
+    const dx=Math.cos(angle)*dist+(Math.random()-.5)*150;
+    const dy=Math.sin(angle)*dist-80+Math.random()*200; // slight upward bias
+    const rot=(Math.random()-.5)*720;
+    const dur=2+Math.random()*2;
+    const delay=i*.02; // staggered explosion
+
+    clone.style.setProperty('--dx',dx+'px');
+    clone.style.setProperty('--dy',(dy+600)+'px'); // gravity pulls down
+    clone.style.setProperty('--rot',rot+'deg');
+    clone.style.setProperty('--dur',dur+'s');
+    clone.style.animation=`nuke-fly ${dur}s cubic-bezier(.12,.7,.3,1) ${delay}s forwards`;
+    document.body.appendChild(clone);
+  });
+
+  // Also scatter smaller elements: progress bars, badges, rings, all the little bits
+  const extras=root.querySelectorAll('.ring, .stt-badge, .ob-pbar-inner, .ob-complete-icon, .ob-complete-title, .ob-complete-desc, .ob-summary span');
+  extras.forEach(el=>{
+    const r=el.getBoundingClientRect();
+    if(r.width<1||r.height<1)return;
+    const clone=el.cloneNode(true);
+    clone.style.visibility='visible';
+    clone.style.position='fixed';
+    clone.style.left=r.left+'px';
+    clone.style.top=r.top+'px';
+    clone.style.width=r.width+'px';
+    clone.style.height='auto';
+    clone.style.margin='0';
+    clone.style.zIndex='10001';
+    clone.style.pointerEvents='none';
+    clone.style.willChange='transform,opacity';
+
+    const ex=r.left+r.width/2,ey=r.top+r.height/2;
+    const angle=Math.atan2(ey-cy,ex-cx)+(Math.random()-.5)*.8;
+    const dist=300+Math.random()*600;
+    const dx=Math.cos(angle)*dist;
+    const dy=Math.sin(angle)*dist-120+Math.random()*300;
+    const rot=(Math.random()-.5)*1080;
+    const dur=1.5+Math.random()*2.5;
+
+    clone.style.setProperty('--dx',dx+'px');
+    clone.style.setProperty('--dy',(dy+500)+'px');
+    clone.style.setProperty('--rot',rot+'deg');
+    clone.style.setProperty('--dur',dur+'s');
+    clone.style.animation=`nuke-fly ${dur}s cubic-bezier(.12,.7,.3,1) ${Math.random()*.3}s forwards`;
+    document.body.appendChild(clone);
+  });
+
+  // Debris particles from center
+  for(let i=0;i<50;i++){
+    const p=document.createElement('div');
+    p.className='nuke-fragment';
+    const size=3+Math.random()*8;
+    p.style.width=size+'px';
+    p.style.height=size*(Math.random()>.5?1:2.5)+'px';
+    p.style.left=cx+'px';
+    p.style.top=cy+'px';
+    p.style.background=['#ff6b6b','#feca57','#48dbfb','#ff9ff3','#ff6348','#6C5CE7','#a29bfe','#1dd1a1'][Math.floor(Math.random()*8)];
+    p.style.borderRadius=Math.random()>.5?'50%':'2px';
+
+    const angle=Math.random()*Math.PI*2;
+    const dist=200+Math.random()*500;
+    const dx=Math.cos(angle)*dist;
+    const dy=Math.sin(angle)*dist-200;
+    const rot=(Math.random()-.5)*1440;
+    p.style.setProperty('--dx',dx+'px');
+    p.style.setProperty('--dy',(dy+400)+'px');
+    p.style.setProperty('--rot',rot+'deg');
+    p.style.setProperty('--dur',(1.5+Math.random()*2)+'s');
+    document.body.appendChild(p);
+  }
+
+  // No auto-cleanup — start mini-game instead
+  setTimeout(()=>{
+    flash.remove();
+    warn.remove();
+    // Keep fragments visible briefly, then start game
+    setTimeout(()=>{
+      document.querySelectorAll('.nuke-fragment,.nuke-fly').forEach(f=>f.remove());
+      document.querySelectorAll('[style*="nuke-fly"]').forEach(f=>f.remove());
+      document.querySelectorAll('[style*="z-index: 10001"]').forEach(f=>{
+        if(f.style.position==='fixed')f.remove();
+      });
+      startNukeGame(targets,origin);
+    },500);
+  },3000);
+}
+
+/* ── Nuke cleanup mini-game ── */
+function startNukeGame(hiddenTargets,origin){
+  const game=$('nukeGame');
+  const canvas=$('nukeCanvas');
+  const ctx=canvas.getContext('2d');
+  const bar=$('nukeBar');
+  const countEl=$('nukeCount');
+  const GOAL=30;
+  let cleared=0;
+  let alive=true;
+  let particles=[]; // falling debris
+  let pops=[]; // click explosion effects
+  let spawnTimer=0;
+  let frameId=null;
+
+  // Show game
+  game.classList.add('on');
+  bar.style.width='0%';
+  countEl.textContent='0 / '+GOAL;
+
+  // Sizing
+  function resize(){
+    canvas.width=window.innerWidth;
+    canvas.height=window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize',resize);
+
+  // Colors
+  const colors=['#ff6b6b','#feca57','#48dbfb','#ff9ff3','#54a0ff','#5f27cd','#01a3a4','#f368e0','#ff6348','#6C5CE7','#a29bfe','#00d2d3','#1dd1a1','#ee5a24'];
+
+  // Spawn a falling debris
+  function spawn(){
+    const size=12+Math.random()*24;
+    particles.push({
+      x:Math.random()*(canvas.width-size*2)+size,
+      y:-size*2,
+      w:size,
+      h:size*(Math.random()>.6?1.8:1),
+      vy:1.2+Math.random()*2.5,
+      vx:(Math.random()-.5)*1.5,
+      rot:Math.random()*Math.PI*2,
+      vr:(Math.random()-.5)*.08,
+      color:colors[Math.floor(Math.random()*colors.length)],
+      radius:Math.random()>.5?'50%':'3px',
+      hit:false,
+    });
+  }
+
+  // Click/tap to pop
+  function onTap(e){
+    if(!alive)return;
+    const rect=canvas.getBoundingClientRect();
+    const mx=(e.clientX||e.touches?.[0]?.clientX)-rect.left;
+    const my=(e.clientY||e.touches?.[0]?.clientY)-rect.top;
+
+    for(let i=particles.length-1;i>=0;i--){
+      const p=particles[i];
+      const cx=p.x+p.w/2,cy=p.y+p.h/2;
+      const dx=mx-cx,dy=my-cy;
+      if(Math.abs(dx)<p.w*.8&&Math.abs(dy)<p.h*.8){
+        // Pop!
+        cleared++;
+        bar.style.width=Math.min(100,cleared/GOAL*100)+'%';
+        countEl.textContent=cleared+' / '+GOAL;
+
+        // Spawn pop particles
+        for(let j=0;j<8;j++){
+          const angle=Math.random()*Math.PI*2;
+          const speed=2+Math.random()*4;
+          pops.push({
+            x:cx,y:cy,
+            vx:Math.cos(angle)*speed,
+            vy:Math.sin(angle)*speed,
+            life:1,
+            color:p.color,
+            size:2+Math.random()*4,
+          });
+        }
+        particles.splice(i,1);
+
+        if(cleared>=GOAL){
+          alive=false;
+          winNukeGame(hiddenTargets,origin,canvas,game,frameId,resize);
+          return;
+        }
+        break;
+      }
+    }
+  }
+  canvas.addEventListener('click',onTap);
+  canvas.addEventListener('touchstart',onTap,{passive:true});
+
+  // Game loop
+  function loop(){
+    if(!alive)return;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    // Spawn debris
+    spawnTimer++;
+    if(spawnTimer%12===0)spawn();
+
+    // Draw & update particles
+    for(let i=particles.length-1;i>=0;i--){
+      const p=particles[i];
+      p.x+=p.vx;
+      p.y+=p.vy;
+      p.vy+=.04; // gravity
+      p.rot+=p.vr;
+
+      // Off screen → remove (penalty? no, just skip)
+      if(p.y>canvas.height+50){
+        particles.splice(i,1);
+        continue;
+      }
+
+      ctx.save();
+      ctx.translate(p.x+p.w/2,p.y+p.h/2);
+      ctx.rotate(p.rot);
+      ctx.fillStyle=p.color;
+      ctx.globalAlpha=.9;
+      if(p.radius==='50%'){
+        ctx.beginPath();
+        ctx.arc(0,0,p.w/2,0,Math.PI*2);
+        ctx.fill();
+      }else{
+        ctx.beginPath();
+        ctx.roundRect(-p.w/2,-p.h/2,p.w,p.h,3);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // Draw pop effects
+    for(let i=pops.length-1;i>=0;i--){
+      const p=pops[i];
+      p.x+=p.vx;
+      p.y+=p.vy;
+      p.vy+=.1;
+      p.life-=.04;
+      if(p.life<=0){pops.splice(i,1);continue}
+      ctx.globalAlpha=p.life;
+      ctx.fillStyle=p.color;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2);
+      ctx.fill();
+    }
+    ctx.globalAlpha=1;
+
+    frameId=requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+function winNukeGame(hiddenTargets,origin,canvas,game,frameId,resizeHandler){
+  cancelAnimationFrame(frameId);
+  window.removeEventListener('resize',resizeHandler);
+
+  // Victory flash
+  const flash=document.createElement('div');
+  flash.style.cssText='position:fixed;inset:0;z-index:10004;background:rgba(255,255,255,.8);animation:nuke-flash .3s ease 2;pointer-events:none';
+  document.body.appendChild(flash);
+
+  setTimeout(()=>{
+    flash.remove();
+    game.classList.remove('on');
+    // Restore all hidden elements
+    hiddenTargets.forEach(el=>{el.style.visibility=''});
+    origin.style.pointerEvents='';
+    canvas.width=0;canvas.height=0;
+    // Celebration!
+    fireConfetti();
+  },600);
+}
+
+/* ── Confetti cannon from 🎉 position ── */
+function fireConfetti(){
+  const container=document.createElement('div');
+  container.className='confetti-container';
+  document.body.appendChild(container);
+
+  // Find the 🎉 icon position
+  const icon=document.querySelector('.ob-complete-icon');
+  const rect=icon?icon.getBoundingClientRect():{left:window.innerWidth/2,top:window.innerHeight/3};
+  const originX=rect.left+(rect.width/2);
+  const originY=rect.top+(rect.height/2);
+
+  const colors=['#ff6b6b','#feca57','#48dbfb','#ff9ff3','#54a0ff','#5f27cd','#01a3a4','#f368e0','#ff6348','#6C5CE7','#a29bfe','#00d2d3','#1dd1a1','#ee5a24'];
+  const shapes=['square','circle','ribbon'];
+  const count=80;
+
+  for(let i=0;i<count;i++){
+    const piece=document.createElement('div');
+    piece.className='confetti-piece';
+    const shape=shapes[Math.floor(Math.random()*shapes.length)];
+    const color=colors[Math.floor(Math.random()*colors.length)];
+    const size=6+Math.random()*10;
+
+    if(shape==='ribbon'){
+      piece.style.width=size*0.4+'px';
+      piece.style.height=size*1.8+'px';
+      piece.style.borderRadius='2px';
+    }else if(shape==='circle'){
+      piece.style.width=size+'px';
+      piece.style.height=size+'px';
+      piece.style.borderRadius='50%';
+    }else{
+      piece.style.width=size+'px';
+      piece.style.height=size+'px';
+      piece.style.borderRadius='2px';
+    }
+    piece.style.background=color;
+
+    // Physics: burst outward and fall
+    const angle=(Math.random()*Math.PI*2);
+    const velocity=120+Math.random()*280;
+    const dx=Math.cos(angle)*velocity;
+    const dy=Math.sin(angle)*velocity - 100 - Math.random()*200; // bias upward
+    const rot=(Math.random()-0.5)*1080;
+    const dur=1.2+Math.random()*1.2;
+    const delay=Math.random()*0.3;
+
+    piece.style.left=originX+'px';
+    piece.style.top=originY+'px';
+    piece.style.setProperty('--dx',dx+'px');
+    piece.style.setProperty('--dy',(dy+500)+'px'); // gravity effect
+    piece.style.setProperty('--rot',rot+'deg');
+    piece.style.animation=`confetti-fall ${dur}s cubic-bezier(.25,.46,.45,.94) ${delay}s forwards`;
+
+    container.appendChild(piece);
+  }
+
+  // Second burst — smaller, delayed
+  setTimeout(()=>{
+    for(let i=0;i<30;i++){
+      const piece=document.createElement('div');
+      piece.className='confetti-piece';
+      const color=colors[Math.floor(Math.random()*colors.length)];
+      const size=4+Math.random()*7;
+      piece.style.width=size+'px';
+      piece.style.height=size*(Math.random()>0.5?1:2.2)+'px';
+      piece.style.borderRadius=Math.random()>0.5?'50%':'2px';
+      piece.style.background=color;
+
+      const angle=(Math.random()*Math.PI*2);
+      const velocity=80+Math.random()*180;
+      const dx=Math.cos(angle)*velocity;
+      const dy=Math.sin(angle)*velocity - 80 - Math.random()*150;
+      const rot=(Math.random()-0.5)*720;
+      const dur=1+Math.random()*1;
+
+      piece.style.left=originX+'px';
+      piece.style.top=originY+'px';
+      piece.style.setProperty('--dx',dx+'px');
+      piece.style.setProperty('--dy',(dy+400)+'px');
+      piece.style.setProperty('--rot',rot+'deg');
+      piece.style.animation=`confetti-fall ${dur}s cubic-bezier(.25,.46,.45,.94) forwards`;
+      container.appendChild(piece);
+    }
+  },350);
+
+  // Cleanup
+  setTimeout(()=>container.remove(),3000);
+}
+
+function obSelectChatModel(el){
+  document.querySelectorAll('#obChatGrid .ob-model-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  obSelectedChatModel=el.dataset.model;
+  $('obCustomChatWrap').style.display=obSelectedChatModel==='custom-chat'?'':'none';
+}
+
+function obSelectTtsModel(el){
+  document.querySelectorAll('#obTtsGrid .ob-model-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  obSelectedTtsModel=el.dataset.model;
+  $('obCustomTtsWrap').style.display=obSelectedTtsModel==='custom-tts'?'':'none';
+}
+
+function obSetupModelStep(){
+  // Chat model cards
+  document.querySelectorAll('#obChatGrid .ob-model-card').forEach(c=>{
+    c.classList.toggle('selected',c.dataset.model===obSelectedChatModel);
+  });
+  $('obCustomChatWrap').style.display=obSelectedChatModel==='custom-chat'?'':'none';
+  if(obSelectedChatModel==='custom-chat')$('obCustomChat').value=S.chatM||'';
+  // TTS model cards
+  document.querySelectorAll('#obTtsGrid .ob-model-card').forEach(c=>{
+    c.classList.toggle('selected',c.dataset.model===obSelectedTtsModel);
+  });
+  $('obCustomTtsWrap').style.display=obSelectedTtsModel==='custom-tts'?'':'none';
+  if(obSelectedTtsModel==='custom-tts')$('obCustomTts').value=S.ttsM||'';
+}
+
+function obSetupVoiceStep(){
+  const m=obSelectedTtsModel;
+  const isV2=m==='mimo-v2-tts';
+  const isVD=m==='mimo-v2.5-tts-voicedesign';
+  const isVC=m==='mimo-v2.5-tts-voiceclone';
+  const isV25Preset=m==='mimo-v2.5-tts';
+  const isCustom=m.startsWith('custom')||(!isV2&&!isVD&&!isVC&&!isV25Preset);
+
+  // Hide all sections first
+  $('obV2VoiceSection').style.display='none';
+  $('obV25VoiceSection').style.display='none';
+  $('obDesignSection').style.display='none';
+  $('obCloneSection').style.display='none';
+  $('obCustomVoiceSection').style.display='none';
+
+  if(isV2){
+    $('obStep3Icon').textContent='📻';
+    $('obStep3Title').textContent='选择音色 (V2)';
+    $('obStep3Desc').textContent='点击音色立即试听，满意后继续';
+    $('obV2VoiceSection').style.display='';
+    obRenderV2Voices();
+  }else if(isV25Preset){
+    $('obStep3Icon').textContent='🔊';
+    $('obStep3Title').textContent='选择音色 (V2.5)';
+    $('obStep3Desc').textContent='点击音色立即试听，满意后继续';
+    $('obV25VoiceSection').style.display='';
+    obRenderV25Voices();
+  }else if(isVD){
+    $('obStep3Icon').textContent='🎨';
+    $('obStep3Title').textContent='设计你的音色';
+    $('obStep3Desc').textContent='用文字描述，AI 为你生成独特音色';
+    $('obDesignSection').style.display='';
+  }else if(isVC){
+    $('obStep3Icon').textContent='🎤';
+    $('obStep3Title').textContent='克隆你的声音';
+    $('obStep3Desc').textContent='录制或上传音频，复刻专属音色';
+    $('obCloneSection').style.display='';
+  }else{
+    // Custom or unknown — skip voice setup
+    $('obStep3Icon').textContent='⚙️';
+    $('obStep3Title').textContent='自定义模型';
+    $('obStep3Desc').textContent='可在进入后于设置中详细配置';
+    $('obCustomVoiceSection').style.display='';
+  }
+}
+
+function obRenderV2Voices(){
+  const voices=[
+    {id:'mimo_default',name:'MiMo-默认',desc:'默认中文女声'},
+    {id:'default_zh',name:'MiMo-中文女声',desc:'标准中文女声'},
+    {id:'default_en',name:'MiMo-英文女声',desc:'标准英文女声'},
+  ];
+  const list=$('obV2VoiceList');
+  list.innerHTML=voices.map(v=>`
+    <div class="ob-voice-item ${v.id===obSelectedVoice?'selected':''}" data-voice="${v.id}" onclick="obSelectVoice(this,'${v.id}')">
+      <div><div class="ob-vi-name">${v.name}</div><div class="ob-vi-desc">${v.desc}</div></div>
+      <div class="ob-vi-check"></div>
+    </div>
+  `).join('');
+}
+
+function obRenderV25Voices(){
+  const voices=[
+    {id:'mimo_default',name:'冰糖 / Mia',desc:'默认音色'},
+    {id:'冰糖',name:'冰糖',desc:'中文女声 · 温暖甜美'},
+    {id:'茉莉',name:'茉莉',desc:'中文女声 · 清新自然'},
+    {id:'苏打',name:'苏打',desc:'中文男声 · 阳光活力'},
+    {id:'白桦',name:'白桦',desc:'中文男声 · 沉稳磁性'},
+    {id:'Mia',name:'Mia',desc:'英文女声 · 柔和优雅'},
+    {id:'Chloe',name:'Chloe',desc:'英文女声 · 活泼开朗'},
+    {id:'Milo',name:'Milo',desc:'英文男声 · 阳刚有力'},
+    {id:'Dean',name:'Dean',desc:'英文男声 · 低沉醇厚'},
+  ];
+  const list=$('obV25VoiceList');
+  list.innerHTML=voices.map(v=>`
+    <div class="ob-voice-item ${v.id===obSelectedVoice?'selected':''}" data-voice="${v.id}" onclick="obSelectVoice(this,'${v.id}')">
+      <div><div class="ob-vi-name">${v.name}</div><div class="ob-vi-desc">${v.desc}</div></div>
+      <div class="ob-vi-check"></div>
+    </div>
+  `).join('');
+}
+
+function obSelectVoice(el,voiceId){
+  const parent=el.parentElement;
+  parent.querySelectorAll('.ob-voice-item').forEach(i=>i.classList.remove('selected'));
+  el.classList.add('selected');
+  obSelectedVoice=voiceId;
+  // Auto-play on voice selection
+  if(obSelectedTtsModel==='mimo-v2.5-tts'){
+    obV25PlayPreview(voiceId);
+  }else if(obSelectedTtsModel==='mimo-v2-tts'){
+    obV2PlayPreview(voiceId);
+  }
+}
+
+/** V2.5: play voice preview with mini orb animation */
+let _obV25Playing=null; // current AudioBufferSourceNode
+let _obV25Abort=false;
+async function obV25PlayPreview(voiceId){
+  const key=S.key||$('obApiKey').value.trim();
+  if(!key){showToast('请先设置 API Key',2000);return}
+  const miniOrb=$('obMiniOrb');
+  const status=$('obV25Status');
+  const rings=miniOrb.parentElement.querySelectorAll('.ring');
+
+  // Stop any previous playback
+  _obV25Abort=true;
+  if(_obV25Playing){try{_obV25Playing.stop()}catch(e){}_obV25Playing=null}
+  if(audioCtx&&audioCtx.state!=='closed'){try{audioCtx.close()}catch(e){}}
+  audioCtx=null;analyser=null;
+  _obV25Abort=false;
+
+  // Set speaking state
+  miniOrb.className='orb speak-ball';
+  miniOrb.style.background='var(--c-speak)';
+  miniOrb.style.boxShadow='0 0 30px color-mix(in srgb,var(--c-speak) 50%,transparent)';
+  rings.forEach(r=>{r.style.opacity='1';r.style.animation='sp-ring-pulse 1.8s ease-out infinite'});
+  status.textContent='🔊 正在生成语音…';
+
+  try{
+    const text=`您已选择音色${voiceId}，现在好听吗？您可以再选一个，或者下一步，之后使用时还可在设置重新设置`;
+    const style=S.style||'温柔';
+    const content=`(${style})${text}`;
+    const r=await fetch(S.ep||'https://api.xiaomimimo.com/v1/chat/completions',{
+      method:'POST',headers:{'Content-Type':'application/json','api-key':key},
+      body:JSON.stringify({model:'mimo-v2.5-tts',messages:[{role:'user',content:text},{role:'assistant',content}],audio:{format:'wav',voice:voiceId}})
+    });
+    if(!r.ok){const e=await r.text();throw new Error(`API ${r.status}: ${e.slice(0,100)}`)}
+    const d=await r.json();if(d.error)throw new Error(JSON.stringify(d.error).slice(0,100));
+    const b64=d.choices?.[0]?.message?.audio?.data;if(!b64)throw new Error('无音频数据');
+    const bin=atob(b64);const raw=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)raw[i]=bin.charCodeAt(i);
+    const wav=ensureWav(raw);
+    ensureAudioCtx();
+    if(_obV25Abort)return; // Another voice was selected during fetch
+
+    // Start pulse animation
+    miniOrb.className='orb speak-ball';
+    status.textContent='🔊 正在播放…';
+
+    const src=audioCtx.createBufferSource();
+    _obV25Playing=src;
+    await new Promise((res,rej)=>{
+      audioCtx.decodeAudioData(wav.buffer.slice(0),buf=>{
+        if(_obV25Abort){res();return}
+        src.buffer=buf;
+        src.connect(audioCtx.destination);
+        src.start(0);
+        // Pulse the orb during playback
+        let raf=null;
+        const pulse=()=>{if(_obV25Abort){cancelAnimationFrame(raf);return}miniOrb.style.transform=`scale(${1+Math.sin(Date.now()/200)*0.08})`;raf=requestAnimationFrame(pulse)};
+        pulse();
+        src.onended=()=>{if(raf)cancelAnimationFrame(raf);_obV25Playing=null;res()};
+        setTimeout(()=>{if(raf)cancelAnimationFrame(raf);_obV25Playing=null;res()},buf.duration*1000+500);
+      },()=>{_obV25Playing=null;rej(new Error('音频解码失败'))});
+    });
+    status.textContent='✅ 播放完成，满意点下一步继续';
+  }catch(e){
+    if(!_obV25Abort)status.textContent='❌ '+e.message.slice(0,80);
+  }finally{
+    _obV25Playing=null;
+    // Reset orb to idle
+    miniOrb.className='orb idle';
+    miniOrb.style.background='';
+    miniOrb.style.boxShadow='';
+    miniOrb.style.transform='';
+    rings.forEach(r=>{r.style.opacity='';r.style.animation=''});
+  }
+}
+
+/** V2: play voice preview with mini orb animation */
+let _obV2Playing=null;
+let _obV2Abort=false;
+async function obV2PlayPreview(voiceId){
+  const key=S.key||$('obApiKey').value.trim();
+  if(!key){showToast('请先设置 API Key',2000);return}
+  const miniOrb=$('obMiniOrbV2');
+  const status=$('obV2Status');
+  const rings=miniOrb.parentElement.querySelectorAll('.ring');
+
+  // Stop any previous playback
+  _obV2Abort=true;
+  if(_obV2Playing){try{_obV2Playing.stop()}catch(e){}_obV2Playing=null}
+  if(audioCtx&&audioCtx.state!=='closed'){try{audioCtx.close()}catch(e){}}
+  audioCtx=null;analyser=null;
+  _obV2Abort=false;
+
+  miniOrb.className='orb speak-ball';
+  miniOrb.style.background='var(--c-speak)';
+  miniOrb.style.boxShadow='0 0 30px color-mix(in srgb,var(--c-speak) 50%,transparent)';
+  rings.forEach(r=>{r.style.opacity='1';r.style.animation='sp-ring-pulse 1.8s ease-out infinite'});
+  status.textContent='🔊 正在生成语音…';
+
+  try{
+    const text=`您已选择音色${voiceId}，现在好听吗？您可以再选一个，或者下一步，之后使用时还可在设置重新设置`;
+    const style=S.styleV2||S.style||'温柔';
+    const content=`<style>${style}</style>${text}`;
+    const r=await fetch(S.ep||'https://api.xiaomimimo.com/v1/chat/completions',{
+      method:'POST',headers:{'Content-Type':'application/json','api-key':key},
+      body:JSON.stringify({model:'mimo-v2-tts',messages:[{role:'user',content:text},{role:'assistant',content}],audio:{format:'wav',voice:voiceId}})
+    });
+    if(!r.ok){const e=await r.text();throw new Error(`API ${r.status}: ${e.slice(0,100)}`)}
+    const d=await r.json();if(d.error)throw new Error(JSON.stringify(d.error).slice(0,100));
+    const b64=d.choices?.[0]?.message?.audio?.data;if(!b64)throw new Error('无音频数据');
+    const bin=atob(b64);const raw=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)raw[i]=bin.charCodeAt(i);
+    const wav=ensureWav(raw);
+    ensureAudioCtx();
+    if(_obV2Abort)return;
+
+    miniOrb.className='orb speak-ball';
+    status.textContent='🔊 正在播放…';
+
+    const src=audioCtx.createBufferSource();
+    _obV2Playing=src;
+    await new Promise((res,rej)=>{
+      audioCtx.decodeAudioData(wav.buffer.slice(0),buf=>{
+        if(_obV2Abort){res();return}
+        src.buffer=buf;
+        src.connect(audioCtx.destination);
+        src.start(0);
+        let raf=null;
+        const pulse=()=>{if(_obV2Abort){cancelAnimationFrame(raf);return}miniOrb.style.transform=`scale(${1+Math.sin(Date.now()/200)*0.08})`;raf=requestAnimationFrame(pulse)};
+        pulse();
+        src.onended=()=>{if(raf)cancelAnimationFrame(raf);_obV2Playing=null;res()};
+        setTimeout(()=>{if(raf)cancelAnimationFrame(raf);_obV2Playing=null;res()},buf.duration*1000+500);
+      },()=>{_obV2Playing=null;rej(new Error('音频解码失败'))});
+    });
+    status.textContent='✅ 播放完成，满意点下一步继续';
+  }catch(e){
+    if(!_obV2Abort)status.textContent='❌ '+e.message.slice(0,80);
+  }finally{
+    _obV2Playing=null;
+    miniOrb.className='orb idle';
+    miniOrb.style.background='';
+    miniOrb.style.boxShadow='';
+    miniOrb.style.transform='';
+    rings.forEach(r=>{r.style.opacity='';r.style.animation=''});
+  }
+}
+
+async function obPlayVoicePreview(){
+  const key=S.key||$('obApiKey').value.trim();
+  if(!key){showToast('请先设置 API Key',2000);return}
+  const btn=$('obVoicePlayBtn');
+  const status=$('obVoicePreviewStatus');
+  btn.disabled=true;btn.textContent='⏳ 生成中…';status.textContent='';
+  try{
+    const text='你好，我是你的AI助手，今天过得怎么样？';
+    const isV2=obSelectedTtsModel==='mimo-v2-tts';
+    const style=S.style||'温柔';
+    const content=isV2?`<style>${style}</style>${text}`:`(${style})${text}`;
+    const r=await fetch(S.ep||'https://api.xiaomimimo.com/v1/chat/completions',{
+      method:'POST',headers:{'Content-Type':'application/json','api-key':key},
+      body:JSON.stringify({model:obSelectedTtsModel,messages:[{role:'user',content:text},{role:'assistant',content}],audio:{format:'wav',voice:obSelectedVoice}})
+    });
+    if(!r.ok){const e=await r.text();throw new Error(`API ${r.status}: ${e.slice(0,100)}`)}
+    const d=await r.json();if(d.error)throw new Error(JSON.stringify(d.error).slice(0,100));
+    const b64=d.choices?.[0]?.message?.audio?.data;if(!b64)throw new Error('无音频数据');
+    const bin=atob(b64);const raw=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)raw[i]=bin.charCodeAt(i);
+    const wav=ensureWav(raw);
+    ensureAudioCtx();const src=audioCtx.createBufferSource();
+    await new Promise((res,rej)=>{
+      audioCtx.decodeAudioData(wav.buffer.slice(0),buf=>{src.buffer=buf;src.connect(audioCtx.destination);src.start(0);src.onended=res;setTimeout(res,buf.duration*1000+1000)},rej);
+    });
+    status.textContent='✅ 播放完成，满意可以继续';
+  }catch(e){
+    status.textContent='❌ '+e.message.slice(0,80);
+  }finally{
+    btn.disabled=false;btn.textContent='▶ 播放';
+  }
+}
+
+// ── Voice Design ──
+async function obPlayDesign(){
+  const key=S.key||$('obApiKey').value.trim();
+  if(!key){showToast('请先设置 API Key',2000);return}
+  const desc=$('obDesignDesc').value.trim();
+  const text=$('obDesignText').value.trim();
+  if(!desc){showToast('请输入音色描述',2000);return}
+  if(!text){showToast('请输入试听文本',2000);return}
+  const btn=$('obDesignPlay');const status=$('obDesignStatus');
+  btn.disabled=true;btn.textContent='⏳ 生成中…';status.textContent='正在根据描述生成音色…';
+  try{
+    const r=await fetch(S.ep||'https://api.xiaomimimo.com/v1/chat/completions',{
+      method:'POST',headers:{'Content-Type':'application/json','api-key':key},
+      body:JSON.stringify({model:'mimo-v2.5-tts-voicedesign',messages:[{role:'user',content:desc},{role:'assistant',content:text}],audio:{format:'wav'}})
+    });
+    if(!r.ok){const e=await r.text();throw new Error(`API ${r.status}: ${e.slice(0,100)}`)}
+    const d=await r.json();if(d.error)throw new Error(JSON.stringify(d.error).slice(0,100));
+    const b64=d.choices?.[0]?.message?.audio?.data;if(!b64)throw new Error('无音频数据');
+    obDesignAudioB64=b64;
+    const bin=atob(b64);const raw=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)raw[i]=bin.charCodeAt(i);
+    const wav=ensureWav(raw);
+    ensureAudioCtx();const src=audioCtx.createBufferSource();
+    await new Promise((res,rej)=>{
+      audioCtx.decodeAudioData(wav.buffer.slice(0),buf=>{src.buffer=buf;src.connect(audioCtx.destination);src.start(0);src.onended=res;setTimeout(res,buf.duration*1000+1000)},rej);
+    });
+    status.textContent='✅ 音色生成完成！满意可继续，不满意可重新设计';
+  }catch(e){
+    status.textContent='❌ '+e.message.slice(0,80);
+  }finally{
+    btn.disabled=false;btn.textContent='🔊 生成并试听';
+  }
+}
+
+function obRetryDesign(){
+  obDesignAudioB64=null;
+  $('obDesignStatus').textContent='';
+  $('obDesignDesc').focus();
+}
+
+// ── Voice Clone ──
+function obToggleRec(){
+  if(obRecStream){
+    obStopRec();
+  }else{
+    obStartRec();
+  }
+}
+
+async function obStartRec(){
+  const key=S.key||$('obApiKey').value.trim();
+  if(!key){showToast('请先设置 API Key',2000);return}
+  try{
+    obRecStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,sampleRate:16000}});
+  }catch(e){
+    $('obRecStatus').textContent='❌ 无法访问麦克风：'+(e.message||'权限被拒绝');return;
+  }
+  obRecChunks=[];obRecBlob=null;obRecDataUrl=null;obCloneAudioB64=null;
+  obMediaRecorder=new MediaRecorder(obRecStream,{mimeType:'audio/webm;codecs=opus'});
+  obMediaRecorder.ondataavailable=e=>{if(e.data.size>0)obRecChunks.push(e.data)};
+  obMediaRecorder.onstop=()=>{
+    obRecBlob=new Blob(obRecChunks,{type:'audio/webm'});
+    console.log('Recording blob size:',obRecBlob.size,'type:',obRecBlob.type);
+    // Convert webm → WAV (PCM16 mono) for API
+    const reader=new FileReader();
+    reader.onload=async()=>{
+      try{
+        const tmpCtx=new(window.AudioContext||window.webkitAudioContext)();
+        let audioBuf;
+        try{
+          audioBuf=await tmpCtx.decodeAudioData(reader.result);
+        }catch(decodeErr){
+          console.error('decodeAudioData failed:',decodeErr);
+          tmpCtx.close();
+          // Fallback: send raw webm
+          const r2=new FileReader();
+          r2.onload=()=>{obRecDataUrl=r2.result;$('obRecStatus').textContent=`✅ 录音完成（${obRecSeconds}秒），可以试听或重新录制`};
+          r2.readAsDataURL(obRecBlob);
+          return;
+        }
+        const sr=audioBuf.sampleRate;
+        console.log('Decoded audio: duration='+audioBuf.duration+'s, sampleRate='+sr+', channels='+audioBuf.numberOfChannels);
+        // Mix to mono
+        let raw;
+        if(audioBuf.numberOfChannels>1){
+          const c0=audioBuf.getChannelData(0),c1=audioBuf.getChannelData(1);
+          raw=new Float32Array(c0.length);
+          for(let i=0;i<c0.length;i++)raw[i]=(c0[i]+c1[i])*0.5;
+        }else{raw=audioBuf.getChannelData(0)}
+        // Trim silence from start
+        let s=0;while(s<raw.length&&Math.abs(raw[s])<0.005)s++;
+        const trimmed=s>800?raw.subarray(s):raw;
+        console.log('PCM samples: before='+raw.length+', after trim='+trimmed.length);
+        // Float32 → Int16
+        const pcm=new Int16Array(trimmed.length);
+        for(let i=0;i<trimmed.length;i++){const v=Math.max(-1,Math.min(1,trimmed[i]));pcm[i]=v<0?v*0x8000:v*0x7FFF}
+        // WAV header (16-bit PCM, mono)
+        const nCh=1,bps=16,hl=44,dl=pcm.byteLength;
+        const ab=new ArrayBuffer(hl+dl),dv=new DataView(ab);
+        const w=(o,t)=>{for(let i=0;i<t.length;i++)dv.setUint8(o+i,t.charCodeAt(i))};
+        w(0,'RIFF');dv.setUint32(4,36+dl,true);w(8,'WAVE');
+        w(12,'fmt ');dv.setUint32(16,16,true);dv.setUint16(20,1);
+        dv.setUint16(22,nCh);dv.setUint32(24,sr);
+        dv.setUint32(28,sr*nCh*bps/8);dv.setUint16(32,nCh*bps/8);
+        dv.setUint16(34,bps);w(36,'data');dv.setUint32(40,dl);
+        new Int16Array(ab,hl).set(pcm);
+        tmpCtx.close();
+        // Verify WAV header
+        const wavBytes=new Uint8Array(ab);
+        const riff=String.fromCharCode(...wavBytes.subarray(0,4));
+        const wave=String.fromCharCode(...wavBytes.subarray(8,12));
+        console.log('WAV check: RIFF='+riff+', WAVE='+wave+', total size='+ab.byteLength);
+        // Convert to base64 data URL
+        let b='';
+        for(let i=0;i<wavBytes.length;i++)b+=String.fromCharCode(wavBytes[i]);
+        const b64=btoa(b);
+        obRecDataUrl='data:audio/wav;base64,'+b64;
+        console.log('Final data URL length:',obRecDataUrl.length,'starts with:',obRecDataUrl.substring(0,30));
+        $('obRecStatus').textContent=`✅ 录音完成（${audioBuf.duration.toFixed(1)}秒），可以试听或重新录制`;
+      }catch(e){
+        console.error('WAV conversion error:',e);
+        // Fallback: send raw webm as data URL
+        const r2=new FileReader();
+        r2.onload=()=>{obRecDataUrl=r2.result;$('obRecStatus').textContent=`✅ 录音完成（${obRecSeconds}秒），可以试听或重新录制`};
+        r2.readAsDataURL(obRecBlob);
+      }
+    };
+    reader.readAsArrayBuffer(obRecBlob);
+    if(obRecStream){obRecStream.getTracks().forEach(t=>t.stop());obRecStream=null}
+    if(obRecTimer){clearInterval(obRecTimer);obRecTimer=null}
+  };
+  obMediaRecorder.start();
+  obRecSeconds=0;
+  $('obRecStatus').textContent='🔴 正在录音…请朗读上方标准文本';
+  $('obRecBtn').textContent='⏹ 停止录音';
+  $('obRecBtn').className='ob-rec-btn ob-rec-stop';
+  obRecTimer=setInterval(()=>{
+    obRecSeconds++;
+    const m=Math.floor(obRecSeconds/60),s=obRecSeconds%60;
+    $('obRecStatus').textContent=`🔴 录音中 ${m}:${String(s).padStart(2,'0')} — 请继续朗读`;
+  },1000);
+}
+
+function obStopRec(){
+  if(obMediaRecorder&&obMediaRecorder.state==='recording')obMediaRecorder.stop();
+  $('obRecBtn').textContent='🎤 重新录音';
+  $('obRecBtn').className='ob-rec-btn ob-rec-start';
+}
+
+async function obPlayClone(){
+  const key=S.key||$('obApiKey').value.trim();
+  if(!key){showToast('请先设置 API Key',2000);return}
+  const text=$('obCloneText').value.trim();
+  if(!text){showToast('请输入试听文本',2000);return}
+
+  // Get audio data
+  let voiceData=null;
+  if(obRecDataUrl){
+    voiceData=obRecDataUrl;
+  }else if($('obCloneFile').files.length>0){
+    const file=$('obCloneFile').files[0];
+    if(file.size>10*1024*1024){showToast('文件过大（最大10MB）',2000);return}
+    const reader=new FileReader();
+    voiceData=await new Promise((res,rej)=>{reader.onload=()=>res(reader.result);reader.onerror=()=>rej(new Error('文件读取失败'));reader.readAsDataURL(file)});
+  }else{
+    showToast('请先录音或上传音频',2000);return;
+  }
+
+  const btn=$('obClonePlay');const status=$('obCloneStatus');
+  btn.disabled=true;btn.textContent='⏳ 复刻中…';status.textContent='正在分析声音特征…';
+  try{
+    // Debug: log voice data format
+    console.log('VoiceClone voice data starts with:',voiceData?.substring(0,40));
+    console.log('VoiceClone voice data length:',voiceData?.length);
+    const r=await fetch(S.ep||'https://api.xiaomimimo.com/v1/chat/completions',{
+      method:'POST',headers:{'Content-Type':'application/json','api-key':key},
+      body:JSON.stringify({model:'mimo-v2.5-tts-voiceclone',messages:[{role:'user',content:''},{role:'assistant',content:text}],audio:{format:'wav',voice:voiceData}})
+    });
+    if(!r.ok){const e=await r.text();console.error('VoiceClone API error:',e);throw new Error(`API ${r.status}: ${e.slice(0,300)}`)}
+    const d=await r.json();if(d.error)throw new Error(JSON.stringify(d.error).slice(0,300));
+    const b64=d.choices?.[0]?.message?.audio?.data;if(!b64)throw new Error('无音频数据');
+    obCloneAudioB64=b64;
+    const bin=atob(b64);const raw=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)raw[i]=bin.charCodeAt(i);
+    const wav=ensureWav(raw);
+    ensureAudioCtx();const src=audioCtx.createBufferSource();
+    await new Promise((res,rej)=>{
+      audioCtx.decodeAudioData(wav.buffer.slice(0),buf=>{src.buffer=buf;src.connect(audioCtx.destination);src.start(0);src.onended=res;setTimeout(res,buf.duration*1000+1000)},rej);
+    });
+    status.textContent='✅ 声音复刻完成！满意可继续，不满意可重新录制';
+  }catch(e){
+    status.textContent='❌ '+e.message.slice(0,80);
+  }finally{
+    btn.disabled=false;btn.textContent='🔊 生成并试听';
+  }
+}
+
+function obRetryClone(){
+  obCloneAudioB64=null;obRecDataUrl=null;obRecBlob=null;
+  $('obRecStatus').textContent='朗读以下标准文本进行声音采集';
+  $('obRecBtn').textContent='🎤 开始录音';
+  $('obRecBtn').className='ob-rec-btn ob-rec-start';
+  $('obCloneStatus').textContent='';
+  $('obCloneFile').value='';
+}
+
+function obSaveVoiceSettings(){
+  const m=obSelectedTtsModel;
+  const isV2=m==='mimo-v2-tts';
+  const isVD=m==='mimo-v2.5-tts-voicedesign';
+  const isVC=m==='mimo-v2.5-tts-voiceclone';
+
+  if(isV2){
+    S.voice=obSelectedVoice;
+    localStorage.setItem('mv',S.voice);
+  }else if(isVD){
+    if(obDesignAudioB64){
+      S.vdVoice=obDesignAudioB64;
+      S.vdVoiceDesc=$('obDesignDesc').value.trim();
+      localStorage.setItem('mvdv',S.vdVoice);
+      localStorage.setItem('mvdd',S.vdVoiceDesc);
+    }
+  }else if(isVC){
+    if(obCloneAudioB64){
+      S.vcVoice=obCloneAudioB64;
+      localStorage.setItem('mvcv',S.vcVoice);
+    }
+  }else if(m==='mimo-v2.5-tts'){
+    S.voice=obSelectedVoice;
+    localStorage.setItem('mv',S.voice);
+  }
+}
+
+function obSetupCompleteStep(){
+  const ttsModelNames={
+    'mimo-v2-tts':'V2 旧版',
+    'mimo-v2.5-tts':'V2.5 预置音色',
+    'mimo-v2.5-tts-voicedesign':'音色设计',
+    'mimo-v2.5-tts-voiceclone':'声音克隆',
+  };
+  const ttsName=ttsModelNames[S.ttsM]||S.ttsM;
+  const chatName=S.chatM==='mimo-v2-flash'?'V2 Flash':(S.chatM==='mimo-v2-omni'?'V2 Omni':S.chatM);
+  let voiceInfo='';
+  if(S.ttsM==='mimo-v2-tts'||S.ttsM==='mimo-v2.5-tts'){
+    voiceInfo=S.voice||'默认';
+  }else if(S.ttsM==='mimo-v2.5-tts-voicedesign'){
+    voiceInfo=S.vdVoiceDesc?'已设计':'未设置';
+  }else if(S.ttsM==='mimo-v2.5-tts-voiceclone'){
+    voiceInfo=S.vcVoice?'已克隆':'未设置';
+  }else{voiceInfo='自定义'}
+
+  $('obSummary').innerHTML=`
+    <div class="ob-summary-item"><span class="label">API Key</span><span class="value">${S.key?'••••'+S.key.slice(-4):'未设置'}</span></div>
+    <div class="ob-summary-item"><span class="label">对话模型</span><span class="value">${chatName}</span></div>
+    <div class="ob-summary-item"><span class="label">语音模型</span><span class="value">${ttsName}</span></div>
+    <div class="ob-summary-item"><span class="label">音色</span><span class="value">${voiceInfo}</span></div>
+  `;
+}
+
+function obFinish(){
+  $('onboardOverlay').classList.remove('show');
+  localStorage.setItem('mob','1');
+  applyTheme();
+  // Update settings UI
+  $('inKey').value=S.key;
+  $('inChat').value=S.chatM;
+  $('inTts').value=S.ttsM;
+  updateTtsUI();
+  if(S.ttsM==='mimo-v2-tts')$('inVoiceV2').value=S.voice;
+  else $('inVoiceV25').value=S.voice;
+  $('inVoiceDesign').value=S.vdVoiceDesc||'';
+  showToast('🎉 设置完成！点击圆球开始对话',3000);
+  setStatus('');
+}
+
+// ── Check if first run ──
+(function checkFirstRun(){
+  const onboarded=localStorage.getItem('mob');
+  if(!onboarded&&!S.key){
+    // First time, no key → show onboarding
+    setTimeout(()=>startOnboard(false),300);
+  }else if(!onboarded&&S.key){
+    // Has key but never onboarded → mark as done (existing user)
+    localStorage.setItem('mob','1');
+  }
+})();
 </script>
 </body>
 </html>
