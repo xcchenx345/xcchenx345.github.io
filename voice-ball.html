@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -423,6 +424,19 @@
     100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.3)}
   }
 
+  /* ── ASR 升级提示 ── */
+  .asr-toast{position:fixed;top:0;left:0;right:0;z-index:200;display:none;justify-content:center;padding:16px;pointer-events:none}
+  .asr-toast.show{display:flex}
+  .asr-toast-card{background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:16px;padding:20px 24px;max-width:420px;width:100%;pointer-events:all;backdrop-filter:blur(20px);box-shadow:0 8px 32px rgba(0,0,0,.4);animation:asr-slide-down .4s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes asr-slide-down{from{opacity:0;transform:translateY(-30px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+  .asr-toast-card h3{font-size:16px;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+  .asr-toast-card p{font-size:13px;color:var(--text2);margin:0 0 16px;line-height:1.5}
+  .asr-toast-card .asr-tag{display:inline-block;background:var(--accent);color:#fff;font-size:11px;padding:2px 8px;border-radius:99px;font-weight:600;vertical-align:middle}
+  .asr-toast-btns{display:flex;gap:10px;justify-content:flex-end}
+  .asr-toast-btns button{border:none;border-radius:10px;padding:10px 20px;font-size:14px;cursor:pointer;font-weight:600;transition:all .2s}
+  .asr-toast-btns .asr-later{background:var(--btn-bg);color:var(--text2)}.asr-toast-btns .asr-later:hover{background:var(--btn-hover)}
+  .asr-toast-btns .asr-switch{background:var(--accent);color:#fff}.asr-toast-btns .asr-switch:hover{opacity:.85;transform:scale(1.02)}
+
   /* ── Nuclear explosion ── */
   .nuke-overlay{position:fixed;inset:0;z-index:10000;pointer-events:none;background:transparent;animation:nuke-flash .15s ease 3}
   @keyframes nuke-flash{0%,100%{background:transparent}50%{background:rgba(255,200,0,.35)}}
@@ -463,6 +477,18 @@
 </style>
 </head>
 <body>
+
+<!-- ASR 升级提示 -->
+<div class="asr-toast" id="asrToast">
+  <div class="asr-toast-card">
+    <h3>🎯 新语音识别模型可用 <span class="asr-tag">免费</span></h3>
+    <p><b>MiMo-V2.5-ASR</b> 已上线，识别更准、支持方言和噪音环境，中英混杂也能轻松搞定，<b>无需 API Key</b> 即可使用。</p>
+    <div class="asr-toast-btns">
+      <button class="asr-later" id="asrLater">以后再说</button>
+      <button class="asr-switch" id="asrSwitch">立即切换</button>
+    </div>
+  </div>
+</div>
 
 <button class="gear" id="gearBtn"><svg viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z"/></svg></button>
 
@@ -517,7 +543,17 @@
   <div class="panel">
     <h2>⚙️ 设置</h2>
     <div class="field"><label for="inKey">API Key</label><input type="password" id="inKey" placeholder="MiMo API Key" autocomplete="off"><div class="hint">platform.xiaomimimo.com 获取</div></div>
-    <div class="field"><label for="inOmni">语音识别模型 (Omni)</label><input type="text" id="inOmni" placeholder="mimo-v2-omni"></div>
+    <div class="field"><label for="inAsrEngine">语音识别引擎</label><select id="inAsrEngine">
+      <option value="omni">MiMo-V2-Omni（多模态理解）</option>
+      <option value="asr">MiMo-V2.5-ASR（专用语音识别）</option>
+    </select></div>
+    <div class="field" id="inOmniWrap"><label for="inOmni">语音识别模型 (Omni)</label><input type="text" id="inOmni" placeholder="mimo-v2-omni"></div>
+    <div class="field" id="inAsrLangWrap" style="display:none"><label for="inAsrLang">ASR 语言</label><select id="inAsrLang">
+      <option value="Auto">自动检测（推荐）</option>
+      <option value="Chinese">中文</option>
+      <option value="English">English</option>
+    </select><div class="hint">自动检测支持中英混合 & 方言</div></div>
+    <div class="field" id="inAsrEpWrap" style="display:none"><label for="inAsrEp">ASR API 地址</label><input type="text" id="inAsrEp" placeholder="https://xiaomimimo-mimo-v2-5-asr.hf.space/gradio_api"><div class="hint">默认使用 HuggingFace Space，可自建部署</div></div>
     <div class="field"><label for="inChat">Chat 模型 (Flash)</label><input type="text" id="inChat" placeholder="mimo-v2-flash"></div>
     <div class="field"><label for="inTts">TTS 模型</label><select id="inTts">
       <option value="mimo-v2.5-tts">mimo-v2.5-tts（预置音色）</option>
@@ -686,6 +722,22 @@
       <div class="ob-field" id="obCustomChatWrap" style="display:none;margin-top:12px">
         <label>自定义对话模型 ID</label>
         <input type="text" id="obCustomChat" placeholder="输入模型名称…">
+      </div>
+
+      <div style="height:24px"></div>
+
+      <div class="ob-model-label">🎤 语音识别引擎（听懂你说的话）</div>
+      <div class="ob-model-grid" id="obAsrGrid">
+        <div class="ob-model-card selected" data-engine="omni" onclick="obSelectAsrEngine(this)">
+          <div class="ob-mc-icon">🌐</div>
+          <div class="ob-mc-name">V2 Omni</div>
+          <div class="ob-mc-desc">多模态理解，需 API Key</div>
+        </div>
+        <div class="ob-model-card" data-engine="asr" onclick="obSelectAsrEngine(this)">
+          <div class="ob-mc-icon">🎯</div>
+          <div class="ob-mc-name">V2.5-ASR</div>
+          <div class="ob-mc-desc">专用语音识别，支持方言、噪音、多人</div>
+        </div>
       </div>
 
       <div style="height:24px"></div>
@@ -1008,6 +1060,9 @@ function getSys(){
 const S={
   key:localStorage.getItem('mk')||'',
   omniM:localStorage.getItem('mom')||'mimo-v2-omni',
+  asrEngine:localStorage.getItem('mae')||'omni',  // 'omni' | 'asr'
+  asrLang:localStorage.getItem('mal')||'Auto',     // 'Auto' | 'Chinese' | 'English'
+  asrEp:localStorage.getItem('maep')||'https://xiaomimimo-mimo-v2-5-asr.hf.space/gradio_api',
   chatM:localStorage.getItem('mcm')||'mimo-v2-flash',
   ttsM:localStorage.getItem('mtm')||'mimo-v2.5-tts',
   ep:localStorage.getItem('mep')||'https://api.xiaomimimo.com/v1/chat/completions',
@@ -1220,6 +1275,11 @@ function startBarsVis(token){
 // ── Settings ──
 $('gearBtn').onclick=()=>{
   $('inKey').value=S.key;$('inOmni').value=S.omniM;$('inChat').value=S.chatM;
+  // ASR engine
+  $('inAsrEngine').value=S.asrEngine||'omni';
+  $('inAsrLang').value=S.asrLang||'Auto';
+  $('inAsrEp').value=S.asrEp||'';
+  updateAsrUI();
   // TTS model select
   const ttsVal=S.ttsM||'mimo-v2.5-tts';
   const ttsOpts=[...$('inTts').options].map(o=>o.value);
@@ -1246,6 +1306,16 @@ $('gearBtn').onclick=()=>{
 };
 $('btnCancel').onclick=()=>overlay.classList.remove('show');
 overlay.onclick=e=>{if(e.target===overlay)overlay.classList.remove('show')};
+/** 根据 ASR 引擎切换 UI */
+function updateAsrUI(){
+  const eng=$('inAsrEngine').value;
+  const isOmni=eng==='omni';
+  $('inOmniWrap').style.display=isOmni?'':'none';
+  $('inAsrLangWrap').style.display=isOmni?'none':'';
+  $('inAsrEpWrap').style.display=isOmni?'none':'';
+}
+$('inAsrEngine').onchange=updateAsrUI;
+
 $('inTts').onchange=()=>{
   $('inTtsCustomWrap').style.display=$('inTts').value==='custom'?'':'none';
   updateTtsUI();
@@ -1286,6 +1356,9 @@ function updateTtsUI(){
 $('btnSave').onclick=()=>{
   S.key=$('inKey').value.trim();
   S.omniM=$('inOmni').value.trim()||'mimo-v2-omni';
+  S.asrEngine=$('inAsrEngine').value;
+  S.asrLang=$('inAsrLang').value;
+  S.asrEp=$('inAsrEp').value.trim()||'https://xiaomimimo-mimo-v2-5-asr.hf.space/gradio_api';
   S.chatM=$('inChat').value.trim()||'mimo-v2-flash';
   S.ttsM=$('inTts').value==='custom'?($('inTtsCustom').value.trim()||'mimo-v2.5-tts'):$('inTts').value;
   S.ep=$('inEp').value.trim()||S.ep;
@@ -1302,6 +1375,7 @@ $('btnSave').onclick=()=>{
   S.theme=$('inTheme').value;
   S.colors.idle=$('cIdle').value;S.colors.listen=$('cListen').value;S.colors.think=$('cThink').value;S.colors.speak=$('cSpeak').value;
   localStorage.setItem('mk',S.key);localStorage.setItem('mom',S.omniM);
+  localStorage.setItem('mae',S.asrEngine);localStorage.setItem('mal',S.asrLang);localStorage.setItem('maep',S.asrEp);
   localStorage.setItem('mcm',S.chatM);localStorage.setItem('mtm',S.ttsM);
   localStorage.setItem('mep',S.ep);localStorage.setItem('mv',S.voice);localStorage.setItem('mvs',S.vis);
   localStorage.setItem('mth',S.thinkStyle);localStorage.setItem('mst',S.style);
@@ -1659,6 +1733,9 @@ async function moderateAudio(text){
  * 直接使用采集的 PCM 数据（无需 decodeAudioData）
  */
 async function recognizeWithOmni(){
+  if(S.asrEngine==='asr'){
+    return recognizeWithASR();
+  }
   if(!S.key){$('gearBtn').click();setSt('idle');return}
   const turn=_turnToken;
   setSt('thinking');
@@ -1709,6 +1786,124 @@ async function recognizeWithOmni(){
     setStatus(`识别出错: ${e.message?.slice(0,80)||'未知错误'}`);
     setSt('idle');setTimeout(()=>{if(S.state==='idle')setStatus('')},5000);
   }
+}
+
+// ════════════════════════════════════════
+// ── MiMo-V2.5-ASR 语音识别 (HuggingFace Gradio) ──
+// ════════════════════════════════════════
+
+/**
+ * 通过 MiMo-V2.5-ASR Gradio API 进行语音识别
+ * 支持中英双语、方言、Code-Switch、歌曲、强噪音、多说话人
+ */
+async function recognizeWithASR(){
+  const turn=_turnToken;
+  setSt('thinking');
+  setStatus('正在识别语音…');
+
+  try{
+    const b64=pcmToWavBase64();
+    if(!b64){setStatus('录音数据为空');setSt('idle');return}
+
+    // 1. base64 → Blob → File
+    const bin=atob(b64);
+    const u8=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
+    const blob=new Blob([u8],{type:'audio/wav'});
+    const file=new File([blob],'recording.wav',{type:'audio/wav'});
+
+    const asrEp=S.asrEp||'https://xiaomimimo-mimo-v2-5-asr.hf.space/gradio_api';
+
+    // 2. 上传音频文件
+    const uploadFd=new FormData();
+    uploadFd.append('files',file);
+    const uploadRes=await fetch(`${asrEp}/upload`,{method:'POST',body:uploadFd});
+    if(!uploadRes.ok){
+      const errText=await uploadRes.text();
+      throw new Error(`ASR Upload ${uploadRes.status}: ${errText.slice(0,200)}`);
+    }
+    const uploadPaths=await uploadRes.json();
+    if(!uploadPaths||!uploadPaths.length)throw new Error('ASR 上传失败：无返回路径');
+
+    // 3. 调用 transcribe
+    const lang=S.asrLang||'Auto';
+    const callRes=await fetch(`${asrEp}/call/transcribe`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({data:[
+        {path:uploadPaths[0],meta:{_type:'gradio.FileData'}},
+        null,
+        lang
+      ]})
+    });
+    if(!callRes.ok){
+      const errText=await callRes.text();
+      throw new Error(`ASR Call ${callRes.status}: ${errText.slice(0,200)}`);
+    }
+    const callData=await callRes.json();
+    const eventId=callData.event_id;
+    if(!eventId)throw new Error('ASR 未返回 event_id');
+
+    // 4. 轮询结果（SSE stream）
+    setStatus('正在转写…');
+    const result=await pollAsrResult(asrEp,eventId,turn);
+    if(turn!==_turnToken)return;
+
+    if(!result){
+      setStatus('未识别到内容，请重试');setSt('idle');
+      setTimeout(()=>{if(S.state==='idle')setStatus('')},3000);
+      return;
+    }
+
+    setStatus(`"${result}"`);
+    await correctAndSend(result,turn);
+  }catch(e){
+    console.error('ASR error:',e);
+    if(turn!==_turnToken)return;
+    setStatus(`识别出错: ${e.message?.slice(0,80)||'未知错误'}`);
+    setSt('idle');setTimeout(()=>{if(S.state==='idle')setStatus('')},5000);
+  }
+}
+
+/**
+ * 轮询 Gradio ASR 结果
+ */
+function pollAsrResult(ep,eventId,turn){
+  return new Promise((resolve,reject)=>{
+    const ctrl=new AbortController();
+    const timeout=setTimeout(()=>{ctrl.abort();reject(new Error('ASR 超时'))},30000);
+
+    fetch(`${ep}/call/transcribe/${eventId}`,{signal:ctrl.signal}).then(r=>{
+      const reader=r.body.getReader();
+      const decoder=new TextDecoder();
+      let buf='';
+
+      function read(){
+        reader.read().then(({done,value})=>{
+          if(done||turn!==_turnToken){clearTimeout(timeout);resolve(null);return}
+          buf+=decoder.decode(value,{stream:true});
+          const lines=buf.split('\n');
+          buf=lines.pop()||'';
+
+          for(const line of lines){
+            if(!line.startsWith('data:'))continue;
+            const payload=line.slice(5).trim();
+            try{
+              const d=JSON.parse(payload);
+              if(d&&Array.isArray(d)&&d.length>=1){
+                clearTimeout(timeout);
+                const text=typeof d[0]==='string'?d[0].trim():'';
+                resolve(text);
+                return;
+              }
+            }catch(e){}
+          }
+          read();
+        }).catch(e=>{clearTimeout(timeout);reject(e)});
+      }
+      read();
+    }).catch(e=>{clearTimeout(timeout);reject(e)});
+  });
 }
 
 // ── 文本纠错 (Flash, 兜底) ──
@@ -2327,6 +2522,24 @@ S.vcVoice=localStorage.getItem('mvcv')||'';
 if(!S.key)setStatus('点击右上角设置 API Key');
 window.addEventListener('beforeunload',()=>closeCamera());
 
+// ── ASR 升级提示 ──
+(function showAsrUpgrade(){
+  // 已经切换到 ASR 或已关闭提示，不再显示
+  if(S.asrEngine==='asr'||localStorage.getItem('masr_dismiss')==='1')return;
+  const toast=$('asrToast');
+  if(!toast)return;
+  // 延迟显示，等页面加载完毕
+  setTimeout(()=>{toast.classList.add('show')},1500);
+  $('asrSwitch').onclick=()=>{
+    S.asrEngine='asr';localStorage.setItem('mae','asr');
+    toast.classList.remove('show');localStorage.setItem('masr_dismiss','1');
+    showToast('已切换到 MiMo-V2.5-ASR ✅',3000);
+  };
+  $('asrLater').onclick=()=>{
+    toast.classList.remove('show');localStorage.setItem('masr_dismiss','1');
+  };
+})();
+
 // ════════════════════════════════════════
 // ── 开场白：缓存音频，首次生成后复用 ──
 // ════════════════════════════════════════
@@ -2460,6 +2673,7 @@ const OB_STEPS=5;
 let obCurrent=0;
 let obSelectedChatModel='mimo-v2-flash';
 let obSelectedTtsModel='mimo-v2.5-tts';
+let obSelectedAsrEngine='omni';
 let obSelectedVoice='mimo_default';
 let obDesignAudioB64=null;
 let obCloneAudioB64=null;
@@ -2501,6 +2715,8 @@ function obNext(){
       S.chatM=custom;
     }else{S.chatM=obSelectedChatModel}
     localStorage.setItem('mcm',S.chatM);
+    S.asrEngine=obSelectedAsrEngine;
+    localStorage.setItem('mae',S.asrEngine);
     if(obSelectedTtsModel==='custom-tts'){
       const custom=$('obCustomTts').value.trim();
       if(!custom){showToast('请输入语音模型 ID',2000);return}
@@ -2973,6 +3189,12 @@ function obSelectTtsModel(el){
   $('obCustomTtsWrap').style.display=obSelectedTtsModel==='custom-tts'?'':'none';
 }
 
+function obSelectAsrEngine(el){
+  document.querySelectorAll('#obAsrGrid .ob-model-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  obSelectedAsrEngine=el.dataset.engine;
+}
+
 function obSetupModelStep(){
   // Chat model cards
   document.querySelectorAll('#obChatGrid .ob-model-card').forEach(c=>{
@@ -2986,6 +3208,11 @@ function obSetupModelStep(){
   });
   $('obCustomTtsWrap').style.display=obSelectedTtsModel==='custom-tts'?'':'none';
   if(obSelectedTtsModel==='custom-tts')$('obCustomTts').value=S.ttsM||'';
+  // ASR engine cards
+  obSelectedAsrEngine=S.asrEngine||'omni';
+  document.querySelectorAll('#obAsrGrid .ob-model-card').forEach(c=>{
+    c.classList.toggle('selected',c.dataset.engine===obSelectedAsrEngine);
+  });
 }
 
 function obSetupVoiceStep(){
