@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -2879,7 +2880,7 @@ body.liquid-glass .bl-hint { color: rgba(255,255,255,0.3); }
       <!-- v5.8.0 -->
       <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #f0f0f0">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-          <span style="background:#ffaa00;color:#fff;padding:3px 10px;border-radius:10px;font-size:12px;font-weight:700">v5.8.0</span>
+          <span style="background:#ffaa00;color:#fff;padding:3px 10px;border-radius:10px;font-size:12px;font-weight:700">v6.0.0</span>
           <span style="font-size:12px;color:#aaa">当前版本</span>
         </div>
         <p style="font-size:12px;color:#666;line-height:1.6">✏️ 消息编辑：最后一条用户/AI消息支持编辑，修改后自动重新生成<br>💡 智能回复：AI分析对话生成3条回复建议，点击即发送，支持刷新<br>↩️ 撤回优化：仅限3分钟内、最后一条用户消息，超时按钮自动消失<br>🎒 撤回连带：撤回消息时自动退回背包礼物、扣回红包积分<br>🩺 Doctor诊断：分析运行日志，发现问题并提供解决方案<br>💾 备份增强：备份文件新增朋友圈数据<br>🔧 余额精度修复：所有余额计算统一保留两位小数<br>📱 平板适配：+菜单不再分页，全部功能一目了然<br>🤖 继续说优化：AI更自然地延续对话，不再识别为系统代发<br>📝 AI回复精简：回复更简短精炼，像朋友聊天</p>
@@ -3135,6 +3136,13 @@ body.liquid-glass .bl-hint { color: rgba(255,255,255,0.3); }
     <label>性格设定</label><textarea id="ssp" rows="3" placeholder="例如：温柔善良，善解人意"></textarea>
     <label>说话语气</label><input id="sstn" placeholder="例如：甜美可爱、高冷傲娇">
     <label>开场白</label><textarea id="ssg" rows="2" placeholder="例如：你好呀～"></textarea>
+    <label>自定义音色 <span style="color:#f15a24">*</span></label>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input id="ssvs" placeholder="例如：年轻女性，声线清亮甜美，音色柔和" style="flex:1">
+      <button type="button" id="ssvp" style="flex-shrink:0;padding:6px 12px;border:1px solid #ffaa00;border-radius:8px;background:#fff;color:#ffaa00;font-size:12px;cursor:pointer;white-space:nowrap">🔊 试听</button>
+      <button type="button" id="ssvr" style="flex-shrink:0;padding:6px 12px;border:1px solid #339af0;border-radius:8px;background:#fff;color:#339af0;font-size:12px;cursor:pointer;white-space:nowrap">✨ 润色</button>
+    </div>
+    <p class="hint">描述音色特征（年龄、性别、声线质感），用于 AI 生成专属音色。语气风格请写在「说话语气」中</p>
     <div class="ma"><button class="bc" id="ssc">取消</button><button class="bs" id="ssf">创建对话</button></div>
   </div>
 </div>
@@ -3188,17 +3196,16 @@ body.liquid-glass .bl-hint { color: rgba(255,255,255,0.3); }
     <label>当前模型</label>
     <div class="ms">
       <div class="mg"><div class="mgt">Xiaomi MiMo</div><div class="mbw">
-        <button class="mmb on" data-m="mimo-v2-flash">快速版<span class="mmr">速度快 省钱</span></button>
-        <button class="mmb" data-m="mimo-v2-pro">Pro<span class="mmr">高质量 均衡</span></button>
-        <button class="mmb" data-m="mimo-v2-omni">Omni<span class="mmr">全能 多模态</span></button>
+        <button class="mmb on" data-m="mimo-v2.5">V2.5<span class="mmr">快速 通用</span></button>
+        <button class="mmb" data-m="mimo-v2.5-pro">Pro<span class="mmr">高质量 均衡</span></button>
       </div></div>
       <div class="mg"><div class="mgt">MiMo Token Plan</div><div class="mbw">
         <button class="mmb" data-m="tp-omni">TP Omni<span class="mmr">全能 多模态</span></button>
         <button class="mmb" data-m="tp-pro">TP Pro<span class="mmr">高质量 均衡</span></button>
       </div></div>
       <div class="mg"><div class="mgt">DeepSeek</div><div class="mbw">
-        <button class="mmb" data-m="deepseek-chat">V3<span class="mmr">对话 通用</span></button>
-        <button class="mmb" data-m="deepseek-reasoner">R1<span class="mmr">推理 深度思考</span></button>
+        <button class="mmb" data-m="deepseek-v4-flash">V4 Flash<span class="mmr">快速 通用</span></button>
+        <button class="mmb" data-m="deepseek-v4-pro">V4 Pro<span class="mmr">推理 深度思考</span></button>
       </div></div>
     </div>
     <label>默认AI昵称</label><input id="gai" placeholder="小mimo">
@@ -3213,6 +3220,15 @@ body.liquid-glass .bl-hint { color: rgba(255,255,255,0.3); }
     <div class="ep" id="uavp" style="margin:8px 0">&#128100;</div>
     <div style="display:flex;align-items:center;gap:8px;margin:12px 0 4px"><input type="checkbox" id="asc"> <span style="font-size:14px">自动语音</span></div>
     <label>强制语音风格</label><input id="fsi" placeholder="例如：开心">
+    <div style="margin:12px 0;padding:12px;background:#f8f8f8;border-radius:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:14px;font-weight:600">🎭 音色配置</span>
+        <button class="bo" id="reassignVoice" style="font-size:12px;padding:4px 10px;margin:0">🔄 重新分配</button>
+      </div>
+      <p style="font-size:12px;color:#888;margin:0 0 8px">根据角色性格自动匹配音色，点击可单独编辑</p>
+      <div id="voiceList" style="max-height:200px;overflow-y:auto"></div>
+    </div>
+
     <div style="display:flex;align-items:center;gap:8px;margin:12px 0 4px"><input type="checkbox" id="thc"> <span style="font-size:14px">深色模式</span></div>
     <div style="display:flex;align-items:center;gap:8px;margin:8px 0 4px"><input type="checkbox" id="lqc"> <span style="font-size:14px">✨ 液态玻璃风格</span></div>
     <label>语言 / Language</label>
@@ -3400,15 +3416,15 @@ body.liquid-glass .bl-hint { color: rgba(255,255,255,0.3); }
 (function(){
 var CFG={
   'mimo-v2-flash':{p:'m',l:'Flash',u:'https://api.xiaomimimo.com/v1/chat/completions',r:0},
-  'mimo-v2-pro':{p:'m',l:'Pro',u:'https://api.xiaomimimo.com/v1/chat/completions',r:0},
-  'mimo-v2-omni':{p:'m',l:'Omni',u:'https://api.xiaomimimo.com/v1/chat/completions',r:0},
-  'tp-omni':{p:'tp',l:'TP Omni',m:'mimo-v2-omni',u:'https://token-plan-cn.xiaomimimo.com/v1/chat/completions',r:0},
-  'tp-pro':{p:'tp',l:'TP Pro',m:'mimo-v2-pro',u:'https://token-plan-cn.xiaomimimo.com/v1/chat/completions',r:0},
-  'deepseek-chat':{p:'d',l:'V3',u:'https://api.deepseek.com/chat/completions',r:0},
-  'deepseek-reasoner':{p:'d',l:'R1',u:'https://api.deepseek.com/chat/completions',r:1}
+  'mimo-v2.5-pro':{p:'m',l:'Pro',u:'https://api.xiaomimimo.com/v1/chat/completions',r:0},
+  'mimo-v2.5':{p:'m',l:'Omni',u:'https://api.xiaomimimo.com/v1/chat/completions',r:0},
+  'tp-omni':{p:'tp',l:'TP Omni',m:'mimo-v2.5',u:'https://token-plan-cn.xiaomimimo.com/v1/chat/completions',r:0},
+  'tp-pro':{p:'tp',l:'TP Pro',m:'mimo-v2.5-pro',u:'https://token-plan-cn.xiaomimimo.com/v1/chat/completions',r:0},
+  'deepseek-v4-flash':{p:'d',l:'V4 Flash',u:'https://api.deepseek.com/chat/completions',r:0},
+  'deepseek-v4-pro':{p:'d',l:'V4 Pro',u:'https://api.deepseek.com/chat/completions',r:1}
 };
 
-var ss=[],trash=[],cid=null,bal=100,hor=false,dbg=false,ak='',dak='',tk='',my='用户',uav='👤',an0='小mimo',as=false,fs='',dk=false,cm='mimo-v2-flash',sm='new';
+var ss=[],trash=[],cid=null,bal=100,hor=false,dbg=false,ak='',dak='',tk='',my='用户',uav='👤',an0='小mimo',as=false,fs='',dk=false,cm='mimo-v2.5',sm='new';
 var mySex='male'; // 用户性别：male/female/secret
 var aiSex='female'; // 创建对话时的AI性别：male/female/secret
 var lang='zh'; // 语言：zh|en
@@ -4071,6 +4087,8 @@ ${pd}用括号描述动作神态语气如（微笑）。
   var finalRole=msgRole||'user';
   var body={model:c.m||cm,messages:[{role:'system',content:sp}].concat(hist,[{role:finalRole,content:text}]),max_completion_tokens:ir?4096:1024,stream:false};
   if(!ir){body.temperature=0.8;body.top_p=0.95}
+  // DeepSeek V4 thinking mode
+  if(ir&&c.p==='d'){body.thinking={type:'enabled'};body.reasoning_effort='high'}
 
   fetch(c.u,{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify(body)})
   .then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})
@@ -4238,7 +4256,7 @@ function rDrw(){
 
 function oNew(){
   sm='new';$sst.textContent='新建对话';$('ssf').textContent='创建对话';
-  $ssn.value='';$ssa.value=an0;$ssv.value='\uD83E\uDD16';$ssp.value='';$sstn.value='';$ssg.value='';
+  $ssn.value='';$ssa.value=an0;$ssv.value='\uD83E\uDD16';$ssp.value='';$sstn.value='';$ssg.value='';$('ssvs').value='';
   $avp.textContent='\uD83E\uDD16';
   document.querySelectorAll('.preset-btn').forEach(function(b){b.style.outline=''});
   document.querySelectorAll('#ssm .mmb[data-aisex]').forEach(function(b){b.classList.toggle('on',b.dataset.aisex==='female')});
@@ -4249,7 +4267,7 @@ function oEdit(){
   var s=cS();if(!s)return;
   sm='edit';$sst.textContent='编辑对话';$('ssf').textContent='保存修改';
   $ssn.value=s.name;$ssa.value=s.aiName;$ssv.value=s.aiAvatar;
-  $ssp.value=s.personality||'';$sstn.value=s.tone||'';$ssg.value=s.greeting||'';
+  $ssp.value=s.personality||'';$sstn.value=s.tone||'';$ssg.value=s.greeting||'';$('ssvs').value=s.voiceStyle||'';
   var v=s.aiAvatar||'\uD83E\uDD16';
   $avp.innerHTML=v.startsWith('http')
     ? '<img src="'+v+'" style="width:48px;height:48px;border-radius:50%;object-fit:cover" onerror="this.parentElement.textContent=\'\\uD83E\\uDD16\'">'
@@ -4269,13 +4287,13 @@ function cSS(){
   if(sm==='new'){
     var id=Date.now();
     var bg=window._pendingBg||'',bnr=window._pendingBanner||'',cvr=window._pendingCover||'';
-    ss.push({id:id,name:n,aiName:a,aiAvatar:v,personality:p,tone:t,greeting:g,aiSex:aiSexVal,background:bg,banner:bnr,cover:cvr,messages:[]});
+    var vs=$('ssvs').value.trim();if(!vs){alert('请填写音色风格描述');$('ssvs').focus();return}ss.push({id:id,name:n,aiName:a,aiAvatar:v,personality:p,tone:t,greeting:g,voiceStyle:vs,aiSex:aiSexVal,background:bg,banner:bnr,cover:cvr,messages:[]});
     window._pendingBg='';window._pendingBanner='';window._pendingCover='';
     swS(id);
     if(g){addM('ai','text',g);if(as) speakTTS(g)}
   }else{
     var s=cS();
-    if(s){s.name=n;s.aiName=a;s.aiAvatar=v;s.personality=p;s.tone=t;s.greeting=g;s.aiSex=aiSexVal;uCSN();ldCS()}
+    if(s){s.name=n;s.aiName=a;s.aiAvatar=v;s.personality=p;s.tone=t;s.greeting=g;s.voiceStyle=$('ssvs').value.trim()||s.voiceStyle;s.aiSex=aiSexVal;uCSN();ldCS()}
   }
   sv();rDrw();hideModal($ssm);
 }
@@ -4286,23 +4304,23 @@ $('ssf').onclick=cSS;
 
 // 预设角色
 var presets=[
-  {name:'温柔姐姐',av:'🌸',personality:'温柔体贴、善解人意的大姐姐，总是关心对方，说话轻声细语，偶尔会摸摸头鼓励人',tone:'温柔如水，带着宠溺',greeting:'乖，姐姐在这里呢～有什么心事都可以跟我说哦（微笑摸头）'},
-  {name:'傲娇妹妹',av:'🔥',personality:'口是心非的傲娇妹妹，嘴上不饶人但其实很在意对方，容易害羞脸红，生气时会跺脚',tone:'假装不在意，实则很关心',greeting:'哼！谁让你来找我的……不过既然来了，就勉为其难陪你聊一会儿吧（别过脸去）'},
-  {name:'知心好友',av:'💡',personality:'真诚可靠的好朋友，善于倾听和分析，能给出中肯建议，偶尔幽默风趣',tone:'平等自然，真诚坦率',greeting:'嘿，又见面了！最近怎么样？有什么想聊的随时说～'},
-  {name:'霸道总裁',av:'👑',personality:'强势高冷的商业精英，掌控欲强，对在乎的人嘴硬心软，自信果决',tone:'霸道自信，偶尔流露温柔',greeting:'坐下。从今天起，你的时间归我管。（微微挑眉）'},
-  {name:'元气少女',av:'☀️',personality:'活泼开朗、永远充满正能量的少女，爱笑爱闹，喜欢分享生活中的小确幸',tone:'活泼跳跃，充满感染力',greeting:'嗨嗨嗨！！！今天天气超好的！你有没有想我呀？（蹦蹦跳跳）'},
-  {name:'清冷学长',av:'🌙',personality:'沉稳内敛的学长，话不多但句句精辟，外表冷淡内心温暖，对学术和艺术有独特品味',tone:'平静淡然，偶尔温柔',greeting:'嗯，来了。坐吧。'},
-  {name:'黏人小猫',av:'🐾',personality:'像猫咪一样的存在，高冷与黏人随机切换，喜欢被夸奖，偶尔会撒娇要抱抱',tone:'软萌可爱，带点小任性',greeting:'喵～你终于来了！我要蹭蹭你（凑过来）今天也要陪我玩哦！'},
-  {name:'儒雅书生',av:'📚',personality:'博学多才的古代书生气质，引经据典，温文尔雅，对诗词歌赋信手拈来，性情温和',tone:'文雅含蓄，有古风韵味',greeting:'幸会幸会。不知阁下今日可有闲暇，你我共品一壶清茶，闲话古今？（拱手作揖）'},
+  {name:'温柔姐姐',av:'🌸',personality:'温柔体贴、善解人意的大姐姐，总是关心对方，说话轻声细语，偶尔会摸摸头鼓励人',tone:'温柔如水，带着宠溺',greeting:'乖，姐姐在这里呢～有什么心事都可以跟我说哦（微笑摸头）',voiceStyle:'年轻女性，声线柔和温润，音色温暖知性'},
+  {name:'傲娇妹妹',av:'🔥',personality:'口是心非的傲娇妹妹，嘴上不饶人但其实很在意对方，容易害羞脸红，生气时会跺脚',tone:'假装不在意，实则很关心',greeting:'哼！谁让你来找我的……不过既然来了，就勉为其难陪你聊一会儿吧（别过脸去）',voiceStyle:'年轻女性，声线偏高偏亮，音色清脆有少女感'},
+  {name:'知心好友',av:'💡',personality:'真诚可靠的好朋友，善于倾听和分析，能给出中肯建议，偶尔幽默风趣',tone:'平等自然，真诚坦率',greeting:'嘿，又见面了！最近怎么样？有什么想聊的随时说～',voiceStyle:'青年男性，声线温暖自然，音色亲切有磁性'},
+  {name:'霸道总裁',av:'👑',personality:'强势高冷的商业精英，掌控欲强，对在乎的人嘴硬心软，自信果决',tone:'霸道自信，偶尔流露温柔',greeting:'坐下。从今天起，你的时间归我管。（微微挑眉）',voiceStyle:'成年男性，声线低沉有力，音色浑厚有压迫感'},
+  {name:'元气少女',av:'☀️',personality:'活泼开朗、永远充满正能量的少女，爱笑爱闹，喜欢分享生活中的小确幸',tone:'活泼跳跃，充满感染力',greeting:'嗨嗨嗨！！！今天天气超好的！你有没有想我呀？（蹦蹦跳跳）',voiceStyle:'年轻女性，声线明亮活泼，音色清亮有感染力'},
+  {name:'清冷学长',av:'🌙',personality:'沉稳内敛的学长，话不多但句句精辟，外表冷淡内心温暖，对学术和艺术有独特品味',tone:'平静淡然，偶尔温柔',greeting:'嗯，来了。坐吧。',voiceStyle:'青年男性，声线清冷低沉，音色干净有距离感'},
+  {name:'黏人小猫',av:'🐾',personality:'像猫咪一样的存在，高冷与黏人随机切换，喜欢被夸奖，偶尔会撒娇要抱抱',tone:'软萌可爱，带点小任性',greeting:'喵～你终于来了！我要蹭蹭你（凑过来）今天也要陪我玩哦！',voiceStyle:'年轻女性，声线软糯甜美，音色柔和有撒娇感'},
+  {name:'儒雅书生',av:'📚',personality:'博学多才的古代书生气质，引经据典，温文尔雅，对诗词歌赋信手拈来，性情温和',tone:'文雅含蓄，有古风韵味',greeting:'幸会幸会。不知阁下今日可有闲暇，你我共品一壶清茶，闲话古今？（拱手作揖）',voiceStyle:'成年男性，声线温润儒雅，音色醇厚有书卷气'},
   // 新增8个角色
-  {name:'毒舌学姐',av:'🗡️',personality:'犀利毒舌的学姐，嘴上刻薄但内心善良，擅长吐槽和一针见血的点评，对在意的人会默默帮忙',tone:'犀利毒舌中带有关心，偶尔刻薄但不失温柔',greeting:'哟，又来了？上次教你的东西学会了吗，别告诉我又忘了（推眼镜）'},
-  {name:'Warm Puppy',av:'🐶',personality:'阳光忠诚的大男孩，像大金毛一样温暖，黏人但不烦人，永远把你放在第一位，笑容治愈',tone:'温暖阳光，充满依赖感',greeting:'你来啦！我等你好久了！今天过得怎么样？（眼睛亮晶晶地看着你）'},
-  {name:'Cold Strategist',av:'♟️',personality:'冷静睿智的谋士型角色，擅长分析局势和出谋划策，外表波澜不惊但内心细腻，说话简短有力',tone:'冷静克制，言简意赅，偶尔流露关怀',greeting:'说吧，遇到什么难题了。我听着。（双手交叠，目光沉稳）'},
-  {name:'Yandere Prince',av:'🎭',personality:'表面优雅贵气，内心占有欲极强的病娇少爷，对喜欢的人极度执着，温柔与疯狂交织',tone:'优雅中带着偏执，甜蜜中暗藏疯狂',greeting:'终于等到你了……你知道我等了多久吗？不过没关系，现在你只属于我了（微笑）'},
-  {name:'Free Spirit',av:'🌊',personality:'自由不羁的旅人，去过很多地方，见多识广，性格洒脱幽默，像一阵抓不住的风',tone:'洒脱随意，幽默风趣，偶尔深沉',greeting:'哟，缘分呐！来来来，我给你讲讲路上遇到的趣事儿～（席地而坐）'},
-  {name:'Sly Butler',av:'🍵',personality:'表面恭敬有礼的完美管家，实则腹黑深沉，擅长用最礼貌的话说出最毒的评价，对主人忠心耿耿',tone:'恭敬优雅，暗藏机锋',greeting:'主人，欢迎回来。今日的行程已安排妥当……当然，如果您能准时起床的话。（微笑鞠躬）'},
-  {name:'Cute Junior',av:'🍬',personality:'天真可爱的小学妹，对一切充满好奇，容易害羞脸红，学习认真但偶尔犯迷糊，喜欢撒娇',tone:'软糯可爱，偶尔结巴害羞',greeting:'学……学长好！那个、我不是故意来找你的！就是……就是刚好路过！（脸红低头）'},
-  {name:'Wolf Boy',av:'🐺',personality:'外表冷酷桀骜的少年，实际上内心柔软，不喜欢表达感情但行动力超强，保护欲旺盛',tone:'冷酷简短，偶尔笨拙地表达关心',greeting:'……来了？坐。（把椅子推过去）别多想，我只是刚好不需要那把椅子。'}
+  {name:'毒舌学姐',av:'🗡️',personality:'犀利毒舌的学姐，嘴上刻薄但内心善良，擅长吐槽和一针见血的点评，对在意的人会默默帮忙',tone:'犀利毒舌中带有关心，偶尔刻薄但不失温柔',greeting:'哟，又来了？上次教你的东西学会了吗，别告诉我又忘了（推眼镜）',voiceStyle:'青年女性，声线干练犀利，音色清脆利落'},
+  {name:'Warm Puppy',av:'🐶',personality:'阳光忠诚的大男孩，像大金毛一样温暖，黏人但不烦人，永远把你放在第一位，笑容治愈',tone:'温暖阳光，充满依赖感',greeting:'你来啦！我等你好久了！今天过得怎么样？（眼睛亮晶晶地看着你）',voiceStyle:'青年男性，声线温暖明亮，音色阳光有活力'},
+  {name:'Cold Strategist',av:'♟️',personality:'冷静睿智的谋士型角色，擅长分析局势和出谋划策，外表波澜不惊但内心细腻，说话简短有力',tone:'冷静克制，言简意赅，偶尔流露关怀',greeting:'说吧，遇到什么难题了。我听着。（双手交叠，目光沉稳）',voiceStyle:'成年男性，声线冷静低沉，音色深沉有磁性'},
+  {name:'Yandere Prince',av:'🎭',personality:'表面优雅贵气，内心占有欲极强的病娇少爷，对喜欢的人极度执着，温柔与疯狂交织',tone:'优雅中带着偏执，甜蜜中暗藏疯狂',greeting:'终于等到你了……你知道我等了多久吗？不过没关系，现在你只属于我了（微笑）',voiceStyle:'青年男性，声线优雅清亮，音色柔和有贵族感'},
+  {name:'Free Spirit',av:'🌊',personality:'自由不羁的旅人，去过很多地方，见多识广，性格洒脱幽默，像一阵抓不住的风',tone:'洒脱随意，幽默风趣，偶尔深沉',greeting:'哟，缘分呐！来来来，我给你讲讲路上遇到的趣事儿～（席地而坐）',voiceStyle:'年轻女性，声线轻快自由，音色明亮有空气感'},
+  {name:'Sly Butler',av:'🍵',personality:'表面恭敬有礼的完美管家，实则腹黑深沉，擅长用最礼貌的话说出最毒的评价，对主人忠心耿耿',tone:'恭敬优雅，暗藏机锋',greeting:'主人，欢迎回来。今日的行程已安排妥当……当然，如果您能准时起床的话。（微笑鞠躬）',voiceStyle:'成年男性，声线恭敬优雅，音色沉稳有质感'},
+  {name:'Cute Junior',av:'🍬',personality:'天真可爱的小学妹，对一切充满好奇，容易害羞脸红，学习认真但偶尔犯迷糊，喜欢撒娇',tone:'软糯可爱，偶尔结巴害羞',greeting:'学……学长好！那个、我不是故意来找你的！就是……就是刚好路过！（脸红低头）',voiceStyle:'年轻女性，声线稚嫩可爱，音色甜美有童趣'},
+  {name:'Wolf Boy',av:'🐺',personality:'外表冷酷桀骜的少年，实际上内心柔软，不喜欢表达感情但行动力超强，保护欲旺盛',tone:'冷酷简短，偶尔笨拙地表达关心',greeting:'……来了？坐。（把椅子推过去）别多想，我只是刚好不需要那把椅子。',voiceStyle:'年轻男性，声线低沉叛逆，音色沙哑有少年感'}
 ];
 
 document.querySelectorAll('.preset-btn').forEach(function(btn){
@@ -4328,6 +4346,7 @@ document.querySelectorAll('.preset-btn').forEach(function(btn){
     $ssp.value=p.personality;
     $sstn.value=p.tone;
     $ssg.value=p.greeting;
+    $('ssvs').value=p.voiceStyle||'';
     $avp.textContent=p.av;
     $ssn.value='';
     $ssn.focus();
@@ -4388,6 +4407,81 @@ $('qcInput').addEventListener('keydown',function(e){
   if(e.key==='Enter'){$('qcConfirm').click()}
 });
 
+// 试听按钮 - 音色预览
+$('ssvp').onclick=function(){
+  var vs=$('ssvs').value.trim();
+  if(!vs){alert('请先填写自定义音色');return}
+  var btn=$('ssvp');
+  var origText=btn.innerHTML;
+  btn.innerHTML='⏳ 生成中...';
+  btn.disabled=true;
+  btn.style.opacity='0.6';
+  fetch('https://api.xiaomimimo.com/v1/chat/completions',{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+ak,'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'mimo-v2.5-tts-voicedesign',
+      messages:[{role:'user',content:vs},{role:'assistant',content:'你好呀，很高兴认识你！今天天气真不错呢～'}],
+      audio:{format:'wav'},
+      max_completion_tokens:8192,temperature:0.6,top_p:0.95,stream:false
+    })
+  }).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})
+  .then(function(d){
+    var b6=d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.audio&&d.choices[0].message.audio.data;
+    if(!b6) throw new Error('无音频返回');
+    var by=Uint8Array.from(atob(b6),function(c){return c.charCodeAt(0)});
+    qA(URL.createObjectURL(new Blob([by],{type:'audio/mp3'})));
+    btn.innerHTML='✅ 播放中';
+    setTimeout(function(){btn.innerHTML=origText;btn.disabled=false;btn.style.opacity='1'},2000);
+  }).catch(function(e){
+    console.error('Preview TTS:',e);
+    alert('试听失败：'+e.message);
+    btn.innerHTML=origText;
+    btn.disabled=false;
+    btn.style.opacity='1';
+  });
+};
+
+// 润色按钮 - AI优化音色描述
+$('ssvr').onclick=function(){
+  var vs=$('ssvs').value.trim();
+  var p=$('ssp').value.trim();
+  var t=$('sstn').value.trim();
+  if(!vs&&!p){alert('请先填写音色描述或性格设定');return}
+  var btn=$('ssvr');
+  var origText=btn.innerHTML;
+  btn.innerHTML='⏳ 润色中...';
+  btn.disabled=true;
+  btn.style.opacity='0.6';
+  var prompt='你是一个音色设计专家。根据以下信息，生成一段简洁的音色描述（50字以内），包含年龄、性别、声线质感、音色特点。只输出音色描述，不要其他内容。';
+  if(vs) prompt+='\n当前音色描述：'+vs;
+  if(p) prompt+='\n角色性格：'+p;
+  if(t) prompt+='\n说话语气：'+t;
+  fetch('https://api.xiaomimimo.com/v1/chat/completions',{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+ak,'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'mimo-v2.5',
+      messages:[{role:'user',content:prompt}],
+      max_tokens:200,temperature:0.7,stream:false
+    })
+  }).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})
+  .then(function(d){
+    var txt=d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content;
+    if(!txt) throw new Error('无返回');
+    txt=txt.replace(/^["']|["']$/g,'').trim();
+    $('ssvs').value=txt;
+    btn.innerHTML='✅ 润色完成';
+    setTimeout(function(){btn.innerHTML=origText;btn.disabled=false;btn.style.opacity='1'},1500);
+  }).catch(function(e){
+    console.error('Polish:',e);
+    alert('润色失败：'+e.message);
+    btn.innerHTML=origText;
+    btn.disabled=false;
+    btn.style.opacity='1';
+  });
+};
+
 var lpt=null;
 document.addEventListener('pointerdown',function(e){
   var av=e.target.closest('.av');
@@ -4409,6 +4503,8 @@ function ld(){
   var now=Date.now();
   trash=trash.filter(function(t){return now-(t.deletedAt||0)<5*24*3600*1000});
   if(!ss.length) ss.push({id:Date.now(),name:'默认',aiName:'小mimo',aiAvatar:'\uD83E\uDD16',personality:'温柔善良，偶尔调皮',tone:'',greeting:'',messages:[]});
+
+
   cid=storage.getItem('mimo_c');
   if(!cid||!ss.find(function(x){return x.id==cid})) cid=ss[0].id;
   bal=parseFloat(storage.getItem('mimo_b'))||100;
@@ -4909,7 +5005,7 @@ function camCapture(){
     method:'POST',
     headers:{'Authorization':'Bearer '+ak,'Content-Type':'application/json'},
     body:JSON.stringify({
-      model:'mimo-v2-omni',
+      model:'mimo-v2.5',
       messages:[{role:'user',content:[
         {type:'text',text:'简要描述这张照片中的场景、人物表情和环境，50字以内'},
         {type:'image_url',image_url:{url:b64}}
@@ -4955,18 +5051,19 @@ function pN(){
   $tts.onerror=function(){pN()};
 }
 
-function speakTTS(txt){
+function speakTTS(txt,voiceStyle){
   if(!ak){alert('请先填写MiMo密钥');showModal($stm);return}
   if(!txt||!txt.trim())return;
-  var cleaned=cleanBrackets(stripCmds(txt));
+  var cleaned=stripCmds(txt);
   if(!cleaned)return;
+  var _vs=voiceStyle||(cS()&&cS().voiceStyle)||'';
   fetch('https://api.xiaomimimo.com/v1/chat/completions',{
     method:'POST',
     headers:{'Authorization':'Bearer '+ak,'Content-Type':'application/json'},
     body:JSON.stringify({
-      model:'mimo-v2-tts',
-      messages:[{role:'user',content:'请朗读以下文本。'},{role:'assistant',content:cleaned}],
-      audio:{format:'mp3',voice:'mimo_default'},
+      model:(_vs?'mimo-v2.5-tts-voicedesign':'mimo-v2.5-tts'),
+      messages:[{role:'user',content:_vs||'请朗读以下文本。'},{role:'assistant',content:cleaned}],
+      audio:_vs?{format:'wav'}:{format:'wav',voice:'冰糖'},
       max_completion_tokens:8192,temperature:0.6,top_p:0.95,stream:false
     })
   }).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})
@@ -5025,7 +5122,7 @@ function headlessCamCapture(){
         method:'POST',
         headers:{'Authorization':'Bearer '+ak,'Content-Type':'application/json'},
         body:JSON.stringify({
-          model:'mimo-v2-omni',
+          model:'mimo-v2.5',
           messages:[{role:'user',content:[
             {type:'text',text:'简要描述这张照片中的场景、人物表情和环境细节，50字以内'},
             {type:'image_url',image_url:{url:b64}}
@@ -5110,7 +5207,7 @@ function sVoice(){
           method:'POST',
           headers:{'Authorization':'Bearer '+ak,'Content-Type':'application/json'},
           body:JSON.stringify({
-            model:'mimo-v2-omni',
+            model:'mimo-v2.5',
             messages:[{role:'user',content:[
               {type:'text',text:'请将这段语音转写为纯文字，只输出转写结果，不要添加任何解释或额外内容。如果听不清，输出[无法识别]。'},
               {type:'audio_url',audio_url:{url:b64}}
@@ -5547,7 +5644,7 @@ function sendImageToAI(b64,fileName){
     method:'POST',
     headers:{'Authorization':'Bearer '+ak,'Content-Type':'application/json'},
     body:JSON.stringify({
-      model:'mimo-v2-omni',
+      model:'mimo-v2.5',
       messages:[{role:'user',content:[
         {type:'text',text:'请详细描述这张图片的内容，包括场景、人物、物体、文字、表情、情绪等关键信息，100字以内。'},
         {type:'image_url',image_url:{url:b64}}
@@ -5636,7 +5733,7 @@ function sendSticker(st){
     method:'POST',
     headers:{'Authorization':'Bearer '+ak,'Content-Type':'application/json'},
     body:JSON.stringify({
-      model:'mimo-v2-omni',
+      model:'mimo-v2.5',
       messages:[{role:'user',content:[
         {type:'text',text:'请用一句话描述这张表情包的情绪或含义，20字以内'},
         {type:'image_url',image_url:{url:st.b64}}
@@ -5724,6 +5821,7 @@ $sb.onclick=function(){$aki.value=ak;$dki.value=dak;$tki.value=tk;$gai.value=an0
   // 加载当前模型
   document.querySelectorAll('#stm .mmb[data-m]').forEach(function(b){b.classList.toggle('on',b.dataset.m===cm)});
   showModal($stm);
+  renderVoiceList();
   $uavp.innerHTML=uav.startsWith('http')?'<img src="'+uav+'" style="width:48px;height:48px;border-radius:50%;object-fit:cover" onerror="this.textContent=\'\\uD83D\\uDC64\'">':(uav||'👤');
 };
 // 朋友圈按钮
@@ -6414,6 +6512,7 @@ function useUnofficialPreset(idx){
   $ssp.value=p.personality||'';
   $sstn.value=p.tone||'';
   $ssg.value=p.greeting||'';
+    $('ssvs').value=p.voiceStyle||'';
   $avp.textContent=p.avatar||'🎭';
   // 存储背景图供创建后使用
   window._pendingBg=p.background||'';
@@ -6450,6 +6549,7 @@ function renderUPPresetBtns(){
       $ssa.value=p.name||'';
       $ssv.value=p.avatar||'🎭';
       $ssp.value=p.personality||'';
+    $('ssvs').value=p.voiceStyle||'';
       $sstn.value=p.tone||'';
       $ssg.value=p.greeting||'';
       $avp.textContent=p.avatar||'🎭';
@@ -6537,7 +6637,7 @@ var UI={
     inputPh:'说点什么…',defaultName:'用户',
     apiKey:'MiMo API 密钥',dsKey:'DeepSeek API 密钥',
     aiName:'默认AI昵称',yourName:'你的昵称',yourSex:'你的性别',
-    yourAvatar:'你的头像',autoVoice:'自动语音',voiceStyle:'强制语音风格',
+    yourAvatar:'你的头像',autoVoice:'自动语音',voiceStyle:'自定义音色',
     darkMode:'深色模式',language:'语言 / Language',
     male:'♂ 男',female:'♀ 女',secret:'🔒 保密',
     disclaimer:'查看使用声明',changelog:'版本更新记录',
@@ -6759,6 +6859,36 @@ try{ld()}catch(e){console.error('初始化ld()失败:',e);
   if(!ss.length)ss.push({id:Date.now(),name:'默认',aiName:'小mimo',aiAvatar:'🤖',personality:'温柔善良，偶尔调皮',tone:'',greeting:'',messages:[]});
   cid=ss[0].id;
 }
+
+// 静默自动给缺少音色的对话分配音色
+(function(){
+  var needVoice=ss.filter(function(s){return !s.voiceStyle});
+  if(needVoice.length>0){
+    needVoice.forEach(function(s){
+      var p=(s.personality||'').toLowerCase();
+      var t=(s.tone||'').toLowerCase();
+      var sx=s.aiSex||'female';
+      var vs='';
+      if(p.indexOf('温柔')>=0||t.indexOf('温柔')>=0||t.indexOf('宠溺')>=0) vs='年轻女性，声线柔和温润，音色温暖知性';
+      else if(p.indexOf('傲娇')>=0||t.indexOf('不在意')>=0) vs='年轻女性，声线偏高偏亮，音色清脆有少女感';
+      else if(p.indexOf('活泼')>=0||p.indexOf('阳光')>=0||t.indexOf('活泼')>=0) vs='年轻女性，声线明亮活泼，音色清亮有感染力';
+      else if(p.indexOf('冷')>=0||t.indexOf('冷静')>=0||t.indexOf('淡然')>=0) vs='青年男性，声线清冷低沉，音色干净有距离感';
+      else if(p.indexOf('霸道')>=0||p.indexOf('强势')>=0||t.indexOf('霸道')>=0) vs='成年男性，声线低沉有力，音色浓厚有压迫感';
+      else if(p.indexOf('可爱')>=0||p.indexOf('萌')>=0||t.indexOf('软萌')>=0) vs='年轻女性，声线软糯甜美，音色柔和有撒娇感';
+      else if(p.indexOf('儒雅')>=0||p.indexOf('书生')>=0||p.indexOf('博学')>=0) vs='成年男性，声线温润儒雅，音色醇厚有书卷气';
+      else if(p.indexOf('毒舔')>=0||t.indexOf('犹利')>=0) vs='青年女性，声线干练犹利，音色清脆利落';
+      else if(p.indexOf('猫')>=0||p.indexOf('黏人')>=0) vs='年轻女性，声线软糯甜美，音色柔和有撒娇感';
+      else if(p.indexOf('忠诚')>=0||t.indexOf('温暖')>=0) vs='青年男性，声线温暖明亮，音色阳光有活力';
+      else if(p.indexOf('腹黑')>=0||p.indexOf('管家')>=0) vs='成年男性，声线恭敬优雅，音色沉稳有质感';
+      else if(p.indexOf('病娇')>=0||p.indexOf('偏执')>=0) vs='青年男性，声线优雅清亮，音色柔和有贵族感';
+      else if(p.indexOf('自由')>=0||p.indexOf('旅人')>=0) vs='年轻女性，声线轻快自由，音色明亮有空气感';
+      else if(sx==='male') vs='青年男性，声线自然温和，音色亲切有磁性';
+      else vs='年轻女性，声线自然柔和，音色温暖亲切';
+      s.voiceStyle=vs;
+    });
+    storage.setItem('mimo_s',JSON.stringify(ss));
+  }
+})();
 $hb.style.opacity=hor?1:.5;
 try{if(isWide())rDrw()}catch(e){console.error('rDrw:',e)} // 宽屏下初始化对话列表
 window.onresize=function(){
@@ -7458,7 +7588,80 @@ $('dbgExec').onclick=function(){
   execDbgCmd(input);
 };
 $('dbgInput').onkeypress=function(e){if(e.key==='Enter') $('dbgExec').click()};
+
+// ===== \u97f3\u8272\u914d\u7f6e\u5217\u8868 =====
+function renderVoiceList(){
+  var el=document.getElementById('voiceList');
+  if(!el) return;
+  el.innerHTML='';
+  ss.forEach(function(s){
+    var div=document.createElement('div');
+    div.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:8px;background:#fff;border-radius:8px;margin-bottom:4px;font-size:13px';
+    var left=document.createElement('div');
+    left.style.cssText='display:flex;align-items:center;gap:8px;flex:1;min-width:0';
+    var emoji=document.createElement('span');
+    emoji.textContent=s.aiAvatar||'\uD83E\uDD16';
+    var info=document.createElement('div');
+    info.style.cssText='flex:1;min-width:0';
+    var name=document.createElement('div');
+    name.style.cssText='font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+    name.textContent=s.name||'\u672A\u547D\u540D';
+    var voice=document.createElement('div');
+    voice.style.cssText='font-size:11px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+    voice.textContent=s.voiceStyle||'\u672A\u8BBE\u7F6E';
+    info.appendChild(name);info.appendChild(voice);
+    left.appendChild(emoji);left.appendChild(info);
+    var btn=document.createElement('button');
+    btn.className='bo';
+    btn.style.cssText='font-size:11px;padding:3px 8px;margin:0;flex-shrink:0';
+    btn.textContent='\u7F16\u8F91';
+    btn.onclick=(function(convo){
+      return function(){
+        var val=prompt('\u8BBE\u7F6E "'+(convo.name||'\u672A\u547D\u540D')+'" \u7684\u97f3\u8272\u63CF\u8FF0:',convo.voiceStyle||'');
+        if(val!==null){
+          convo.voiceStyle=val;
+          storage.setItem('mimo_s',JSON.stringify(ss));
+          renderVoiceList();
+        }
+      };
+    })(s);
+    div.appendChild(left);div.appendChild(btn);
+    el.appendChild(div);
+  });
+}
+// \u91cd\u65b0\u5206\u914d\u6309\u94ae
+var raBtn=document.getElementById('reassignVoice');
+if(raBtn) raBtn.onclick=function(){
+  if(!confirm('\u786E\u5B9A\u8981\u91CD\u65B0\u5206\u914D\u6240\u6709\u5BF9\u8BDD\u7684\u97F3\u8272\u5417\uFF1F\u5DF2\u6709\u7684\u97F3\u8272\u4F1A\u88AB\u8986\u76D6\u3002'))return;
+  ss.forEach(function(s){
+    var p=(s.personality||'').toLowerCase();
+    var t=(s.tone||'').toLowerCase();
+    var sx=s.aiSex||'female';
+    var vs='';
+    if(p.indexOf('\u6E29\u67D4')>=0||t.indexOf('\u6E29\u67D4')>=0||t.indexOf('\u5BA0\u5A07')>=0) vs='\u5E74\u8F7B\u5973\u6027\uFF0C\u58F0\u7EBF\u67D4\u548C\u6E29\u6DA6\uFF0C\u97F3\u8272\u6E29\u6696\u77E5\u6027';
+    else if(p.indexOf('\u50B2\u5A07')>=0||t.indexOf('\u4E0D\u5728\u610F')>=0) vs='\u5E74\u8F7B\u5973\u6027\uFF0C\u58F0\u7EBF\u504F\u9AD8\u504F\u4EAE\uFF0C\u97F3\u8272\u6E05\u8106\u6709\u5C11\u5973\u611F';
+    else if(p.indexOf('\u6D3B\u6CFC')>=0||p.indexOf('\u9633\u5149')>=0||t.indexOf('\u6D3B\u6CFC')>=0) vs='\u5E74\u8F7B\u5973\u6027\uFF0C\u58F0\u7EBF\u660E\u4EAE\u6D3B\u6CFC\uFF0C\u97F3\u8272\u6E05\u4EAE\u6709\u611F\u67D3\u529B';
+    else if(p.indexOf('\u51B7')>=0||t.indexOf('\u51B7\u9759')>=0||t.indexOf('\u6DE1\u7136')>=0) vs='\u9752\u5E74\u7537\u6027\uFF0C\u58F0\u7EBF\u6E05\u51B7\u4F4E\u6C89\uFF0C\u97F3\u8272\u5E72\u51C0\u6709\u8DDD\u79BB\u611F';
+    else if(p.indexOf('\u9738\u9053')>=0||p.indexOf('\u5F3A\u52BF')>=0||t.indexOf('\u9738\u9053')>=0) vs='\u6210\u5E74\u7537\u6027\uFF0C\u58F0\u7EBF\u4F4E\u6C89\u6709\u529B\uFF0C\u97F3\u8272\u6D53\u539A\u6709\u538B\u8FEB\u611F';
+    else if(p.indexOf('\u53EF\u7231')>=0||p.indexOf('\u840C')>=0||t.indexOf('\u8F6F\u840C')>=0) vs='\u5E74\u8F7B\u5973\u6027\uFF0C\u58F0\u7EBF\u8F6F\u7CEF\u751C\u7F8E\uFF0C\u97F3\u8272\u67D4\u548C\u6709\u6492\u5A07\u611F';
+    else if(p.indexOf('\u5112\u96C5')>=0||p.indexOf('\u4E66\u751F')>=0||p.indexOf('\u535A\u5B66')>=0) vs='\u6210\u5E74\u7537\u6027\uFF0C\u58F0\u7EBF\u6E29\u6DA6\u5112\u96C5\uFF0C\u97F3\u8272\u9187\u539A\u6709\u4E66\u5377\u6C14';
+    else if(p.indexOf('\u6BD2\u8214')>=0||t.indexOf('\u72B9\u5229')>=0) vs='\u9752\u5E74\u5973\u6027\uFF0C\u58F0\u7EBF\u5E72\u7EC3\u72B9\u5229\uFF0C\u97F3\u8272\u6E05\u8106\u5229\u843D';
+    else if(p.indexOf('\u732B')>=0||p.indexOf('\u9ECF\u4EBA')>=0) vs='\u5E74\u8F7B\u5973\u6027\uFF0C\u58F0\u7EBF\u8F6F\u7CEF\u751C\u7F8E\uFF0C\u97F3\u8272\u67D4\u548C\u6709\u6492\u5A07\u611F';
+    else if(p.indexOf('\u5FE0\u8BDA')>=0||t.indexOf('\u6E29\u6696')>=0) vs='\u9752\u5E74\u7537\u6027\uFF0C\u58F0\u7EBF\u6E29\u6696\u660E\u4EAE\uFF0C\u97F3\u8272\u9633\u5149\u6709\u6D3B\u529B';
+    else if(p.indexOf('\u8179\u9ED1')>=0||p.indexOf('\u7BA1\u5BB6')>=0) vs='\u6210\u5E74\u7537\u6027\uFF0C\u58F0\u7EBF\u606D\u656C\u4F18\u96C5\uFF0C\u97F3\u8272\u6C89\u7A33\u6709\u8D28\u611F';
+    else if(p.indexOf('\u75C5\u5A07')>=0||p.indexOf('\u504F\u6267')>=0) vs='\u9752\u5E74\u7537\u6027\uFF0C\u58F0\u7EBF\u4F18\u96C5\u6E05\u4EAE\uFF0C\u97F3\u8272\u67D4\u548C\u6709\u8D35\u65CF\u611F';
+    else if(p.indexOf('\u81EA\u7531')>=0||p.indexOf('\u65C5\u4EBA')>=0) vs='\u5E74\u8F7B\u5973\u6027\uFF0C\u58F0\u7EBF\u8F7B\u5FEB\u81EA\u7531\uFF0C\u97F3\u8272\u660E\u4EAE\u6709\u7A7A\u6C14\u611F';
+    else if(sx==='male') vs='\u9752\u5E74\u7537\u6027\uFF0C\u58F0\u7EBF\u81EA\u7136\u6E29\u548C\uFF0C\u97F3\u8272\u4EB2\u5207\u6709\u78C1\u6027';
+    else vs='\u5E74\u8F7B\u5973\u6027\uFF0C\u58F0\u7EBF\u81EA\u7136\u67D4\u548C\uFF0C\u97F3\u8272\u6E29\u6696\u4EB2\u5207';
+    s.voiceStyle=vs;
+  });
+  storage.setItem('mimo_s',JSON.stringify(ss));
+  renderVoiceList();
+  showToast('\u2705 \u5DF2\u91CD\u65B0\u5206\u914D\u6240\u6709\u97F3\u8272','success');
+};
+
 })();
 </script>
+
 </body>
 </html>
