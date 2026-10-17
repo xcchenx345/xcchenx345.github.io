@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>下载中心 — 斌雪山飞瀑</title>
+<meta name="description" content="斌雪山飞瀑下载中心 — 蓝奏云资源与提取码。">
+<link rel="icon" type="image/svg+xml" href="assets/icons/page-downloads.svg">
+<style>
+/* ==========================================================================
+   TWO-INK PRESS SHEET — 下载中心（SHEET 03）
+   与 press-sheet / app.html 同一套双色印张风格
+   保留原页功能：三语切换（中/文言/EN）、确认弹窗、键盘快捷键
+   ========================================================================== */
+
+:root {
+    --paper:      #f2ece0;
+    --paper-tint: #e7dfcd;
+    --ink:        #191512;
+    --vermilion:  #e23c1d;   /* 仅：确认按钮（动作/完成） + 上墨横杆（瞬态） */
+    --ink-dim:    #a49b8a;
+    --rule:       #c9c0ae;
+
+    --cjk: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+    --press: cubic-bezier(.4, 0, .2, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; border-radius: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--cjk);
+    -webkit-font-smoothing: antialiased;
+}
+:focus-visible { outline: 2px solid var(--vermilion); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; clip: rect(0 0 0 0); overflow: hidden; white-space: nowrap; }
+
+.slug {
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    font-size: 11px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---- 缩放舞台 ---- */
+.stage { position: fixed; inset: 0; }
+.sheet {
+    position: absolute; left: 50%; top: 50%;
+    width: 1440px; height: 900px;
+    transform: translate(-50%, -50%) scale(var(--scale, 1));
+    transform-origin: center center;
+    background: var(--paper);
+    overflow: hidden;
+}
+
+/* ==========================================================================
+   印张装置
+   ========================================================================== */
+.ink-edge {
+    position: absolute; left: 0; top: -8px; bottom: -8px;
+    width: 8px; background: var(--ink); z-index: 40;
+}
+.hazard {
+    position: absolute; right: 0; top: -8px; bottom: -8px;
+    width: 8px; z-index: 40;
+    background: repeating-linear-gradient(45deg,
+        var(--ink) 0 5px, var(--paper) 5px 10px);
+}
+.reg { position: absolute; width: 14px; height: 14px; z-index: 41; pointer-events: none; }
+.reg::before, .reg::after { content: ""; position: absolute; background: var(--ink); }
+.reg::before { left: 0; right: 0; top: 50%; height: 1px; }
+.reg::after  { top: 0; bottom: 0; left: 50%; width: 1px; }
+
+.trim-cm { position: absolute; width: 14px; height: 14px; z-index: 41; pointer-events: none; }
+.trim-cm.tl { left: -7px;   top: -7px;    border-left: 1px solid var(--ink); border-top: 1px solid var(--ink); }
+.trim-cm.tr { right: -7px;  top: -7px;    border-right: 1px solid var(--ink); border-top: 1px solid var(--ink); }
+.trim-cm.bl { left: -7px;   bottom: -7px; border-left: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+.trim-cm.br { right: -7px;  bottom: -7px; border-right: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+
+.cm { position: absolute; width: 12px; height: 12px; pointer-events: none; }
+.cm.tl { left: -8px;  top: -8px;    border-left: 1px solid var(--ink); border-top: 1px solid var(--ink); }
+.cm.tr { right: -8px; top: -8px;    border-right: 1px solid var(--ink); border-top: 1px solid var(--ink); }
+.cm.bl { left: -8px;  bottom: -8px; border-left: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+.cm.br { right: -8px; bottom: -8px; border-right: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+
+.crease { position: absolute; left: 28px; right: 28px; height: 0; border-top: 1px dashed var(--rule); z-index: 5; }
+.crease .rn {
+    position: absolute; left: 0; top: 6px;
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+    letter-spacing: .14em; color: var(--rule);
+}
+.crease.v { left: auto; right: auto; width: 0; border-top: none; border-left: 1px dashed var(--rule); }
+.crease.v .rn { left: 8px; top: 0; }
+
+/* ==========================================================================
+   顶部信息栏（含三语切换）
+   ========================================================================== */
+.rail {
+    position: absolute; left: 28px; right: 28px; top: 20px; height: 62px;
+    display: flex; align-items: center; gap: 22px;
+    border-bottom: 1px solid var(--ink);
+    z-index: 30;
+}
+.rail__name { font-weight: 900; font-size: 19px; letter-spacing: -0.03em; white-space: nowrap; }
+.rail__mark { display: block; width: 22px; height: 22px; flex-shrink: 0; }
+.rail__meta { display: flex; gap: 18px; flex: 1; }
+.rail__tools { display: flex; align-items: center; gap: 14px; }
+
+/* 三语分段开关（0 圆角，按压反相） */
+.langsw { display: flex; }
+.langsw button {
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    letter-spacing: .1em;
+    padding: 6px 10px;
+    border: 1px solid var(--ink);
+    border-left-width: 0;
+    background: var(--paper); color: var(--ink);
+    cursor: pointer;
+    transition: background-color 80ms var(--press), color 80ms var(--press);
+}
+.langsw button:first-child { border-left-width: 1px; }
+.langsw button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+
+.keycap {
+    position: relative;
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 24px; height: 24px; padding: 0 4px;
+    border: 1px solid var(--ink); background: var(--paper);
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+}
+.keycap::after { content: ""; position: absolute; left: 2px; right: 2px; bottom: 2px; height: 1px; background: var(--ink); }
+.legend-item { display: flex; align-items: center; gap: 6px; }
+
+/* ==========================================================================
+   主印刷区
+   ========================================================================== */
+.press-area { position: absolute; left: 28px; right: 28px; top: 82px; bottom: 64px; z-index: 10; }
+
+.masthead { position: absolute; left: -34px; top: 4px; right: 0; }
+.masthead__title {
+    font-size: 132px; font-weight: 900;
+    line-height: .96; letter-spacing: -0.03em;
+    white-space: nowrap;
+}
+.masthead__tag { margin: 8px 0 0 34px; font-size: 25px; font-weight: 900; letter-spacing: -0.03em; }
+.masthead__slug { margin: 9px 0 0 34px; }
+
+.mod { position: absolute; }
+.mod__label { display: block; margin-bottom: 14px; }
+
+/* ==========================================================================
+   下载文件卡（整卡 = 按钮 → 确认弹窗）
+   ========================================================================== */
+.files { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.dlfile {
+    display: block; text-align: left; width: 100%;
+    padding: 18px 20px;
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    font-family: var(--cjk); color: var(--ink);
+    cursor: pointer;
+    transition: background-color 100ms var(--press), color 100ms var(--press);
+}
+.dlfile:hover, .dlfile:active { background: var(--ink); color: var(--paper); transition-duration: 80ms; }
+.dlfile:hover .code { border-color: var(--paper); }
+.dlfile__id { display: block; margin-bottom: 6px; }
+.dlfile__name { display: block; font-size: 19px; font-weight: 900; letter-spacing: -0.03em; line-height: 1.35; }
+.dlfile__sub { display: block; margin-top: 4px; }
+.dlfile__desc { margin-top: 10px; font-size: 12.5px; line-height: 1.7; font-weight: 700; letter-spacing: -0.01em; }
+
+/* 提取码字段：等宽数值，直接标注（替代原悬浮提示） */
+.code {
+    display: flex; align-items: center; justify-content: space-between;
+    border: 1px dashed var(--rule);
+    padding: 8px 10px;
+    margin-top: 12px;
+    transition: border-color 100ms var(--press);
+}
+.code span {
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    letter-spacing: .14em; text-transform: uppercase;
+}
+.code b {
+    font-family: var(--mono); font-size: 15px; font-weight: 700;
+    letter-spacing: .08em;
+}
+
+.act {
+    display: inline-flex; align-items: center; gap: 7px;
+    margin-top: 13px;
+    font-size: 13.5px; font-weight: 900; letter-spacing: -0.03em;
+}
+.act .ico { width: 15px; height: 15px; flex-shrink: 0; }
+
+/* ==========================================================================
+   使用说明 NOTE（不可点击）
+   ========================================================================== */
+.note {
+    border: 1px dashed var(--ink);
+    padding: 16px 18px;
+    background: var(--paper);
+}
+.note__title { display: block; font-size: 16px; font-weight: 900; letter-spacing: -0.03em; }
+.note__text { margin-top: 8px; font-size: 12.5px; line-height: 1.8; font-weight: 700; }
+.tips { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px; }
+.tip { border-top: 1px solid var(--rule); padding-top: 10px; }
+.tip b {
+    display: block;
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    letter-spacing: .14em; text-transform: uppercase;
+    margin-bottom: 5px;
+}
+.tip i { font-style: normal; display: block; font-size: 12.5px; font-weight: 700; line-height: 1.6; }
+
+/* ==========================================================================
+   键盘图例行
+   ========================================================================== */
+.keys { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.key-item { display: flex; align-items: center; gap: 7px; }
+.key-item .slug { font-size: 10px; }
+
+/* ==========================================================================
+   书脊留白
+   ========================================================================== */
+.spine { position: absolute; right: 0; width: 100px; }
+.spine__word {
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%) rotate(90deg);
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+    letter-spacing: .3em; text-transform: uppercase;
+    white-space: nowrap; color: var(--ink);
+}
+.spine .cm { left: auto; right: -8px; top: -8px; border-left: none; border-top: 1px solid var(--ink); border-right: 1px solid var(--ink); border-bottom: none; }
+
+/* ==========================================================================
+   底部信息条
+   ========================================================================== */
+.colophon {
+    position: absolute; left: 28px; right: 28px; bottom: 20px; height: 44px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 14px;
+    background: var(--paper-tint);
+    border-top: 1px solid var(--ink);
+    z-index: 30;
+}
+.btn-ghost {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 8px 16px;
+    background: transparent; border: 1px solid var(--ink);
+    color: var(--ink); text-decoration: none;
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+    letter-spacing: .14em; text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 120ms var(--press), color 120ms var(--press);
+}
+.btn-ghost:hover { background: var(--ink); color: var(--paper); }
+
+/* ==========================================================================
+   确认弹窗（扁平墨框 + 角规线，无阴影无模糊）
+   ========================================================================== */
+.modal {
+    position: absolute; inset: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    visibility: hidden; opacity: 0;
+    transition: opacity 160ms var(--press), visibility 0s linear 160ms;
+}
+.modal.open { visibility: visible; opacity: 1; transition: opacity 160ms var(--press); }
+.modal__overlay { position: absolute; inset: 0; background: rgba(242, 236, 224, .95); cursor: pointer; }
+.modal__box {
+    position: relative; width: min(440px, calc(100vw - 28px));
+    background: var(--paper); border: 1px solid var(--ink);
+    max-height: 84vh; overflow: auto;
+}
+.modal__head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 20px 12px;
+    border-bottom: 1px solid var(--ink);
+}
+.modal__title { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 900; letter-spacing: -0.03em; }
+.modal__title .ico { width: 16px; height: 16px; }
+.modal__close {
+    width: 28px; height: 28px;
+    border: 1px solid var(--ink); background: var(--paper);
+    color: var(--ink); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background-color 80ms var(--press), color 80ms var(--press);
+}
+.modal__close:hover { background: var(--ink); color: var(--paper); }
+.modal__close .ico { width: 12px; height: 12px; }
+.modal__body { padding: 16px 20px 20px; }
+.modal__q { font-size: 13.5px; line-height: 1.8; font-weight: 700; margin-bottom: 14px; }
+
+.mrow {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 11px 0;
+    border-top: 1px solid var(--rule);
+}
+.mrow__k {
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    letter-spacing: .14em; text-transform: uppercase;
+}
+.mrow__v { font-size: 15px; font-weight: 900; letter-spacing: -0.03em; }
+.mrow__v.mono { font-family: var(--mono); font-size: 15px; letter-spacing: .08em; }
+
+.modal__actions { display: flex; gap: 12px; margin-top: 18px; }
+.modal__actions .btn-ghost { flex: 1; justify-content: center; padding: 12px 16px; }
+/* 朱红确认键（动作/完成态）+ 4px 墨块按压 */
+.btn-fill {
+    position: relative;                        /* 不建层叠上下文：墨块垫在朱红底之下 */
+    flex: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 12px 16px;
+    background: var(--vermilion); color: var(--paper);
+    border: 1px solid var(--ink);
+    font-family: var(--cjk); font-size: 19px; font-weight: 900;
+    letter-spacing: -0.03em;
+    cursor: pointer;
+    transition: transform 80ms var(--press);
+}
+.btn-fill::after {
+    content: ""; position: absolute; z-index: -1;
+    left: 4px; top: 4px; right: -4px; bottom: -4px;
+    background: var(--ink);
+}
+.btn-fill:hover { transform: translate(2px, 2px); }
+.btn-fill:active { transform: translate(4px, 4px); transition: transform 42ms linear; }
+
+/* ==========================================================================
+   本地 SVG 图标（mask + currentColor）
+   ========================================================================== */
+.ico {
+    display: block;
+    background-color: currentColor;
+    -webkit-mask-repeat: no-repeat; -webkit-mask-position: center; -webkit-mask-size: contain;
+    mask-repeat: no-repeat; mask-position: center; mask-size: contain;
+}
+.ico-download { -webkit-mask-image: url("assets/icons/download.svg"); mask-image: url("assets/icons/download.svg"); }
+.ico-arrow    { -webkit-mask-image: url("assets/icons/arrow-right.svg"); mask-image: url("assets/icons/arrow-right.svg"); }
+.ico-close    { -webkit-mask-image: url("assets/icons/close.svg"); mask-image: url("assets/icons/close.svg"); }
+
+/* ==========================================================================
+   “上墨”仪式
+   ========================================================================== */
+.ink-bar {
+    position: absolute; left: 0; top: 0; right: 0; height: 3px;
+    background: var(--vermilion);
+    z-index: 60; pointer-events: none;
+    transform: translateY(0); display: none;
+}
+.cell-ink { transition: background-color 200ms var(--press), color 200ms var(--press), border-color 200ms var(--press); }
+.cell-ink.inked { background: var(--ink); color: var(--paper); transition: none; }
+.cell-ink.inked .code { border-color: var(--paper); }
+.cell-ink.inked .note { background: var(--ink); color: var(--paper); border-color: var(--paper); }
+.cell-ink.inked .tip { border-top-color: var(--paper); }
+
+/* ==========================================================================
+   手机 / 窄视口（≤860px）：流式堆叠
+   ========================================================================== */
+@media (max-width: 860px) {
+    html, body { height: auto; overflow-x: hidden; overflow-y: auto; }
+    .stage { position: static; }
+    .sheet {
+        position: relative; left: auto; top: auto;
+        width: 100%; height: auto; min-height: 100vh;
+        transform: none; overflow: hidden;
+    }
+    .reg, .trim-cm, .spine, .rail__tools .legend-item, .crease.v,
+    .masthead .cm, .mod .cm { display: none; }
+
+    .rail {
+        position: static; height: auto;
+        flex-wrap: wrap; gap: 8px 16px;
+        padding: 14px 16px;
+        left: auto; right: auto; top: auto;
+    }
+    .rail__meta { flex: 1 1 100%; flex-wrap: wrap; gap: 4px 14px; order: 3; }
+    .rail__tools { margin-left: auto; }
+
+    .press-area {
+        position: relative;
+        left: auto; right: auto; top: auto; bottom: auto;
+        padding: 0 16px 28px;
+    }
+    .masthead { position: static; margin-top: 26px; }
+    .masthead__title { font-size: clamp(56px, 16vw, 96px); margin-left: -12px; }
+    .masthead__tag { margin: 10px 0 0; font-size: clamp(17px, 5vw, 25px); }
+    .masthead__slug { margin: 8px 0 0; font-size: 9.5px; word-break: break-word; }
+
+    .crease { position: static; left: auto; right: auto; margin: 30px 0 22px; }
+    .crease .rn { position: static; display: block; margin-bottom: 8px; }
+
+    .mod {
+        position: static !important;
+        left: auto !important; top: auto !important;
+        width: auto !important;
+        margin-bottom: 34px;
+    }
+    .files { grid-template-columns: 1fr; }
+    .tips { grid-template-columns: 1fr; }
+    .keys { gap: 14px; }
+
+    .modal { position: fixed; }
+    .colophon {
+        position: static; height: auto;
+        flex-direction: column; gap: 12px; text-align: center;
+        padding: 18px 16px;
+        left: auto; right: auto; bottom: auto;
+    }
+}
+
+/* ==========================================================================
+   减少动效
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+    .ink-bar { display: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="stage">
+<div class="sheet" id="sheet">
+
+    <!-- 着墨边（左） + 危险条（右） -->
+    <div class="ink-edge" aria-hidden="true"></div>
+    <div class="hazard" aria-hidden="true"></div>
+
+    <!-- 十字规矩线 -->
+    <div class="reg" style="left:13px;top:13px" aria-hidden="true"></div>
+    <div class="reg" style="left:713px;top:13px" aria-hidden="true"></div>
+    <div class="reg" style="left:1413px;top:13px" aria-hidden="true"></div>
+    <div class="reg" style="left:13px;top:443px" aria-hidden="true"></div>
+    <div class="reg" style="left:1413px;top:443px" aria-hidden="true"></div>
+    <div class="reg" style="left:13px;top:873px" aria-hidden="true"></div>
+    <div class="reg" style="left:713px;top:873px" aria-hidden="true"></div>
+    <div class="reg" style="left:1413px;top:873px" aria-hidden="true"></div>
+
+    <!-- 页边角规线（出血切断） -->
+    <div class="trim-cm tl" aria-hidden="true"></div>
+    <div class="trim-cm tr" aria-hidden="true"></div>
+    <div class="trim-cm bl" aria-hidden="true"></div>
+    <div class="trim-cm br" aria-hidden="true"></div>
+
+    <!-- ===== 顶部信息栏 ===== -->
+    <header class="rail">
+        <img class="rail__mark" src="assets/icons/page-downloads.svg" alt="" width="22" height="22"><div class="rail__name">斌雪山飞瀑 下载中心</div>
+        <div class="rail__meta">
+            <span class="slug">SHEET 03 — DOWNLOADS</span>
+            <span class="slug">03 FILES — LANZOU</span>
+            <span class="slug">UPDATED 2026</span>
+        </div>
+        <div class="rail__tools">
+            <div class="langsw" role="group" aria-label="语言">
+                <button type="button" data-lang="zh" aria-pressed="true">中文</button>
+                <button type="button" data-lang="classical" aria-pressed="false">文言</button>
+                <button type="button" data-lang="en" aria-pressed="false">EN</button>
+            </div>
+            <span class="legend-item"><span class="keycap">B</span><span class="slug">HOME</span></span>
+            <span class="legend-item"><span class="keycap">R</span><span class="slug">RE-INK</span></span>
+        </div>
+    </header>
+
+    <!-- ===== 主印刷区 ===== -->
+    <main class="press-area" id="pressArea">
+
+        <div class="ink-bar" id="inkBar" aria-hidden="true"></div>
+
+        <!-- 断裂：主标题被画布切开 -->
+        <div class="masthead">
+            <i class="cm tl"></i><i class="cm tr"></i><i class="cm bl"></i><i class="cm br"></i>
+            <h1 class="masthead__title cell-ink" id="mastTitle">下载中心</h1>
+            <p class="masthead__tag cell-ink" data-i18n="dl.tagline">点击卡片前往蓝奏云，提取码直接标注在卡片内</p>
+            <p class="masthead__slug slug">DOWNLOAD CENTER · LANZOU CLOUD · CODES SHOWN ON CARD</p>
+        </div>
+
+        <!-- 折痕 I -->
+        <div class="crease" style="top:204px"><span class="rn">I</span></div>
+
+        <!-- 01 下载文件 -->
+        <section class="mod" style="left:0;top:218px;width:1384px" aria-label="下载文件">
+            <i class="cm tl"></i><i class="cm tr"></i><i class="cm bl"></i><i class="cm br"></i>
+            <span class="mod__label slug">01 / FILES — 下载文件</span>
+
+            <div class="files">
+                <button type="button" class="dlfile cell-ink" data-idx="0">
+                    <span class="dlfile__id slug">FILE 01 — MOD</span>
+                    <span class="dlfile__name" data-i18n="dl.name1">Minecraft货币多多人民币版</span>
+                    <span class="dlfile__sub slug" data-i18n="dl.sub1">Java 1.16.x – 1.20.x</span>
+                    <p class="dlfile__desc" data-i18n="dl.desc1">为Minecraft Java版添加人民币货币系统的模组，适用于1.16.x到1.20.x版本。</p>
+                    <span class="code">
+                        <span data-i18n="dl.codeLabel">提取码</span>
+                        <b>mcmod</b>
+                    </span>
+                    <span class="act"><span class="ico ico-download"></span><span data-i18n="dl.act">前往下载页面</span></span>
+                </button>
+
+                <button type="button" class="dlfile cell-ink" data-idx="1">
+                    <span class="dlfile__id slug">FILE 02 — TOOL</span>
+                    <span class="dlfile__name" data-i18n="dl.name2">TruboWarp（旧版）</span>
+                    <span class="dlfile__sub slug" data-i18n="dl.sub2">高性能Scratch修改版</span>
+                    <p class="dlfile__desc" data-i18n="dl.desc2">Scratch的高性能修改版本，提供更快的运行速度和更好的性能表现，适合旧版项目兼容。</p>
+                    <span class="code">
+                        <span data-i18n="dl.codeLabel">提取码</span>
+                        <b>xcxNB</b>
+                    </span>
+                    <span class="act"><span class="ico ico-download"></span><span data-i18n="dl.act">前往下载页面</span></span>
+                </button>
+
+                <button type="button" class="dlfile cell-ink" data-idx="2">
+                    <span class="dlfile__id slug">FILE 03 — SHADER</span>
+                    <span class="dlfile__name" data-i18n="dl.name3">Minecraft: Java低配光影</span>
+                    <span class="dlfile__sub slug" data-i18n="dl.sub3">适用于低配置设备的优化光影</span>
+                    <p class="dlfile__desc" data-i18n="dl.desc3">专门为低配置电脑优化的Minecraft Java版光影包，在提升画面效果的同时保持流畅运行。</p>
+                    <span class="code">
+                        <span data-i18n="dl.codeLabel">提取码</span>
+                        <b>c7pe</b>
+                    </span>
+                    <span class="act"><span class="ico ico-download"></span><span data-i18n="dl.act">前往下载页面</span></span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 折痕 II -->
+        <div class="crease" style="top:475px"><span class="rn">II</span></div>
+
+        <!-- 02 使用说明 -->
+        <section class="mod" style="left:0;top:500px;width:1250px" aria-label="使用说明">
+            <i class="cm tl"></i><i class="cm tr"></i><i class="cm bl"></i><i class="cm br"></i>
+            <span class="mod__label slug">02 / NOTE — 使用说明</span>
+
+            <div class="note cell-ink">
+                <span class="note__title" data-i18n="dl.noteTitle">使用说明</span>
+                <p class="note__text" data-i18n="dl.noteText">点击任意下载卡片，确认资源与提取码后即可跳转蓝奏云下载页面。此卡片仅为说明用途，不可点击。</p>
+                <div class="tips">
+                    <div class="tip">
+                        <b>CODE — 提取码</b>
+                        <i data-i18n="dl.tip1">每张卡片下方直接显示对应提取码，确认弹窗中再次核对</i>
+                    </div>
+                    <div class="tip">
+                        <b>DOWNLOAD — 点击下载</b>
+                        <i data-i18n="dl.tip2">点击卡片任意位置，在确认弹窗中点击「前往下载」即可跳转</i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 书脊留白 -->
+        <aside class="spine" style="top:500px;height:175px" aria-hidden="true">
+            <i class="cm"></i>
+            <span class="spine__word">XCCHENX345.GITHUB.IO</span>
+        </aside>
+
+        <!-- 折痕 III -->
+        <div class="crease" style="top:690px"><span class="rn">III</span></div>
+
+        <!-- 键盘图例 -->
+        <section class="mod" style="left:0;top:706px;width:1384px" aria-label="键盘快捷键">
+            <i class="cm tl"></i><i class="cm tr"></i><i class="cm bl"></i><i class="cm br"></i>
+            <div class="keys">
+                <span class="key-item"><span class="keycap">1</span><span class="keycap">2</span><span class="keycap">3</span><span class="slug">OPEN FILE</span></span>
+                <span class="key-item"><span class="keycap">B</span><span class="slug">HOME</span></span>
+                <span class="key-item"><span class="keycap">R</span><span class="slug">RE-INK</span></span>
+                <span class="key-item"><span class="keycap">ESC</span><span class="slug">CLOSE / BACK</span></span>
+                <span class="key-item"><span class="slug">CTRL+1/2/3 — LANGUAGE</span></span>
+            </div>
+        </section>
+
+        <div class="sr" id="announce" aria-live="polite"></div>
+    </main>
+
+    <!-- ===== 底部信息条 ===== -->
+    <footer class="colophon">
+        <span class="slug" data-i18n="dl.footer">© 2026 斌雪山飞瀑 | 下载中心 | 所有资源仅供学习交流使用</span>
+        <a class="btn-ghost" href="index.html"><span class="ico ico-arrow" style="transform:rotate(180deg)"></span> MAIN SHEET</a>
+    </footer>
+
+    <!-- ===== 下载确认弹窗 ===== -->
+    <div class="modal" id="dlModal" role="dialog" aria-modal="true" aria-labelledby="dlModalTitle">
+        <div class="modal__overlay"></div>
+        <div class="modal__box">
+            <i class="cm tl"></i><i class="cm tr"></i><i class="cm bl"></i><i class="cm br"></i>
+            <div class="modal__head">
+                <h3 class="modal__title" id="dlModalTitle"><span class="ico ico-download"></span><span data-i18n="dl.modalTitle">下载确认</span></h3>
+                <button class="modal__close" type="button" aria-label="关闭"><span class="ico ico-close"></span></button>
+            </div>
+            <div class="modal__body">
+                <p class="modal__q" data-i18n="dl.modalQuestion">是否前往下载？</p>
+                <div class="mrow">
+                    <span class="mrow__k" data-i18n="dl.resource">资源</span>
+                    <span class="mrow__v" id="modalName">—</span>
+                </div>
+                <div class="mrow">
+                    <span class="mrow__k" data-i18n="dl.cloud">云盘</span>
+                    <span class="mrow__v" data-i18n="dl.cloudValue">蓝奏云</span>
+                </div>
+                <div class="mrow">
+                    <span class="mrow__k" data-i18n="dl.codeLabel">提取码</span>
+                    <span class="mrow__v mono" id="modalCode">—</span>
+                </div>
+                <div class="modal__actions">
+                    <button class="btn-ghost" type="button" id="modalCancel" data-i18n="dl.cancel">取消</button>
+                    <button class="btn-fill" type="button" id="modalConfirm" data-i18n="dl.confirm">前往下载</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<script>
+/* ==========================================================================
+   THE PRESS —— 缩放 / 上墨 / 三语 / 下载确认 / 键盘
+   ========================================================================== */
+(function () {
+    "use strict";
+
+    var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var DURATION = 500;
+    var $ = function (id) { return document.getElementById(id); };
+
+    /* ---- 等比缩放 ---- */
+    function fit() {
+        var s = Math.min(window.innerWidth / 1440, window.innerHeight / 900);
+        document.documentElement.style.setProperty("--scale", s);
+    }
+    fit();
+    window.addEventListener("resize", fit);
+
+    /* ---- 文件数据（蓝奏云） ---- */
+    var FILES = [
+        { link: "https://wwazf.lanzouw.com/b014wphl2j", code: "mcmod", name: "Minecraft货币多多人民币版" },
+        { link: "https://wwazf.lanzouw.com/b014wpwlyb", code: "xcxNB", name: "TruboWarp（旧版）" },
+        { link: "https://wwazf.lanzouw.com/b014ws207g", code: "c7pe",  name: "Minecraft: Java低配光影" }
+    ];
+
+    /* ---- 三语（独立存储键 dlLanguage，避免与主页互串） ---- */
+    var dict = {
+        zh: {
+            "dl.tagline": "点击卡片前往蓝奏云，提取码直接标注在卡片内",
+            "dl.name1": "Minecraft货币多多人民币版", "dl.sub1": "Java 1.16.x – 1.20.x",
+            "dl.desc1": "为Minecraft Java版添加人民币货币系统的模组，适用于1.16.x到1.20.x版本。",
+            "dl.name2": "TruboWarp（旧版）", "dl.sub2": "高性能Scratch修改版",
+            "dl.desc2": "Scratch的高性能修改版本，提供更快的运行速度和更好的性能表现，适合旧版项目兼容。",
+            "dl.name3": "Minecraft: Java低配光影", "dl.sub3": "适用于低配置设备的优化光影",
+            "dl.desc3": "专门为低配置电脑优化的Minecraft Java版光影包，在提升画面效果的同时保持流畅运行。",
+            "dl.act": "前往下载页面", "dl.codeLabel": "提取码",
+            "dl.noteTitle": "使用说明",
+            "dl.noteText": "点击任意下载卡片，确认资源与提取码后即可跳转蓝奏云下载页面。此卡片仅为说明用途，不可点击。",
+            "dl.tip1": "每张卡片下方直接显示对应提取码，确认弹窗中再次核对",
+            "dl.tip2": "点击卡片任意位置，在确认弹窗中点击「前往下载」即可跳转",
+            "dl.footer": "© 2026 斌雪山飞瀑 | 下载中心 | 所有资源仅供学习交流使用",
+            "dl.modalTitle": "下载确认", "dl.modalQuestion": "是否前往下载？",
+            "dl.resource": "资源", "dl.cloud": "云盘", "dl.cloudValue": "蓝奏云",
+            "dl.cancel": "取消", "dl.confirm": "前往下载"
+        },
+        classical: {
+            "dl.tagline": "点击卡片可至蓝奏云下载之页，提取之码示于卡片之内",
+            "dl.name1": "Minecraft货币多多人民币版", "dl.sub1": "Java 1.16.x – 1.20.x",
+            "dl.desc1": "为Minecraft Java版增添人民币货币系统之模组，适用于1.16.x至1.20.x诸版本。",
+            "dl.name2": "TruboWarp（旧版）", "dl.sub2": "高性能Scratch修改版",
+            "dl.desc2": "Scratch之高性能修改版本，运行迅捷，性能优异，适于旧版项目之兼容。",
+            "dl.name3": "Minecraft: Java低配光影", "dl.sub3": "适于低配设备之优化光影",
+            "dl.desc3": "专为低配电脑优化之Minecraft Java版光影包，既提升画面之效，亦保运行之畅。",
+            "dl.act": "往下载页面", "dl.codeLabel": "提取之码",
+            "dl.noteTitle": "使用说明",
+            "dl.noteText": "点击任意下载卡片，确认资源与提取之码，即可至蓝奏云下载之页。此卡片仅为说明用途，不可点击。",
+            "dl.tip1": "每卡片之下皆示提取之码，确认之时复核之",
+            "dl.tip2": "点击卡片任意处，于确认弹窗中点「前往下载」即可至下载之页",
+            "dl.footer": "© 2026 斌雪山飞瀑 | 下载中心 | 所有资源仅供学习交流之用",
+            "dl.modalTitle": "下载确认", "dl.modalQuestion": "是否前往下载？",
+            "dl.resource": "资源", "dl.cloud": "云盘", "dl.cloudValue": "蓝奏云",
+            "dl.cancel": "取消", "dl.confirm": "前往下载"
+        },
+        en: {
+            "dl.tagline": "Click a card for LanZou Cloud — extraction codes are shown inside each card",
+            "dl.name1": "Minecraft Currency Mod RMB Edition", "dl.sub1": "Java Edition 1.16.x – 1.20.x",
+            "dl.desc1": "A mod that adds an RMB currency system to Minecraft Java Edition, compatible with 1.16.x to 1.20.x.",
+            "dl.name2": "TruboWarp (Legacy)", "dl.sub2": "High-performance Scratch Mod",
+            "dl.desc2": "A high-performance modified version of Scratch — faster and smoother, suited for legacy project compatibility.",
+            "dl.name3": "Minecraft: Java Low-End Shaders", "dl.sub3": "Optimized shaders for low-end devices",
+            "dl.desc3": "A Minecraft Java shader pack optimized for low-end PCs, improving visuals while staying smooth.",
+            "dl.act": "Go to download", "dl.codeLabel": "Extraction code",
+            "dl.noteTitle": "Instructions",
+            "dl.noteText": "Click any download card, confirm the resource and extraction code, then proceed to the LanZou Cloud page. This card is informational only.",
+            "dl.tip1": "Each card shows its extraction code below — verify it again in the confirmation dialog",
+            "dl.tip2": "Click anywhere on a card, then press Go to Download in the dialog",
+            "dl.footer": "© 2026 BinXueshan Feipu | Download Center | All resources for learning and exchange only",
+            "dl.modalTitle": "Download Confirmation", "dl.modalQuestion": "Do you want to proceed to download?",
+            "dl.resource": "Resource", "dl.cloud": "Cloud", "dl.cloudValue": "LanZou Cloud",
+            "dl.cancel": "Cancel", "dl.confirm": "Go to Download"
+        }
+    };
+
+    var currentLang = localStorage.getItem("dlLanguage") || "zh";
+    var announce = $("announce");
+
+    function applyLang(lang) {
+        var t = dict[lang] || dict.zh;
+        currentLang = lang;
+        document.documentElement.lang = lang === "en" ? "en" : "zh-CN";
+        document.querySelectorAll("[data-i18n]").forEach(function (el) {
+            var v = t[el.getAttribute("data-i18n")];
+            if (v !== undefined) el.textContent = v;
+        });
+        document.querySelectorAll(".langsw button").forEach(function (b) {
+            b.setAttribute("aria-pressed", String(b.dataset.lang === lang));
+        });
+        localStorage.setItem("dlLanguage", lang);
+    }
+
+    document.querySelectorAll(".langsw button").forEach(function (b) {
+        b.addEventListener("click", function () { applyLang(b.dataset.lang); });
+    });
+
+    /* ---- 下载确认弹窗 ---- */
+    var modal = $("dlModal");
+    var currentFile = null;
+
+    function openModal(idx) {
+        currentFile = FILES[idx];
+        $("modalName").textContent = currentFile.name;
+        $("modalCode").textContent = currentFile.code;
+        modal.classList.add("open");
+        document.body.style.overflow = "hidden";
+        modal.querySelector(".modal__close").focus();
+    }
+    function closeModal() {
+        modal.classList.remove("open");
+        document.body.style.overflow = "";
+    }
+
+    document.querySelectorAll(".dlfile").forEach(function (card) {
+        card.addEventListener("click", function () { openModal(Number(card.dataset.idx)); });
+    });
+    $("modalCancel").addEventListener("click", closeModal);
+    modal.querySelector(".modal__overlay").addEventListener("click", closeModal);
+    modal.querySelector(".modal__close").addEventListener("click", closeModal);
+    $("modalConfirm").addEventListener("click", function () {
+        if (currentFile) window.open(currentFile.link, "_blank");
+        closeModal();
+    });
+
+    /* ---- 上墨仪式 ---- */
+    var bar = $("inkBar");
+    var area = $("pressArea");
+    var cells = document.querySelectorAll(".cell-ink");
+    var inking = false;
+
+    function inkUp() {
+        if (inking || reduced) return;
+        inking = true;
+        announce.textContent = "上墨中";
+        bar.style.display = "block";
+        bar.style.transform = "translateY(0)";
+
+        var areaRect = area.getBoundingClientRect();
+        var localH = area.offsetHeight;
+        var anim = bar.animate(
+            [{ transform: "translateY(0)" },
+             { transform: "translateY(" + localH + "px)" }],
+            { duration: DURATION, easing: "cubic-bezier(.4,0,.2,1)", fill: "forwards" }
+        );
+
+        cells.forEach(function (cell) {
+            var r = cell.getBoundingClientRect();
+            var center = (r.top + r.height / 2 - areaRect.top) / areaRect.height;
+            var bottom = (r.bottom - areaRect.top) / areaRect.height;
+            setTimeout(function () { cell.classList.add("inked"); },
+                Math.max(0, center * DURATION));
+            setTimeout(function () { cell.classList.remove("inked"); },
+                Math.min(DURATION, bottom * DURATION) + 80);
+        });
+
+        anim.onfinish = function () {
+            bar.style.display = "none";
+            announce.textContent = "上墨完成";
+            inking = false;
+        };
+    }
+
+    /* ---- 键盘：1/2/3 开文件 · B 主页 · R 重墨 · ESC 关闭/返回 · CTRL+1/2/3 语言 ---- */
+    document.addEventListener("keydown", function (e) {
+        var open = modal.classList.contains("open");
+
+        if (e.key === "Escape") {
+            e.preventDefault();
+            if (open) closeModal();
+            else window.location.href = "index.html";
+            return;
+        }
+        if (open) return;                       /* 弹窗打开时仅响应 Esc */
+
+        if (e.ctrlKey && "123".indexOf(e.key) >= 0) {
+            e.preventDefault();
+            applyLang(e.key === "1" ? "zh" : e.key === "2" ? "classical" : "en");
+            return;
+        }
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+        if (!open && "123".indexOf(e.key) >= 0 && e.key.length === 1) {
+            e.preventDefault();
+            openModal(Number(e.key) - 1);
+            return;
+        }
+        var k = e.key.toLowerCase();
+        if (k === "b") { e.preventDefault(); window.location.href = "index.html"; }
+        if (k === "r") { e.preventDefault(); inkUp(); }
+    });
+
+    /* ---- 初始化 ---- */
+    applyLang(currentLang);
+    if (!reduced) setTimeout(inkUp, 140);
+})();
+</script>
+</body>
+</html>
