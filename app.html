@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>应用中心 — 斌雪山飞瀑</title>
+<meta name="description" content="斌雪山飞瀑应用中心 — 知白 ZhiBai、情感交流与 TTS 体验。">
+<link rel="icon" type="image/svg+xml" href="assets/icons/page-apps.svg">
+<style>
+/* ==========================================================================
+   TWO-INK PRESS SHEET — 应用中心（SHEET 02）
+   与 press-sheet.html 同一套双色印张风格：0 圆角 / 无阴影 / 无渐变 / 无循环动效
+   ========================================================================== */
+
+:root {
+    --paper:      #f2ece0;
+    --paper-tint: #e7dfcd;
+    --ink:        #191512;
+    --vermilion:  #e23c1d;   /* 仅：首推卡顶规 + 上墨横杆（瞬态） */
+    --ink-dim:    #a49b8a;
+    --rule:       #c9c0ae;
+
+    --cjk: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+    --press: cubic-bezier(.4, 0, .2, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; border-radius: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--cjk);
+    -webkit-font-smoothing: antialiased;
+}
+:focus-visible { outline: 2px solid var(--vermilion); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; clip: rect(0 0 0 0); overflow: hidden; white-space: nowrap; }
+
+/* 拉丁 = 全大写等宽印工条 */
+.slug {
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    font-size: 11px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---- 缩放舞台：固定视口，纸色信箱 ---- */
+.stage { position: fixed; inset: 0; }
+.sheet {
+    position: absolute; left: 50%; top: 50%;
+    width: 1440px; height: 900px;
+    transform: translate(-50%, -50%) scale(var(--scale, 1));
+    transform-origin: center center;
+    background: var(--paper);
+    overflow: hidden;
+}
+
+/* ==========================================================================
+   印张装置
+   ========================================================================== */
+.ink-edge {
+    position: absolute; left: 0; top: -8px; bottom: -8px;
+    width: 8px; background: var(--ink); z-index: 40;
+}
+.hazard {
+    position: absolute; right: 0; top: -8px; bottom: -8px;
+    width: 8px; z-index: 40;
+    background: repeating-linear-gradient(45deg,
+        var(--ink) 0 5px, var(--paper) 5px 10px);
+}
+.reg { position: absolute; width: 14px; height: 14px; z-index: 41; pointer-events: none; }
+.reg::before, .reg::after { content: ""; position: absolute; background: var(--ink); }
+.reg::before { left: 0; right: 0; top: 50%; height: 1px; }
+.reg::after  { top: 0; bottom: 0; left: 50%; width: 1px; }
+
+.trim-cm { position: absolute; width: 14px; height: 14px; z-index: 41; pointer-events: none; }
+.trim-cm.tl { left: -7px;   top: -7px;    border-left: 1px solid var(--ink); border-top: 1px solid var(--ink); }
+.trim-cm.tr { right: -7px;  top: -7px;    border-right: 1px solid var(--ink); border-top: 1px solid var(--ink); }
+.trim-cm.bl { left: -7px;   bottom: -7px; border-left: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+.trim-cm.br { right: -7px;  bottom: -7px; border-right: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+
+.cm { position: absolute; width: 12px; height: 12px; pointer-events: none; }
+.cm.tl { left: -8px;  top: -8px;    border-left: 1px solid var(--ink); border-top: 1px solid var(--ink); }
+.cm.tr { right: -8px; top: -8px;    border-right: 1px solid var(--ink); border-top: 1px solid var(--ink); }
+.cm.bl { left: -8px;  bottom: -8px; border-left: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+.cm.br { right: -8px; bottom: -8px; border-right: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+
+.crease { position: absolute; left: 28px; right: 28px; height: 0; border-top: 1px dashed var(--rule); z-index: 5; }
+.crease .rn {
+    position: absolute; left: 0; top: 6px;
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+    letter-spacing: .14em; color: var(--rule);
+}
+.crease.v { left: auto; right: auto; width: 0; border-top: none; border-left: 1px dashed var(--rule); }
+.crease.v .rn { left: 8px; top: 0; }
+
+/* ==========================================================================
+   顶部信息栏
+   ========================================================================== */
+.rail {
+    position: absolute; left: 28px; right: 28px; top: 20px; height: 62px;
+    display: flex; align-items: center; gap: 28px;
+    border-bottom: 1px solid var(--ink);
+    z-index: 30;
+}
+.rail__name { font-weight: 900; font-size: 19px; letter-spacing: -0.03em; white-space: nowrap; }
+.rail__mark { display: block; width: 22px; height: 22px; flex-shrink: 0; }
+.rail__meta { display: flex; gap: 22px; flex: 1; }
+.rail__legend { display: flex; align-items: center; gap: 10px; }
+
+.keycap {
+    position: relative;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px;
+    border: 1px solid var(--ink); background: var(--paper);
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+}
+.keycap::after { content: ""; position: absolute; left: 2px; right: 2px; bottom: 2px; height: 1px; background: var(--ink); }
+.legend-item { display: flex; align-items: center; gap: 6px; }
+
+/* ==========================================================================
+   主印刷区
+   ========================================================================== */
+.press-area { position: absolute; left: 28px; right: 28px; top: 82px; bottom: 64px; z-index: 10; }
+
+/* 断裂：主标题被画布切开（印刷出血） */
+.masthead { position: absolute; left: -34px; top: 4px; right: 0; }
+.masthead__title {
+    font-size: 132px; font-weight: 900;
+    line-height: .96; letter-spacing: -0.03em;
+    white-space: nowrap;
+}
+.masthead__tag { margin: 8px 0 0 34px; font-size: 25px; font-weight: 900; letter-spacing: -0.03em; }
+.masthead__slug { margin: 9px 0 0 34px; }
+
+.mod { position: absolute; }
+.mod__label { display: block; margin-bottom: 14px; }
+
+/* ==========================================================================
+   首推卡（APP 01）—— 朱红顶规 = 屏上朱红之唯一实体
+   ========================================================================== */
+.feature {
+    position: relative;
+    display: flex; gap: 28px;
+    padding: 22px 24px;
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    border-top: 3px solid var(--vermilion);
+    text-decoration: none; color: var(--ink);
+    cursor: pointer;
+    transition: background-color 100ms var(--press), color 100ms var(--press);
+}
+.feature:hover, .feature:active { background: var(--ink); color: var(--paper); transition-duration: 80ms; }
+.feature:hover .badge { background: var(--paper); color: var(--ink); }
+.feature:hover .chip { border-color: var(--paper); color: var(--paper); }
+.feature:hover .meter { border-color: var(--paper); }
+.feature:hover .meter i { background: var(--paper); }
+.feature:hover .act svg { color: var(--paper); }
+
+.feature__body { flex: 1; min-width: 0; }
+.feature__id { display: block; margin-bottom: 8px; }
+.feature__name { font-size: 30px; font-weight: 900; letter-spacing: -0.03em; line-height: 1.2; }
+.feature__desc {
+    margin-top: 10px;
+    font-size: 13.5px; line-height: 1.85;
+    font-weight: 700; letter-spacing: -0.01em;
+    max-width: 780px;
+}
+.chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 14px; }
+.chip {
+    border: 1px solid var(--ink); background: var(--paper);
+    padding: 4px 12px;
+    font-size: 12.5px; font-weight: 900; letter-spacing: -0.03em;
+    cursor: default;
+    transition: background-color 100ms var(--press), color 100ms var(--press), border-color 100ms var(--press);
+}
+.chip:hover { background: var(--ink); color: var(--paper); }
+.feature:hover .chip:hover { background: var(--paper); color: var(--ink); }
+
+.act {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 16px;
+    font-size: 15px; font-weight: 900; letter-spacing: -0.03em;
+}
+.act .ico { width: 18px; height: 18px; flex-shrink: 0; }
+
+/* 检表式声柱印花（静态，无循环动效） */
+.meter {
+    width: 78px; height: 78px; flex-shrink: 0;
+    border: 1px solid var(--ink);
+    display: flex; align-items: flex-end; justify-content: center;
+    gap: 4px; padding: 0 10px 12px;
+    align-self: center;
+    transition: border-color 100ms var(--press);
+}
+.meter i {
+    display: block; width: 4px; background: var(--ink);
+    transition: background-color 100ms var(--press);
+}
+.meter i:nth-child(1) { height: 10px; }
+.meter i:nth-child(2) { height: 16px; }
+.meter i:nth-child(3) { height: 12px; }
+.meter i:nth-child(4) { height: 20px; }
+.meter i:nth-child(5) { height: 9px; }
+
+/* ==========================================================================
+   应用格（APP 02 / 03）
+   ========================================================================== */
+.cat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+}
+.tile {
+    position: relative;
+    display: block;
+    padding: 18px 20px;
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    text-decoration: none; color: var(--ink);
+    cursor: pointer;
+    transition: background-color 100ms var(--press), color 100ms var(--press);
+}
+.tile:hover, .tile:active { background: var(--ink); color: var(--paper); transition-duration: 80ms; }
+.tile:hover .badge { background: var(--paper); color: var(--ink); }
+.tile:hover .chip { border-color: var(--paper); color: var(--paper); }
+.tile:hover .act svg { color: var(--paper); }
+
+.tile__head { display: flex; align-items: center; gap: 14px; }
+.badge {
+    width: 40px; height: 40px; flex-shrink: 0;
+    background: var(--ink); color: var(--paper);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+    letter-spacing: .08em;
+    transition: background-color 100ms var(--press), color 100ms var(--press);
+}
+.tile__name { font-size: 21px; font-weight: 900; letter-spacing: -0.03em; }
+.tile__id { display: block; margin-top: 3px; }
+.tile__desc {
+    margin-top: 10px;
+    font-size: 12.5px; line-height: 1.7;
+    font-weight: 700; letter-spacing: -0.01em;
+}
+.tile .chips { margin-top: 12px; }
+.tile .act { margin-top: 12px; font-size: 13.5px; }
+.tile .act .ico { width: 15px; height: 15px; }
+
+/* ==========================================================================
+   书脊留白（刻意近空）
+   ========================================================================== */
+.spine { position: absolute; right: 0; top: 218px; width: 100px; height: 280px; }
+.spine__word {
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%) rotate(90deg);
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+    letter-spacing: .3em; text-transform: uppercase;
+    white-space: nowrap; color: var(--ink);
+}
+.spine .cm { left: auto; right: -8px; top: -8px; border-left: none; border-top: 1px solid var(--ink); border-right: 1px solid var(--ink); border-bottom: none; }
+
+/* ==========================================================================
+   底部信息条
+   ========================================================================== */
+.colophon {
+    position: absolute; left: 28px; right: 28px; bottom: 20px; height: 44px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 14px;
+    background: var(--paper-tint);
+    border-top: 1px solid var(--ink);
+    z-index: 30;
+}
+.btn-ghost {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 8px 16px;
+    background: transparent; border: 1px solid var(--ink);
+    color: var(--ink); text-decoration: none;
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+    letter-spacing: .14em; text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 120ms var(--press), color 120ms var(--press);
+}
+.btn-ghost:hover { background: var(--ink); color: var(--paper); }
+
+/* ==========================================================================
+   本地 SVG 图标（assets/icons/）：mask + currentColor
+   ========================================================================== */
+.ico {
+    display: block;
+    background-color: currentColor;
+    -webkit-mask-repeat: no-repeat; -webkit-mask-position: center; -webkit-mask-size: contain;
+    mask-repeat: no-repeat; mask-position: center; mask-size: contain;
+}
+.ico-arrow {
+    -webkit-mask-image: url("assets/icons/arrow-right.svg");
+    mask-image: url("assets/icons/arrow-right.svg");
+}
+
+/* ==========================================================================
+   “上墨”仪式
+   ========================================================================== */
+.ink-bar {
+    position: absolute; left: 0; top: 0; right: 0; height: 3px;
+    background: var(--vermilion);
+    z-index: 60; pointer-events: none;
+    transform: translateY(0); display: none;
+}
+.cell-ink { transition: background-color 200ms var(--press), color 200ms var(--press), border-color 200ms var(--press); }
+.cell-ink.inked { background: var(--ink); color: var(--paper); transition: none; }
+.cell-ink.inked .badge { background: var(--paper); color: var(--ink); }
+.cell-ink.inked .chip { border-color: var(--paper); color: var(--paper); }
+.cell-ink.inked .meter { border-color: var(--paper); }
+.cell-ink.inked .meter i { background: var(--paper); }
+
+/* ==========================================================================
+   手机 / 窄视口（≤860px）：流式堆叠（同 press-sheet 规则）
+   注：.mod 带行内定位，需 !important 覆盖
+   ========================================================================== */
+@media (max-width: 860px) {
+    html, body { height: auto; overflow-x: hidden; overflow-y: auto; }
+    .stage { position: static; }
+    .sheet {
+        position: relative; left: auto; top: auto;
+        width: 100%; height: auto; min-height: 100vh;
+        transform: none; overflow: hidden;
+    }
+    .reg, .trim-cm, .spine, .rail__legend, .crease.v,
+    .masthead .cm, .mod .cm { display: none; }
+
+    .rail {
+        position: static; height: auto;
+        flex-wrap: wrap; gap: 6px 16px;
+        padding: 14px 16px;
+        left: auto; right: auto; top: auto;
+    }
+    .rail__meta { flex: 1 1 100%; flex-wrap: wrap; gap: 4px 14px; order: 3; }
+
+    .press-area {
+        position: relative;
+        left: auto; right: auto; top: auto; bottom: auto;
+        padding: 0 16px 28px;
+    }
+    .masthead { position: static; margin-top: 26px; }
+    .masthead__title { font-size: clamp(56px, 16vw, 96px); margin-left: -12px; }
+    .masthead__tag { margin: 10px 0 0; font-size: clamp(17px, 5vw, 25px); }
+    .masthead__slug { margin: 8px 0 0; font-size: 9.5px; word-break: break-word; }
+
+    .crease { position: static; left: auto; right: auto; margin: 30px 0 22px; }
+    .crease .rn { position: static; display: block; margin-bottom: 8px; }
+
+    .mod {
+        position: static !important;
+        left: auto !important; top: auto !important;
+        width: auto !important;
+        margin-bottom: 34px;
+    }
+    .cat-grid { grid-template-columns: 1fr; }
+    .feature { flex-direction: column; }
+    .meter { align-self: flex-start; }
+
+    .colophon {
+        position: static; height: auto;
+        flex-direction: column; gap: 12px; text-align: center;
+        padding: 18px 16px;
+        left: auto; right: auto; bottom: auto;
+    }
+}
+
+/* ==========================================================================
+   减少动效
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+    .ink-bar { display: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="stage">
+<div class="sheet" id="sheet">
+
+    <!-- 着墨边（左） + 危险条（右） -->
+    <div class="ink-edge" aria-hidden="true"></div>
+    <div class="hazard" aria-hidden="true"></div>
+
+    <!-- 十字规矩线：四角 + 四边中点 -->
+    <div class="reg" style="left:13px;top:13px" aria-hidden="true"></div>
+    <div class="reg" style="left:713px;top:13px" aria-hidden="true"></div>
+    <div class="reg" style="left:1413px;top:13px" aria-hidden="true"></div>
+    <div class="reg" style="left:13px;top:443px" aria-hidden="true"></div>
+    <div class="reg" style="left:1413px;top:443px" aria-hidden="true"></div>
+    <div class="reg" style="left:13px;top:873px" aria-hidden="true"></div>
+    <div class="reg" style="left:713px;top:873px" aria-hidden="true"></div>
+    <div class="reg" style="left:1413px;top:873px" aria-hidden="true"></div>
+
+    <!-- 页边角规线（出血切断） -->
+    <div class="trim-cm tl" aria-hidden="true"></div>
+    <div class="trim-cm tr" aria-hidden="true"></div>
+    <div class="trim-cm bl" aria-hidden="true"></div>
+    <div class="trim-cm br" aria-hidden="true"></div>
+
+    <!-- ===== 顶部信息栏 ===== -->
+    <header class="rail">
+        <img class="rail__mark" src="assets/icons/page-apps.svg" alt="" width="22" height="22"><div class="rail__name">斌雪山飞瀑 应用中心</div>
+        <div class="rail__meta">
+            <span class="slug">SHEET 02 — APPS</span>
+            <span class="slug">04 APPS — FREE</span>
+            <span class="slug">UPDATED 2026</span>
+        </div>
+        <div class="rail__legend">
+            <span class="legend-item"><span class="keycap">B</span><span class="slug">HOME</span></span>
+            <span class="legend-item"><span class="keycap">R</span><span class="slug">RE-INK</span></span>
+        </div>
+    </header>
+
+    <!-- ===== 主印刷区 ===== -->
+    <main class="press-area" id="pressArea">
+
+        <div class="ink-bar" id="inkBar" aria-hidden="true"></div>
+
+        <!-- 断裂：主标题被画布切开 -->
+        <div class="masthead">
+            <i class="cm tl"></i><i class="cm tr"></i><i class="cm bl"></i><i class="cm br"></i>
+            <h1 class="masthead__title cell-ink" id="mastTitle">应用中心</h1>
+            <p class="masthead__tag cell-ink">探索应用，体验智能交互能力</p>
+            <p class="masthead__slug slug">APP CENTER · ZHIBAI / EMOTION / TTS · FREE TO USE</p>
+        </div>
+
+        <!-- 折痕 I -->
+        <div class="crease" style="top:204px"><span class="rn">I</span></div>
+
+        <!-- 01 首推 -->
+        <section class="mod" style="left:0;top:218px;width:1250px" aria-label="首推应用">
+            <i class="cm tl"></i><i class="cm tr"></i><i class="cm bl"></i><i class="cm br"></i>
+            <span class="mod__label slug">01 / FEATURED — 首推应用</span>
+
+            <a href="zhibai.html" class="feature cell-ink">
+                <span class="feature__body">
+                    <span class="feature__id slug">APP 01 — ZHIBAI</span>
+                    <span class="feature__name">知白 ZhiBai</span>
+                    <p class="feature__desc">为小米 MiMo 大模型而生的第三方 Android 客户端。多模态理解、Agent 自动化、语音对话，所见皆可问，尽在掌握。</p>
+                    <span class="chips">
+                        <span class="chip">Android 客户端</span>
+                        <span class="chip">多模态</span>
+                        <span class="chip">Agent 自动化</span>
+                        <span class="chip">语音对话</span>
+                    </span>
+                    <span class="act">立即了解 <span class="ico ico-arrow"></span></span>
+                </span>
+                <span class="meter" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+            </a>
+        </section>
+
+        <!-- 书脊留白 -->
+        <aside class="spine" aria-hidden="true">
+            <i class="cm"></i>
+            <span class="spine__word">XCCHENX345.GITHUB.IO</span>
+        </aside>
+
+        <!-- 折痕 II -->
+        <div class="crease" style="top:505px"><span class="rn">II</span></div>
+
+        <!-- 02 应用列表 -->
+        <section class="mod" style="left:0;top:525px;width:1384px" aria-label="更多应用">
+            <i class="cm tl"></i><i class="cm tr"></i><i class="cm bl"></i><i class="cm br"></i>
+            <span class="mod__label slug">02 / CATALOG — 更多应用</span>
+
+            <div class="cat-grid">
+                <a href="aibeat.html" class="tile cell-ink">
+                    <span class="tile__head">
+                        <span class="badge">AI</span>
+                        <span>
+                            <span class="tile__name">AI 感情对话</span>
+                            <span class="tile__id slug">APP 02 — EMOTION CHAT</span>
+                        </span>
+                    </span>
+                    <p class="tile__desc">与AI进行情感交流，体验温暖贴心的智能对话，理解你的情绪与需求。<//p>
+                    <span class="chips">
+                        <span class="chip">情感识别</span>
+                        <span class="chip">自然对话</span>
+                        <span class="chip">智能回应</span>
+                    </span>
+                    <span class="act">开始体验 <span class="ico ico-arrow"></span></span>
+                </a>
+
+                <a href="mimotts.html" class="tile cell-ink">
+                    <span class="tile__head">
+                        <span class="badge">TTS</span>
+                        <span>
+                            <span class="tile__name">V2-TTS 体验</span>
+                            <span class="tile__id slug">APP 03 — TEXT TO SPEECH</span>
+                        </span>
+                    </span>
+                    <p class="tile__desc">体验文本转语音技术，感受自然流畅的语音合成效果。</p>
+                    <span class="chips">
+                        <span class="chip">多音色</span>
+                        <span class="chip">自然韵律</span>
+                        <span class="chip">高质量</span>
+                    </span>
+                    <span class="act">开始体验 <span class="ico ico-arrow"></span></span>
+                </a>
+
+                <a href="voice-ball.html" class="tile cell-ink">
+                    <span class="tile__head">
+                        <span class="badge">MIC</span>
+                        <span>
+                            <span class="tile__name">MiMo 语音球</span>
+                            <span class="tile__id slug">APP 04 — VOICE DIALOG</span>
+                        </span>
+                    </span>
+                    <p class="tile__desc">点击圆球开始语音对话。MiMo-V2-Flash 智能应答 + MiMo-V2-TTS 真人级语音合成，支持情绪、方言、副语言。</p>
+                    <span class="chips">
+                        <span class="chip">语音对话</span>
+                        <span class="chip">情感合成</span>
+                        <span class="chip">方言支持</span>
+                        <span class="chip">长期记忆</span>
+                    </span>
+                    <span class="act">开始对话 <span class="ico ico-arrow"></span></span>
+                </a>
+            </div>
+        </section>
+
+        <!-- 折痕 III / IV：纵向，分隔三枚应用格 -->
+        <div class="crease v" style="left:457px;top:550px;height:190px"><span class="rn">III</span></div>
+        <div class="crease v" style="left:927px;top:550px;height:190px"><span class="rn">IV</span></div>
+
+        <div class="sr" id="announce" aria-live="polite"></div>
+    </main>
+
+    <!-- ===== 底部信息条 ===== -->
+    <footer class="colophon">
+        <span class="slug">APP CENTER · ZHIBAI / EMOTION / TTS · FREE TO USE · © 2026 BINXUESHAN FEIPU</span>
+        <a class="btn-ghost" href="index.html"><span class="ico ico-arrow" style="transform:rotate(180deg)"></span> MAIN SHEET</a>
+    </footer>
+
+</div>
+</div>
+
+<script>
+/* ==========================================================================
+   THE PRESS —— 等比缩放 / 上墨仪式 / 键盘
+   ========================================================================== */
+(function () {
+    "use strict";
+
+    var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var DURATION = 500;
+
+    /* ---- 等比缩放：固定视口，纸色信箱 ---- */
+    function fit() {
+        var s = Math.min(window.innerWidth / 1440, window.innerHeight / 900);
+        document.documentElement.style.setProperty("--scale", s);
+    }
+    fit();
+    window.addEventListener("resize", fit);
+
+    /* ---- 上墨仪式 ---- */
+    var bar = document.getElementById("inkBar");
+    var area = document.getElementById("pressArea");
+    var cells = document.querySelectorAll(".cell-ink");
+    var announce = document.getElementById("announce");
+    var inking = false;
+
+    function inkUp() {
+        if (inking || reduced) return;
+        inking = true;
+        announce.textContent = "上墨中";
+        bar.style.display = "block";
+        bar.style.transform = "translateY(0)";
+
+        var areaRect = area.getBoundingClientRect();
+        var localH = area.offsetHeight;
+
+        var anim = bar.animate(
+            [{ transform: "translateY(0)" },
+             { transform: "translateY(" + localH + "px)" }],
+            { duration: DURATION, easing: "cubic-bezier(.4,0,.2,1)", fill: "forwards" }
+        );
+
+        cells.forEach(function (cell) {
+            var r = cell.getBoundingClientRect();
+            var center = (r.top + r.height / 2 - areaRect.top) / areaRect.height;
+            var bottom = (r.bottom - areaRect.top) / areaRect.height;
+            setTimeout(function () { cell.classList.add("inked"); },
+                Math.max(0, center * DURATION));
+            setTimeout(function () { cell.classList.remove("inked"); },
+                Math.min(DURATION, bottom * DURATION) + 80);
+        });
+
+        anim.onfinish = function () {
+            bar.style.display = "none";
+            announce.textContent = "上墨完成";
+            inking = false;
+        };
+    }
+
+    /* ---- 键盘：B 返回主页 / R 重新上墨 ---- */
+    document.addEventListener("keydown", function (e) {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        var k = e.key.toLowerCase();
+        if (k === "b") { e.preventDefault(); window.location.href = "index.html"; }
+        if (k === "r") { e.preventDefault(); inkUp(); }
+    });
+
+    if (!reduced) setTimeout(inkUp, 140);
+})();
+</script>
+</body>
+</html>
