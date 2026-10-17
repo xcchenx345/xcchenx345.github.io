@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" stroke="#191512" stroke-width="2.6" stroke-linecap="round">
+  <!-- 主页：十字规矩线（registration mark）—— 印张的定位原点 -->
+  <path d="M16 3v26M3 16h26"/>
+  <circle cx="16" cy="16" r="7.5"/>
+</svg>

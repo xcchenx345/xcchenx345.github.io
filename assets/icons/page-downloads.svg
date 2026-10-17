@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" stroke="#191512" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- 下载中心：入盘箭头 -->
+  <path d="M16 4v13"/>
+  <path d="M9.5 11.5 16 18l6.5-6.5"/>
+  <path d="M5 22v4a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2v-4"/>
+</svg>
