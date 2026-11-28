@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>整改中 — 斌雪山飞瀑</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<style>
+/* 同 index.html 的双色油墨印张风格 */
+:root {
+    --paper:     #f2ece0;
+    --paper-tint:#e7dfcd;
+    --ink:       #191512;
+    --vermilion: #e23c1d;
+    --ink-dim:   #a49b8a;
+    --rule:      #c9c0ae;
+    --cjk:  "PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+* { margin:0; padding:0; box-sizing:border-box; border-radius:0; }
+body {
+    background: var(--paper); color: var(--ink);
+    font-family: var(--cjk); min-height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    padding:32px 16px;
+    -webkit-font-smoothing:antialiased;
+}
+.sheet { width:min(620px, 100%); border:1px solid var(--ink); background:var(--paper); }
+.bar {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:11px 18px; border-bottom:1px solid var(--ink);
+    font-family:var(--mono); font-size:11px; font-weight:700;
+    letter-spacing:.14em; text-transform:uppercase;
+}
+.bar .mark { color:var(--vermilion); }
+.body { padding:44px 30px 30px; }
+h1 {
+    font-size:clamp(30px, 7vw, 46px); line-height:1.12;
+    letter-spacing:-.015em; margin-bottom:18px; font-weight:700;
+}
+h1 em { font-style:normal; color:var(--vermilion); }
+.lead { font-size:15px; line-height:1.9; opacity:.88; }
+.lead + .lead { margin-top:12px; }
+.rule { height:1px; background:var(--rule); margin:26px 0 18px; }
+.meta {
+    font-family:var(--mono); font-size:11px; letter-spacing:.11em;
+    text-transform:uppercase; color:var(--ink-dim); line-height:2.1;
+}
+.meta b { color:var(--ink); font-weight:700; }
+.back {
+    display:inline-block; margin-top:26px;
+    font-family:var(--mono); font-size:12px; font-weight:700;
+    letter-spacing:.12em; text-transform:uppercase;
+    color:var(--vermilion); text-decoration:none;
+    border-bottom:1px solid var(--vermilion); padding-bottom:2px;
+}
+.back:hover { background:var(--vermilion); color:var(--paper); border-bottom-color:transparent; }
+a:focus-visible { outline:2px solid var(--vermilion); outline-offset:2px; }
+</style>
+</head>
+<body>
+<main class="sheet">
+    <div class="bar"><span>Press Sheet</span><span class="mark">Under Repair</span></div>
+    <div class="body">
+        <h1>正在<em>整改</em></h1>
+        <p class="lead">「AI 节拍」这一页正在重做，暂时不可用。之前那版留着只是占位，功能已经拆掉重写了。</p>
+        <p class="lead">改完会放回来。想先看看别的，下面这些都还能用。</p>
+
+        <div class="rule"></div>
+
+        <div class="meta">
+            <div><b>状态</b>　整改中（暂不可用）</div>
+            <div><b>计划</b>　重做交互与节拍引擎</div>
+            <div><b>可用</b>　<a class="back" href="../app/">应用中心</a></div>
+        </div>
+
+        <a class="back" href="../">← 返回首页</a>
+    </div>
+</main>
+</body>
+</html>
